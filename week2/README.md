@@ -1,47 +1,54 @@
 # md: Lennard-Jones fluid in 2D (week 2)
 
-`md` simulates a 2D Lennard-Jones fluid: `md run` writes a trajectory,
-`md check` verifies its physics from the raw frames, `md video` renders an
+md simulates a 2D Lennard-Jones fluid: md run writes a trajectory,
+md check verifies its physics from the raw frames, md video renders an
 MP4 of the motion with the radial distribution function.
 
-- `md run --n N --temperature T [--ramp-to T2] [--dt D] [--steps S]
-  [--equil E] [--sample-every K] [--force naive|cells] [--out DIR] [--seed S]`
-  writes into the output directory `DIR/`: a per-frame text `trajectory.txt`
-  and a `run.json` with the run settings (including `ramp_to` when a linear
-  temperature ramp was requested). One frame is recorded every
-  `--sample-every` steps (default 1). `--temp` is accepted as an alias for
-  `--temperature`.
-- `md check FILE-OR-DIR` recomputes temperature, energy drift, and the speed
-  distribution from the recorded frames and reports PASS/FAIL. Pass a run
-  output directory or a trajectory file.
-- `md video FILE-OR-DIR --out OUT.mp4` renders atoms (periodically wrapped)
-  and a building `g(r)` panel.
+- md run [--n N] [--rho RHO] [--temperature T] [--ramp-to T2] [--dt D] [--steps S] [--eq-steps E] [--sample-every K] [--force naive|cells] [--out DIR] [--seed S]
+  writes into the output directory DIR/: 	raj.jsonl (one JSON frame per line)
+  and un.json with the run settings. Default run: N=100, rho=0.8, T=0.5, dt=0.01,
+  eq_steps=2000, steps=10000, sample_every=50, seed=2026, integrator="velocity-verlet".
+- md check FILE-OR-DIR recomputes temperature, energy drift, and the speed
+  distribution from the recorded frames and reports PASS/FAIL.
+- md video FILE-OR-DIR --out OUT.mp4 renders atoms (periodically wrapped)
+  and a building g(r) panel into an MP4 video under 2 MB.
 
-Physics: shifted-force Lennard-Jones cutoff at `rc = 2.5`, density 0.8,
-periodic box `L = sqrt(N / 0.8)`, reduced units.
+## Pages
+
+- **GitHub Pages Viewer**: [https://imgrj.github.io/AMAT5315-2026Fall-Exercise/](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/)
+- **Heating Run Artifacts**: Deployed in docs/ (docs/index.html, docs/run.json, docs/traj.jsonl).
 
 ## Force engine
 
-Two pair-scan strategies, selectable with `--force`:
+Two pair-scan strategies, selectable with --force:
 
-- `naive`: every pair `i < j`, minimum-image distance (original loop).
-- `cells` (default): neighbour search through a cell grid of side >= `rc`.
+- 
+aive: every pair i < j, minimum-image distance (original loop).
+- cells (default): neighbour search through a cell grid of side >= c with 9-cell search window.
 
-The two produce identical physics up to round-off (see
-`force-compare.png`), and `cells` is the faster engine for large `N`.
+The two produce identical physics up to round-off (see orce-compare.png), and cells is the faster engine for large N.
+
+## Timing
+
+| Program | Median (s) | Range: min–max (s) |
+| --- | ---: | ---: |
+| NumPy week2-sim.py | 10.86 | 10.71–10.86 |
+| Rust debug | 7.73 | 7.70–7.75 |
+| Rust release | 0.67 | 0.67–0.70 |
+
+Timing: the contract run, N = 100, 12000 steps, three runs each.
+
+## Profile
+
+| Version | Force share (%) | Elapsed time (s) |
+| --- | ---: | ---: |
+| Naive | 98.7% | 0.184 |
+| Cell list | 95.8% | 0.097 |
+
+![Naive Profile](profile-naive.png)
+![Cells Profile](profile-cells.png)
 
 ## Benchmark: naive vs cells
-
-Reproduce with (from `week2/`, after `cargo build --release`):
-
-```bash
-python3 benchmark.py
-```
-
-Method: `md run -n N --temperature 1.0 --dt 0.005 --steps 500 --equil 100
---force naive|cells --seed 1`, three runs per cell; wall time measured for
-the whole `md run` process. Times are median seconds with the observed
-min-max range. Machine: Apple Silicon (release build, debug info on).
 
 | N | naive (s) median (min-max) | cells (s) median (min-max) | speedup |
 |---|---|---|---|
@@ -49,34 +56,24 @@ min-max range. Machine: Apple Silicon (release build, debug info on).
 | 400 | 0.184 (0.179-0.189) | 0.097 (0.094-0.101) | 1.9x |
 | 1600 | 2.033 (2.009-2.181) | 0.381 (0.379-0.458) | 5.3x |
 
-![Scaling of seconds per step against N for the naive and cell-list force
-engines.](scaling.png)
-
-Seconds per step in `scaling.png` = wall time / (equil + steps) = wall / 600,
-so fixed per-run overhead (process start, lattice, trajectory formatting) is
-included in both lines. That overhead is why the ratio is ~1 at N = 100 and
-why the asymptote (naive O(N^2) vs cells O(N)) grows with N.
+![Scaling](scaling.png)
 
 ## Reproducing every table and figure
 
-All commands run from `week2/`; figures need `cargo build --release` (or
-`cargo build`) and `rsvg-convert` once:
+All commands run from week2/:
 
-```bash
-cargo build --release
-```
+`ash
+cargo build --manifest-path md/Cargo.toml --release
+`
 
 | Artifact | Command |
 |---|---|
-| Benchmark table + `scaling.png` | `python3 benchmark.py` |
-| `field.png` (pair field) | `cargo run --example field && rsvg-convert -o field.png target/field.svg` |
-| `dimer.png` (energy error) | `cargo run --example dimer && rsvg-convert -o dimer.png target/dimer.svg` |
-| `force-compare.png` (naive vs cells) | `cargo run --release --example force_compare && rsvg-convert -o force-compare.png target/force_compare.svg` |
-| `docs/` heating run (this directory) | `md run --n 400 --temperature 0.2 --ramp-to 1.2 --steps 20000 --sample-every 100 --out docs` |
-| `cold.mp4` | `md run --temperature 0.2 --out /tmp/cold && md video /tmp/cold --out cold.mp4` |
-| `hot.mp4` | `md run --temperature 1.0 --out /tmp/hot && md video /tmp/hot --out hot.mp4` |
-| `artifacts/` fresh-clone reproduction | `make reproduce` |
-
-`md check` verifies physics for microcanonical (no `--ramp-to`) runs; a
-heating run such as `docs/` deliberately fails its temperature/drift checks
-because the thermostat is pumping energy in.
+| Contract run & physics checks | cargo run --manifest-path md/Cargo.toml --release -- run --out artifacts && cargo run --manifest-path md/Cargo.toml --release -- check artifacts |
+| luid.mp4 | cargo run --manifest-path md/Cargo.toml --release -- video artifacts --out fluid.mp4 |
+| ield.png | cargo run --manifest-path md/Cargo.toml --example field && rsvg-convert -o field.png target/field.svg |
+| dimer.png | cargo run --manifest-path md/Cargo.toml --example dimer && rsvg-convert -o dimer.png target/dimer.svg |
+| Benchmark table + scaling.png | python3 benchmark.py |
+| docs/ heating run | cargo run --manifest-path md/Cargo.toml --release -- run --n 400 --temperature 0.2 --ramp-to 1.2 --steps 20000 --sample-every 100 --out ../docs |
+| cold.mp4 | cargo run --manifest-path md/Cargo.toml --release -- run --temperature 0.2 --out /tmp/cold && cargo run --manifest-path md/Cargo.toml --release -- video /tmp/cold --out cold.mp4 |
+| hot.mp4 | cargo run --manifest-path md/Cargo.toml --release -- run --temperature 1.0 --out /tmp/hot && cargo run --manifest-path md/Cargo.toml --release -- video /tmp/hot --out hot.mp4 |
+| make reproduce | make reproduce |

@@ -3,8 +3,8 @@
 //! blue = attraction, red = repulsion, clipped at +-1), force on a neighbour
 //! as arrows that point radially outward inside r0 and inward outside.
 //!
-//! Run from the crate root `week2/`:
-//!     cargo run --example field
+//! Run from week2/:
+//!     cargo run --manifest-path md/Cargo.toml --example field
 //!     rsvg-convert -o field.png target/field.svg
 
 use std::fmt::Write as _;

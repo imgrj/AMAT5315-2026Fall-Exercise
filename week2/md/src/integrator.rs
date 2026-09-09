@@ -19,6 +19,7 @@ impl Integrator for Euler {
             x[0] += dt * v[0];
             x[1] += dt * v[1];
         }
+        system.wrap_positions();
         for (v, a) in system.velocities.iter_mut().zip(&a) {
             v[0] += dt * a[0];
             v[1] += dt * a[1];
@@ -43,6 +44,7 @@ impl Integrator for VelocityVerlet {
             x[0] += dt * v[0];
             x[1] += dt * v[1];
         }
+        system.wrap_positions();
         // a_{n+1} at the new positions, stored for the next step
         system.refresh_accelerations();
         // v_{n+1} = v_{n+1/2} + (dt/2) * a_{n+1}

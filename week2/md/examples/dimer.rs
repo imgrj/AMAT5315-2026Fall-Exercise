@@ -4,8 +4,8 @@
 //! Left panel: both integrators, 500 steps at dt = 0.01.
 //! Right panel: velocity-Verlet alone for 5000 steps, error scaled by 1000.
 //!
-//! Run from the crate root `week2/`:
-//!     cargo run --example dimer
+//! Run from week2/:
+//!     cargo run --manifest-path md/Cargo.toml --example dimer
 //!     rsvg-convert -o dimer.png target/dimer.svg
 
 use std::fmt::Write as _;
