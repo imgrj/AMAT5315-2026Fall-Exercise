@@ -2,7 +2,7 @@
 """Benchmark md run: --force naive vs --force cells at several N.
 
 Each cell: three runs of
-    md run -n N --temp 1.0 --dt 0.005 --steps 500 --equil 100 \
+    md run -n N --temperature 1.0 --dt 0.005 --steps 500 --equil 100 \
         --force naive|cells --seed 1 --out /tmp/mdbench_...
 Reported: median wall seconds with (min-max); speedup = median naive / median cells.
 Seconds per step = wall time / (equil + steps) = wall / 600.
@@ -31,13 +31,13 @@ def run_once(n: int, force: str) -> float:
     cmd = [
         BIN, "run",
         "-n", str(n),
-        "--temp", "1.0",
+        "--temperature", "1.0",
         "--dt", "0.005",
         "--steps", str(STEPS),
         "--equil", str(EQUIL),
         "--force", force,
         "--seed", "1",
-        "--out", f"/tmp/mdbench_{n}_{force}.txt",
+        "--out", f"/tmp/mdbench_{n}_{force}_dir",
     ]
     t0 = time.perf_counter()
     subprocess.run(cmd, check=True, capture_output=True)

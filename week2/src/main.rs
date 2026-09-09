@@ -4,9 +4,10 @@ use md::cli::{self, Command};
 use md::ops;
 
 fn usage() -> ! {
-    eprintln!("usage: md run -n N --temp T --dt DT --steps S --equil E [--ramp-to T2] [--force naive|cells] [--out FILE] [--seed S]");
-    eprintln!("       md check FILE [--force naive|cells] [--temp-tol T] [--drift-tol D] [--ks-tol K]");
-    eprintln!("       md video FILE [--out OUT.mp4] [--fps F]");
+    eprintln!("usage: md run --n N --temperature T [--ramp-to T2] [--dt D] [--steps S]");
+    eprintln!("           [--equil E] [--sample-every K] [--force naive|cells] [--out DIR] [--seed S]");
+    eprintln!("       md check FILE-OR-DIR [--temp-tol T] [--drift-tol D] [--ks-tol K]");
+    eprintln!("       md video FILE-OR-DIR --out OUT.mp4 [--fps F]");
     std::process::exit(2);
 }
 

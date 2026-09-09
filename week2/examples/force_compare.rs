@@ -32,12 +32,13 @@ fn run(strategy: ForceStrategy, tag: &str) -> Trajectory {
         dt: 0.005,
         steps: STEPS,
         equil: EQUIL,
+        sample_every: 1,
         ramp_to: None,
-        out: format!("/tmp/force_compare_{tag}.txt"),
+        out: format!("/tmp/force_compare_{tag}"),
         seed: 2026,
     };
     ops::run_sim(&cfg).unwrap();
-    trajectory::read(&cfg.out).unwrap()
+    trajectory::read(&format!("{}/trajectory.txt", cfg.out)).unwrap()
 }
 
 fn frame_energy(t: &Trajectory, k: usize, strategy: ForceStrategy) -> f64 {

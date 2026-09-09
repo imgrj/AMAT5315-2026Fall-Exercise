@@ -8,6 +8,8 @@ pub struct Meta {
     pub box_l: f64,
     pub temp: f64,
     pub dt: f64,
+    /// One frame is recorded every this many steps.
+    pub sample_every: usize,
 }
 
 /// All frames of a run; each frame holds one `[x, y, vx, vy]` per atom.
@@ -24,6 +26,7 @@ pub fn write(path: &str, t: &Trajectory) -> std::io::Result<()> {
     let _ = writeln!(s, "# box {:.10}", t.meta.box_l);
     let _ = writeln!(s, "# temp {:.10}", t.meta.temp);
     let _ = writeln!(s, "# dt {:.10}", t.meta.dt);
+    let _ = writeln!(s, "# sample_every {}", t.meta.sample_every);
     let _ = writeln!(s, "# frames {}", t.frames.len());
     for frame in &t.frames {
         for a in frame {
@@ -40,6 +43,7 @@ pub fn read(path: &str) -> Result<Trajectory, String> {
     let mut box_l = None;
     let mut temp = None;
     let mut dt = None;
+    let mut sample_every = 1usize;
     let mut frames_expected = None;
     for line in text.lines().filter(|l| l.starts_with('#')) {
         let f: Vec<&str> = line[1..].split_whitespace().collect();
@@ -50,6 +54,9 @@ pub fn read(path: &str) -> Result<Trajectory, String> {
             "box" => box_l = val(1),
             "temp" => temp = val(1),
             "dt" => dt = val(1),
+            "sample_every" => {
+                sample_every = f.get(1).and_then(|v| v.parse::<usize>().ok()).unwrap_or(1)
+            }
             "frames" => frames_expected = f.get(1).and_then(|v| v.parse::<usize>().ok()),
             _ => return Err(format!("unknown header line: {line}")),
         }
@@ -59,6 +66,7 @@ pub fn read(path: &str) -> Result<Trajectory, String> {
         box_l: box_l.ok_or("missing # box")?,
         temp: temp.ok_or("missing # temp")?,
         dt: dt.ok_or("missing # dt")?,
+        sample_every,
     };
     let frames_expected = frames_expected.ok_or("missing # frames")?;
     let mut frames = Vec::new();
@@ -96,7 +104,7 @@ mod tests {
 
     fn sample() -> Trajectory {
         Trajectory {
-            meta: Meta { n: 2, box_l: 10.0, temp: 0.7, dt: 0.005 },
+            meta: Meta { n: 2, box_l: 10.0, temp: 0.7, dt: 0.005, sample_every: 1 },
             frames: vec![
                 vec![[1.0, 2.0, 0.1, -0.2], [3.0, 4.0, 0.0, 0.5]],
                 vec![[1.1, 2.1, 0.1, -0.2], [3.1, 4.1, 0.0, 0.5]],

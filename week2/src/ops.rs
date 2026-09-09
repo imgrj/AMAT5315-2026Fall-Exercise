@@ -1,9 +1,28 @@
 //! The three operations behind the md subcommands.
 
+use std::path::Path;
+
 use crate::cli::RunCfg;
 use crate::rng::Rng;
 use crate::trajectory::{Meta, Trajectory};
 use crate::{triangular_lattice, Integrator, System, VelocityVerlet};
+
+/// The name of the trajectory file inside a run output directory.
+const TRAJECTORY_FILE: &str = "trajectory.txt";
+
+/// If `path` is a directory, point at the trajectory file inside it;
+/// otherwise return it unchanged (a legacy trajectory file path).
+pub fn resolve_trajectory(path: &str) -> Result<String, String> {
+    if Path::new(path).is_dir() {
+        let joined = Path::new(path).join(TRAJECTORY_FILE);
+        joined
+            .to_str()
+            .map(|s| s.to_string())
+            .ok_or_else(|| format!("path not valid UTF-8: {path}"))
+    } else {
+        Ok(path.to_string())
+    }
+}
 
 /// Shifted-force cutoff.
 const RC: f64 = 2.5;
@@ -37,6 +56,11 @@ pub fn run_sim(cfg: &RunCfg) -> Result<String, String> {
     let (positions, box_l) = triangular_lattice(side as usize, 0.8);
     let mut rng = Rng::new(cfg.seed);
     let velocities = maxwell_velocities(positions.len(), cfg.temp, &mut rng);
+    // Output is a directory holding trajectory.txt and run.json.
+    std::fs::create_dir_all(&cfg.out).map_err(|e| format!("create {}: {e}", cfg.out))?;
+    let out = Path::new(&cfg.out).join(TRAJECTORY_FILE);
+    let out = out.to_str().ok_or("output path not valid UTF-8")?.to_string();
+
     let mut system = System::periodic(positions, velocities, box_l, RC);
     system.set_force(cfg.force);
     let integrator = VelocityVerlet;
@@ -49,22 +73,24 @@ pub fn run_sim(cfg: &RunCfg) -> Result<String, String> {
 
     // Recording. Without --ramp-to this is pure NVE; with it, every step
     // rescales velocities to a target rising linearly from temp (step 0) to
-    // ramp_to (the last step).
-    let mut frames = Vec::with_capacity(cfg.steps);
+    // ramp_to (the last step). One frame is kept every --sample-every steps.
+    let mut frames = Vec::with_capacity(cfg.steps / cfg.sample_every + 1);
     for k in 0..cfg.steps {
         integrator.step(&mut system, cfg.dt);
         if let Some(ramp) = cfg.ramp_to {
             let f = (k + 1) as f64 / cfg.steps as f64;
             rescale(&mut system.velocities, cfg.temp + (ramp - cfg.temp) * f);
         }
-        frames.push(
-            system
-                .positions
-                .iter()
-                .zip(&system.velocities)
-                .map(|(x, v)| [x[0], x[1], v[0], v[1]])
-                .collect(),
-        );
+        if (k + 1) % cfg.sample_every == 0 {
+            frames.push(
+                system
+                    .positions
+                    .iter()
+                    .zip(&system.velocities)
+                    .map(|(x, v)| [x[0], x[1], v[0], v[1]])
+                    .collect(),
+            );
+        }
     }
     let t = Trajectory {
         meta: Meta {
@@ -72,15 +98,17 @@ pub fn run_sim(cfg: &RunCfg) -> Result<String, String> {
             box_l,
             temp: cfg.temp,
             dt: cfg.dt,
+            sample_every: cfg.sample_every,
         },
         frames,
     };
-    crate::trajectory::write(&cfg.out, &t).map_err(|e| e.to_string())?;
+    crate::trajectory::write(&out, &t).map_err(|e| e.to_string())?;
     write_run_json(cfg, &t)?;
     Ok(format!(
-        "wrote {} frames (N = {}, box = {box_l:.4}) to {}",
+        "wrote {} frames (N = {}, box = {box_l:.4}, dt = {}) to {}",
         t.frames.len(),
         t.meta.n,
+        cfg.dt,
         cfg.out
     ))
 }
@@ -91,23 +119,25 @@ use crate::trajectory;
 /// Write run.json beside the trajectory file: the run's settings, including
 /// ramp_to when a ramp was requested.
 fn write_run_json(cfg: &RunCfg, t: &Trajectory) -> Result<(), String> {
-    let dir = std::path::Path::new(&cfg.out)
-        .parent()
-        .map(|p| p.to_path_buf())
-        .unwrap_or_default();
     let force = match cfg.force {
         crate::ForceStrategy::Naive => "naive",
         crate::ForceStrategy::Cells => "cells",
     };
     let mut s = format!(
-        "{{\"n\":{},\"temp\":{},\"dt\":{},\"steps\":{},\"equil\":{},\"seed\":{},\"force\":\"{force}\"",
-        t.meta.n, t.meta.temp, t.meta.dt, t.frames.len(), cfg.equil, cfg.seed
+        "{{\"n\":{},\"temp\":{},\"dt\":{},\"steps\":{},\"equil\":{},\"sample_every\":{},\"seed\":{},\"force\":\"{force}\"",
+        t.meta.n,
+        t.meta.temp,
+        t.meta.dt,
+        cfg.steps,
+        cfg.equil,
+        cfg.sample_every,
+        cfg.seed
     );
     if let Some(ramp) = cfg.ramp_to {
         s.push_str(&format!(",\"ramp_to\":{ramp}"));
     }
     s.push_str("}\n");
-    std::fs::write(dir.join("run.json"), s).map_err(|e| e.to_string())
+    std::fs::write(Path::new(&cfg.out).join("run.json"), s).map_err(|e| e.to_string())
 }
 
 /// Outcome of the three physics checks on one trajectory.
@@ -154,7 +184,8 @@ fn ks_statistic(speeds: &mut [f64], temp: f64) -> f64 {
 }
 
 pub fn check(cfg: &CheckCfg) -> Result<Report, String> {
-    let t = trajectory::read(&cfg.file)?;
+    let file = resolve_trajectory(&cfg.file)?;
+    let t = trajectory::read(&file)?;
     if t.frames.is_empty() {
         return Err("trajectory has no frames".into());
     }
@@ -171,13 +202,14 @@ pub fn check(cfg: &CheckCfg) -> Result<Report, String> {
     // Energy drift: least-squares slope of E(t), scaled by duration and |E0|.
     let energies: Vec<f64> = t.frames.iter().map(|f| frame_energy(&t.meta, f, cfg.force)).collect();
     let e0 = energies[0];
-    let duration = (t.frames.len() - 1) as f64 * t.meta.dt;
+    let step = t.meta.dt * t.meta.sample_every as f64;
+    let duration = (t.frames.len() - 1) as f64 * step;
     let tm = duration / 2.0;
     let em = energies.iter().sum::<f64>() / energies.len() as f64;
     let mut cov = 0.0;
     let mut var = 0.0;
     for (k, e) in energies.iter().enumerate() {
-        let tk = k as f64 * t.meta.dt;
+        let tk = k as f64 * step;
         cov += (tk - tm) * (e - em);
         var += (tk - tm) * (tk - tm);
     }
@@ -236,7 +268,8 @@ use crate::rdf::Rdf;
 use crate::video;
 
 pub fn make_video(cfg: &VideoCfg) -> Result<String, String> {
-    let t = trajectory::read(&cfg.file)?;
+    let file = resolve_trajectory(&cfg.file)?;
+    let t = trajectory::read(&file)?;
     let factor = ((t.frames.len() as f64) / (cfg.fps * 10.0)).ceil().max(1.0) as usize;
     let frame_ids: Vec<usize> = (0..t.frames.len()).step_by(factor).collect();
     let dir = std::env::temp_dir().join(format!("md_video_frames_{}", std::process::id()));

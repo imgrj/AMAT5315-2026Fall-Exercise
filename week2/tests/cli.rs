@@ -1,8 +1,39 @@
 //! End-to-end checks of the md CLI operations.
 
+use std::path::PathBuf;
+
 use md::cli::{CheckCfg, RunCfg, VideoCfg};
 use md::ops::run_sim;
 use md::trajectory::read;
+
+fn run_dir(name: &str) -> PathBuf {
+    let dir = std::env::temp_dir().join(name);
+    std::fs::create_dir_all(&dir).unwrap();
+    dir
+}
+
+/// Run a default simulation into `dir` unless one is already there, so tests
+/// that inspect the output never race with the test that created it.
+fn ensure_run(dir: &PathBuf) {
+    if !dir.join("trajectory.txt").exists() {
+        run_sim(&run_cfg(dir.to_str().unwrap())).unwrap();
+    }
+}
+
+fn run_cfg(out: &str) -> RunCfg {
+    RunCfg {
+        force: md::ForceStrategy::Cells,
+        n: 100,
+        temp: 1.0,
+        dt: 0.005,
+        steps: 500,
+        equil: 100,
+        sample_every: 1,
+        ramp_to: None,
+        out: out.to_string(),
+        seed: 1,
+    }
+}
 
 fn check_cfg(path: &str) -> CheckCfg {
     CheckCfg {
@@ -14,56 +45,44 @@ fn check_cfg(path: &str) -> CheckCfg {
     }
 }
 
+fn mean_t(frame: &[[f64; 4]]) -> f64 {
+    frame.iter().map(|a| a[2] * a[2] + a[3] * a[3]).sum::<f64>() / 200.0
+}
+
 #[test]
 fn run_writes_a_checkable_trajectory() {
-    let path = std::env::temp_dir().join("md_cli_run_test.txt");
-    let path = path.to_str().unwrap().to_string();
-    let cfg = RunCfg {
-        force: md::ForceStrategy::Cells,
-        n: 100,
-        temp: 1.0,
-        dt: 0.005,
-        steps: 500,
-        equil: 100,
-        ramp_to: None,
-        out: path.clone(),
-        seed: 1,
-    };
-    run_sim(&cfg).unwrap();
-    let t = read(&path).unwrap();
+    let dir = run_dir("md_cli_run_test");
+    let out = dir.to_str().unwrap().to_string();
+    run_sim(&run_cfg(&out)).unwrap();
+    let traj = dir.join("trajectory.txt");
+    let t = read(traj.to_str().unwrap()).unwrap();
     assert_eq!(t.meta.n, 100);
     assert_eq!(t.frames.len(), 500);
-    // Right after exact rescaling, Verlet drift over 500 steps is tiny:
-    // the mean temperature stays close to the target.
-    let mean_t: f64 = t
-        .frames
-        .iter()
-        .map(|f| f.iter().map(|a| a[2] * a[2] + a[3] * a[3]).sum::<f64>() / 200.0)
-        .sum::<f64>()
-        / t.frames.len() as f64;
-    assert!((mean_t - 1.0).abs() < 0.05 * 1.0, "mean T {mean_t}");
+    let mean: f64 = t.frames.iter().map(|f| mean_t(f)).sum::<f64>() / t.frames.len() as f64;
+    assert!((mean - 1.0).abs() < 0.05, "mean T {mean}");
 }
 
 #[test]
 fn check_passes_on_our_own_run() {
-    let path = std::env::temp_dir().join("md_cli_run_test.txt");
-    let path = path.to_str().unwrap().to_string();
-    let report = md::ops::check(&check_cfg(&path)).unwrap();
+    let dir = run_dir("md_cli_check_test");
+    ensure_run(&dir);
+    let report = md::ops::check(&check_cfg(dir.to_str().unwrap())).unwrap();
     assert!(report.pass, "report {report:?}");
 }
 
 #[test]
 fn check_rejects_doctored_temperature() {
     // Re-scale all velocities by 1.5: mean temperature rises ~2.25x, out of tolerance.
-    let src = std::env::temp_dir().join("md_cli_run_test.txt");
-    let mut t = read(src.to_str().unwrap()).unwrap();
+    let dir = run_dir("md_cli_doctored");
+    ensure_run(&dir);
+    let mut t = read(dir.join("trajectory.txt").to_str().unwrap()).unwrap();
     for frame in &mut t.frames {
         for a in frame {
             a[2] *= 1.5;
             a[3] *= 1.5;
         }
     }
-    let path = std::env::temp_dir().join("md_cli_doctored.txt");
+    let path = dir.join("doctored.txt");
     md::trajectory::write(path.to_str().unwrap(), &t).unwrap();
     let report = md::ops::check(&check_cfg(path.to_str().unwrap())).unwrap();
     assert!(!report.pass);
@@ -71,25 +90,23 @@ fn check_rejects_doctored_temperature() {
 
 #[test]
 fn energy_of_frames_is_consistent() {
-    // The drift metric on an NVE Verlet run stays far below the tolerance.
-    let path = std::env::temp_dir().join("md_cli_run_test.txt");
-    let report = md::ops::check(&check_cfg(path.to_str().unwrap())).unwrap();
+    let dir = run_dir("md_cli_energy_test");
+    ensure_run(&dir);
+    let report = md::ops::check(&check_cfg(dir.to_str().unwrap())).unwrap();
     assert!(report.drift < 1e-3, "drift {}", report.drift);
 }
 
 #[test]
 fn frames_render_as_ppm() {
-    let path = std::env::temp_dir().join("md_cli_run_test.txt");
-    let t = read(path.to_str().unwrap()).unwrap();
+    let dir = run_dir("md_cli_frames_test");
+    ensure_run(&dir);
+    let t = read(dir.join("trajectory.txt").to_str().unwrap()).unwrap();
     let frame = &t.frames[0];
     let positions: Vec<[f64; 2]> = frame.iter().map(|a| [a[0], a[1]]).collect();
     let ppm = md::video::render_frame(t.meta.box_l, &positions, &[], 450);
-    // P6 header with the right dimensions (2 panels wide, 1 tall), then RGB.
     const HEADER: &[u8] = b"P6\n900 450 255\n";
     assert_eq!(&ppm[..HEADER.len()], HEADER);
     assert_eq!(ppm.len(), HEADER.len() + 900 * 450 * 3);
-    // An atom center lands on a non-white pixel in the LEFT panel: margin
-    // p = 22.5 px, drawing side 405 px, atoms of radius ~14 px.
     let a = frame[0];
     let scale = 405.0 / t.meta.box_l;
     let px = 22.5 + a[0] * scale;
@@ -100,10 +117,9 @@ fn frames_render_as_ppm() {
 
 #[test]
 fn render_wraps_positions_into_the_box() {
-    // Shifting every atom by one box length in x and y must not change the
-    // frame: rem_euclid(box) makes the display periodic.
-    let path = std::env::temp_dir().join("md_cli_run_test.txt");
-    let t = read(path.to_str().unwrap()).unwrap();
+    let dir = run_dir("md_cli_wrap_test");
+    ensure_run(&dir);
+    let t = read(dir.join("trajectory.txt").to_str().unwrap()).unwrap();
     let frame = &t.frames[0];
     let box_l = t.meta.box_l;
     let positions: Vec<[f64; 2]> = frame.iter().map(|a| [a[0], a[1]]).collect();
@@ -118,8 +134,6 @@ fn render_wraps_positions_into_the_box() {
 
 #[test]
 fn rdf_gets_its_own_panel() {
-    // A nonempty RDF curve draws blue pixels in the RIGHT half only;
-    // the atoms-only LEFT half stays free of blue.
     let box_l = 10.0;
     let positions = vec![[1.0, 5.0], [4.0, 5.0]];
     let curve = vec![(1.0, 2.0), (2.0, 1.5), (3.0, 1.0)];
@@ -142,10 +156,11 @@ fn rdf_gets_its_own_panel() {
 
 #[test]
 fn make_video_produces_an_mp4() {
-    let path = std::env::temp_dir().join("md_cli_run_test.txt");
+    let dir = run_dir("md_cli_video_test");
+    ensure_run(&dir);
     let out = std::env::temp_dir().join("md_cli_video_test.mp4");
-    let cfg = md::cli::VideoCfg {
-        file: path.to_str().unwrap().into(),
+    let cfg = VideoCfg {
+        file: dir.to_str().unwrap().into(),
         out: out.to_str().unwrap().into(),
         fps: 10.0,
     };
@@ -154,28 +169,28 @@ fn make_video_produces_an_mp4() {
     assert!(meta.len() > 1000, "mp4 too small: {}", meta.len());
 }
 
-fn mean_t(frame: &[[f64; 4]]) -> f64 {
-    frame.iter().map(|a| a[2] * a[2] + a[3] * a[3]).sum::<f64>() / 200.0
+#[test]
+fn sample_every_thins_frames() {
+    let dir = run_dir("md_cli_sample_test");
+    let mut cfg = run_cfg(dir.to_str().unwrap());
+    cfg.steps = 500;
+    cfg.sample_every = 100;
+    run_sim(&cfg).unwrap();
+    let t = read(dir.join("trajectory.txt").to_str().unwrap()).unwrap();
+    assert_eq!(t.frames.len(), 5);
+    assert_eq!(t.meta.sample_every, 100);
 }
 
 #[test]
 fn ramp_to_heats_along_schedule_and_is_recorded() {
-    let dir = std::env::temp_dir().join("md_ramp_test");
-    std::fs::create_dir_all(&dir).unwrap();
-    let path = dir.join("ramp.txt");
-    let cfg = RunCfg {
-        force: md::ForceStrategy::Cells,
-        n: 100,
-        temp: 1.0,
-        dt: 0.005,
-        steps: 200,
-        equil: 10,
-        ramp_to: Some(2.0),
-        out: path.to_str().unwrap().into(),
-        seed: 1,
-    };
+    let dir = run_dir("md_ramp_test");
+    let out = dir.join("ramp_out");
+    let mut cfg = run_cfg(out.to_str().unwrap());
+    cfg.steps = 200;
+    cfg.equil = 10;
+    cfg.ramp_to = Some(2.0);
     run_sim(&cfg).unwrap();
-    let t = read(path.to_str().unwrap()).unwrap();
+    let t = read(out.join("trajectory.txt").to_str().unwrap()).unwrap();
     assert_eq!(t.frames.len(), 200);
     // Rescaling every recorded step makes the instantaneous temperature equal
     // the ramp target: frame k sits after step k+1, fraction (k+1)/steps.
@@ -184,8 +199,8 @@ fn ramp_to_heats_along_schedule_and_is_recorded() {
     assert!((first - target_first).abs() < 1e-6, "first T {first} vs {target_first}");
     let last = mean_t(&t.frames[199]);
     assert!((last - 2.0).abs() < 1e-6, "last T {last} vs 2.0");
-    // ramp_to recorded in run.json next to the trajectory.
-    let text = std::fs::read_to_string(dir.join("run.json")).unwrap();
+    // ramp_to recorded in run.json inside the output directory.
+    let text = std::fs::read_to_string(out.join("run.json")).unwrap();
     assert!(text.contains("ramp_to"), "run.json: {text}");
     assert!(text.contains("2"), "run.json: {text}");
 }

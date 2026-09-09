@@ -7,6 +7,8 @@ pub struct RunCfg {
     pub dt: f64,
     pub steps: usize,
     pub equil: usize,
+    /// Record one frame every this many steps.
+    pub sample_every: usize,
     /// Optional linear temperature ramp during the recorded run.
     pub ramp_to: Option<f64>,
     pub out: String,
@@ -42,7 +44,7 @@ pub fn parse(args: &[String]) -> Result<Command, String> {
     while i < args.len() {
         let a = &args[i];
         if a.starts_with('-') && a.len() > 1 {
-            let name = a.trim_start_matches('-');
+            let name = canon(a.trim_start_matches('-'));
             let value = args
                 .get(i + 1)
                 .ok_or_else(|| format!("flag {name} needs a value"))?;
@@ -77,27 +79,28 @@ pub fn parse(args: &[String]) -> Result<Command, String> {
     };
     match sub.as_str() {
         "run" => {
-            reject_unknown(&flags, &["force", "n", "temp", "dt", "steps", "equil", "ramp-to", "out", "seed"])?;
-            // Physics-shaping parameters are required: a silently defaulted
-            // value could produce an unwanted result.
-            let required = ["n", "temp", "dt", "steps", "equil"];
-            let missing: Vec<&str> = required
-                .iter()
-                .copied()
-                .filter(|k| !flags.contains_key(*k))
-                .collect();
-            if !missing.is_empty() {
-                return Err(format!("run requires: {}", missing.join(", ")));
+            reject_unknown(
+                &flags,
+                &["force", "n", "temperature", "dt", "steps", "equil", "ramp-to", "sample-every", "out", "seed"],
+            )?;
+            // The temperature shapes the result; everything else has a default.
+            if !flags.contains_key("temperature") {
+                return Err("run requires --temperature".into());
+            }
+            let sample_every = uint("sample-every")?.unwrap_or(1);
+            if sample_every == 0 {
+                return Err("--sample-every must be >= 1".into());
             }
             Ok(Command::Run(RunCfg {
                 force: force("force")?.unwrap_or(crate::ForceStrategy::Cells),
-                n: uint("n")?.unwrap(),
-                temp: num("temp")?.unwrap(),
-                dt: num("dt")?.unwrap(),
-                steps: uint("steps")?.unwrap(),
-                equil: uint("equil")?.unwrap(),
+                n: uint("n")?.unwrap_or(100),
+                temp: num("temperature")?.unwrap(),
+                dt: num("dt")?.unwrap_or(0.005),
+                steps: uint("steps")?.unwrap_or(10000),
+                equil: uint("equil")?.unwrap_or(1000),
+                sample_every,
                 ramp_to: num("ramp-to")?,
-                out: flags.get("out").cloned().unwrap_or_else(|| "trajectory.txt".into()),
+                out: flags.get("out").cloned().unwrap_or_else(|| "out".into()),
                 seed: flags
                     .get("seed")
                     .map(|v| v.parse::<u64>().map_err(|_| "--seed: not an integer"))
@@ -129,6 +132,14 @@ pub fn parse(args: &[String]) -> Result<Command, String> {
     }
 }
 
+/// Map legacy spellings onto canonical flag names.
+fn canon(name: &str) -> &str {
+    match name {
+        "temp" => "temperature",
+        other => other,
+    }
+}
+
 /// Reject any flag not in the allowed set for the subcommand.
 fn reject_unknown(
     flags: &std::collections::HashMap<String, String>,
@@ -152,14 +163,14 @@ mod tests {
     fn run_requires_physics_parameters() {
         // Physics-shaping parameters must be explicit; missing any is an error.
         assert!(parse(&args(&["run"])).is_err());
-        assert!(parse(&args(&["run", "-n", "100", "--temp", "1", "--dt", "0.01"])).is_err());
-        assert!(parse(&args(&["run", "-n", "100", "--temp", "1", "--dt", "0.01", "--steps", "10", "--equil", "5"])).is_ok());
+        assert!(parse(&args(&["run", "-n", "100", "--dt", "0.01"])).is_err()); // no temperature
+        assert!(parse(&args(&["run", "-n", "100", "--temperature", "1", "--dt", "0.01", "--steps", "10", "--equil", "5"])).is_ok());
     }
 
     #[test]
     fn overrides() {
         let c = parse(&args(&[
-            "run", "-n", "144", "--temp", "0.5", "--dt", "0.01", "--steps", "10", "--equil", "5",
+            "run", "-n", "144", "--temperature", "0.5", "--dt", "0.01", "--steps", "10", "--equil", "5",
             "--out", "t.txt", "--seed", "9",
         ]))
         .unwrap();
@@ -170,6 +181,7 @@ mod tests {
                 assert_eq!(cfg.dt, 0.01);
                 assert_eq!(cfg.steps, 10);
                 assert_eq!(cfg.equil, 5);
+                assert_eq!(cfg.sample_every, 1);
                 assert_eq!(cfg.out, "t.txt");
                 assert_eq!(cfg.seed, 9);
             }
@@ -180,17 +192,17 @@ mod tests {
     #[test]
     fn force_flag_defaults_to_cells() {
         use crate::ForceStrategy;
-        let c = parse(&args(&["run", "-n", "4", "--temp", "1", "--dt", "0.01", "--steps", "1", "--equil", "1"])).unwrap();
+        let c = parse(&args(&["run", "-n", "4", "--temperature", "1", "--dt", "0.01", "--steps", "1", "--equil", "1"])).unwrap();
         match c {
             Command::Run(cfg) => assert_eq!(cfg.force, ForceStrategy::Cells),
             _ => panic!("wrong command"),
         }
-        let c = parse(&args(&["run", "-n", "4", "--temp", "1", "--dt", "0.01", "--steps", "1", "--equil", "1", "--force", "naive"])).unwrap();
+        let c = parse(&args(&["run", "-n", "4", "--temperature", "1", "--dt", "0.01", "--steps", "1", "--equil", "1", "--force", "naive"])).unwrap();
         match c {
             Command::Run(cfg) => assert_eq!(cfg.force, ForceStrategy::Naive),
             _ => panic!("wrong command"),
         }
-        assert!(parse(&args(&["run", "-n", "4", "--temp", "1", "--dt", "0.01", "--steps", "1", "--equil", "1", "--force", "magic"])).is_err());
+        assert!(parse(&args(&["run", "-n", "4", "--temperature", "1", "--dt", "0.01", "--steps", "1", "--equil", "1", "--force", "magic"])).is_err());
     }
 
     #[test]
