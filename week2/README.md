@@ -56,3 +56,27 @@ Seconds per step in `scaling.png` = wall time / (equil + steps) = wall / 600,
 so fixed per-run overhead (process start, lattice, trajectory formatting) is
 included in both lines. That overhead is why the ratio is ~1 at N = 100 and
 why the asymptote (naive O(N^2) vs cells O(N)) grows with N.
+
+## Reproducing every table and figure
+
+All commands run from `week2/`; figures need `cargo build --release` (or
+`cargo build`) and `rsvg-convert` once:
+
+```bash
+cargo build --release
+```
+
+| Artifact | Command |
+|---|---|
+| Benchmark table + `scaling.png` | `python3 benchmark.py` |
+| `field.png` (pair field) | `cargo run --example field && rsvg-convert -o field.png target/field.svg` |
+| `dimer.png` (energy error) | `cargo run --example dimer && rsvg-convert -o dimer.png target/dimer.svg` |
+| `force-compare.png` (naive vs cells) | `cargo run --release --example force_compare && rsvg-convert -o force-compare.png target/force_compare.svg` |
+| `docs/` heating run (this directory) | `md run --n 400 --temperature 0.2 --ramp-to 1.2 --steps 20000 --sample-every 100 --out docs` |
+| `cold.mp4` | `md run --temperature 0.2 --out /tmp/cold && md video /tmp/cold --out cold.mp4` |
+| `hot.mp4` | `md run --temperature 1.0 --out /tmp/hot && md video /tmp/hot --out hot.mp4` |
+| `artifacts/` fresh-clone reproduction | `make reproduce` |
+
+`md check` verifies physics for microcanonical (no `--ramp-to`) runs; a
+heating run such as `docs/` deliberately fails its temperature/drift checks
+because the thermostat is pumping energy in.
