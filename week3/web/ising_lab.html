@@ -1,0 +1,543 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ising Lattice Lab — Week 3</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --paper: #fbfaf6;
+    --paper-2: #f1efe8;
+    --ink: #1d2029;
+    --ink-2: #4b5063;
+    --ink-3: #7b8093;
+    --rule: #d9d6cc;
+    --accent: #33548c;
+    --accent-soft: #e9eef7;
+    --key: #ffee9a;
+    --amber: #c98a1e;
+    --bond: #c4453a;
+    --green: #2f8a57;
+    --up: #f3f1ea;
+    --down: #24262d;
+    --panel: #ffffff;
+    --shadow: 0 1px 2px rgba(29, 32, 41, .06), 0 8px 24px rgba(29, 32, 41, .06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #16181e;
+      --paper-2: #1e2129;
+      --ink: #e9e7df;
+      --ink-2: #b4b7c4;
+      --ink-3: #7d8294;
+      --rule: #2f333e;
+      --accent: #8fa9dc;
+      --accent-soft: #232b3c;
+      --key: #6b5d12;
+      --amber: #e0a43a;
+      --bond: #e0665a;
+      --green: #58b581;
+      --up: #e6e3da;
+      --down: #0d0e12;
+      --panel: #1b1e25;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 16.5px;
+    line-height: 1.55;
+    padding-inline: clamp(16px, 4vw, 40px);
+    padding-block: 28px 64px;
+  }
+  .mono { font-family: "IBM Plex Mono", monospace; }
+
+  header.masthead {
+    max-width: 1180px;
+    margin: 0 auto 26px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 24px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 14px;
+  }
+  header h1 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(28px, 3.4vw, 38px);
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  header .sub {
+    color: var(--ink-2);
+    font-size: 15px;
+    max-width: 52ch;
+  }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .lab {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(320px, 470px) minmax(0, 1fr);
+    gap: 36px;
+    align-items: start;
+  }
+  .bench { position: sticky; top: 16px; display: grid; gap: 14px; }
+
+  .lattice-wrap {
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    padding: 12px;
+    border-radius: 4px;
+  }
+  canvas#lattice {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    cursor: crosshair;
+    background: var(--down);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+  }
+  .legend {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    font-size: 13px; color: var(--ink-2);
+    margin-top: 8px;
+    align-items: center;
+  }
+  .legend .sw {
+    display: inline-block; width: 12px; height: 12px; vertical-align: -1px;
+    margin-right: 6px; border: 1px solid var(--rule);
+  }
+  .hover-read {
+    min-height: 1.4em;
+    font-size: 13.5px;
+    color: var(--ink-2);
+    margin-top: 6px;
+  }
+  .hover-read b { color: var(--ink); font-weight: 600; }
+
+  .dials {
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    border-radius: 4px;
+    padding: 14px;
+    display: grid; gap: 12px;
+  }
+  .dial-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .dial-row label { font-size: 13px; color: var(--ink-2); min-width: 9ch; }
+  input[type="range"] { flex: 1 1 140px; accent-color: var(--amber); }
+  .tval { font-size: 15px; min-width: 6ch; font-weight: 600; color: var(--amber); }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  button {
+    font: inherit; font-size: 13px;
+    font-family: "IBM Plex Mono", monospace;
+    color: var(--ink);
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button.on { background: var(--accent); color: #ffffff; border-color: var(--accent); font-weight: 600; }
+  button.preset { color: var(--amber); font-weight: 500; }
+
+  .readouts {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+    background: var(--rule); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden;
+  }
+  .ro { background: var(--panel); padding: 7px 9px; }
+  .ro .k { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); font-family: "IBM Plex Mono", monospace; }
+  .ro .v { font-size: 15px; font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .ro .v.amber { color: var(--amber); }
+  .ro .v.green { color: var(--green); }
+
+  .concepts { max-width: 62ch; display: grid; gap: 26px; }
+  .concept { border-top: 1px solid var(--rule); padding-top: 14px; }
+  .concept h2 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 500;
+    font-size: 22px;
+    margin: 4px 0 8px;
+  }
+  .formula {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 14px;
+    background: var(--paper-2);
+    padding: 8px 12px;
+    border-radius: 3px;
+    margin: 8px 0 12px;
+  }
+  .key {
+    background: var(--key);
+    padding: 1px 4px;
+    border-radius: 2px;
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div>
+    <div class="eyebrow">Week 3 · Monte Carlo Simulation</div>
+    <h1>Ising Lattice Lab</h1>
+  </div>
+  <div class="sub">A 64 × 64 Ising lattice, sampled live by Metropolis and Wolff rules. Heat it, cool it, hover a spin, and interact with the phase transition live.</div>
+</header>
+
+<div class="lab">
+  <aside class="bench">
+    <div class="lattice-wrap">
+      <canvas id="lattice" width="512" height="512"></canvas>
+      <div class="legend">
+        <span><span class="sw" style="background: var(--up)"></span>+1, up</span>
+        <span><span class="sw" style="background: var(--down)"></span>−1, down</span>
+        <span><span class="sw" style="background: var(--bond); border-color: var(--bond)"></span>disagreeing bond</span>
+      </div>
+      <div class="hover-read mono" id="hover">Hover a site to see its four bonds and flip cost.</div>
+    </div>
+
+    <div class="dials">
+      <div class="dial-row">
+        <label for="temp">Temperature <span class="mono">T</span></label>
+        <input type="range" id="temp" min="1.0" max="4.0" step="0.01" value="2.27">
+        <span class="tval mono" id="tval">2.27</span>
+      </div>
+      <div class="btns">
+        <button class="preset" id="p-cold" type="button">cold 1.8</button>
+        <button class="preset on" id="p-crit" type="button">critical 2.27</button>
+        <button class="preset" id="p-hot" type="button">hot 3.0</button>
+      </div>
+
+      <div class="btns">
+        <button id="btn-run" class="on" type="button">Pause</button>
+        <button id="btn-step" type="button">Step</button>
+        <button id="btn-reset-up" type="button">All-Up</button>
+        <button id="btn-reset-rand" type="button">Randomize</button>
+      </div>
+
+      <div class="dial-row" style="margin-top: 4px;">
+        <label>Sampler</label>
+        <div class="btns" style="flex:1;">
+          <button id="btn-metro" class="on" type="button">Metropolis</button>
+          <button id="btn-wolff" type="button">Wolff Cluster</button>
+        </div>
+      </div>
+
+      <div class="readouts">
+        <div class="ro"><div class="k">Temp T</div><div class="v amber" id="ro-t">2.27</div></div>
+        <div class="ro"><div class="k">Magnet. M</div><div class="v" id="ro-m">+0.000</div></div>
+        <div class="ro"><div class="k">Energy E</div><div class="v" id="ro-e">-1.414</div></div>
+        <div class="ro"><div class="k" id="ro-stat-k">Accept.</div><div class="v green" id="ro-stat-v">21.5%</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="concepts">
+    <section class="concept">
+      <div class="eyebrow">Spin and Lattice</div>
+      <h2>A spin is one bit on a torus</h2>
+      <p>Every site of the $64 \times 64$ square lattice holds a spin $s_i \in \{-1, +1\}$, drawn white for up and dark for down. Periodic boundaries wrap edges: right column neighbours left, bottom neighbours top. The whole model is $4096$ bits and a local rule for their interactions.</p>
+    </section>
+
+    <section class="concept">
+      <div class="eyebrow">Energy</div>
+      <h2>The energy counts disagreements</h2>
+      <div class="formula">E(s) = -J ∑ s_i s_j  (J = 1)</div>
+      <p>Agreeing nearest neighbours contribute $-1$, disagreeing pairs $+1$. A fully aligned lattice sits at $-2$ per site. Disagreeing bonds carry energy $+1$ and are highlighted red when you hover a spin.</p>
+    </section>
+
+    <section class="concept">
+      <div class="eyebrow">Exact Solution & Criticality</div>
+      <h2>Onsager's Phase Transition</h2>
+      <div class="formula">T_c = 2 / ln(1 + √2) ≈ 2.26919</div>
+      <p>Below $T_c$, spontaneous symmetry breaking leads to long-range ferromagnetic order. Above $T_c$, thermal entropy destroys magnetization. At $T_c$, fractal domains of all lengths coexist.</p>
+    </section>
+
+    <section class="concept">
+      <div class="eyebrow">Cluster Algorithms</div>
+      <h2>Wolff Cluster Flips Beat Critical Slowing Down</h2>
+      <div class="formula">p_bond = 1 - e^(-2/T)</div>
+      <p>Metropolis single-spin updates take hundreds of sweeps to reconfigure large domains at $T_c$ ($z \approx 2.2$). Wolff grows clusters of aligned spins with bond probability $p$ and flips them with acceptance $1$, accelerating independent sampling by over <span class="key">1000×</span>!</p>
+    </section>
+  </main>
+</div>
+
+<script>
+const L = 64;
+const N = L * L;
+let spins = new Int8Array(N);
+spins.fill(1); // start all-up
+
+let T = 2.27;
+let running = true;
+let mode = 'metropolis'; // 'metropolis' or 'wolff'
+
+const nbrs = new Int32Array(N * 4);
+for (let y = 0; y < L; y++) {
+  for (let x = 0; x < L; x++) {
+    const idx = (y * L + x) * 4;
+    nbrs[idx]     = y * L + ((x + 1) % L);
+    nbrs[idx + 1] = ((y + 1) % L) * L + x;
+    nbrs[idx + 2] = y * L + ((x - 1 + L) % L);
+    nbrs[idx + 3] = ((y - 1 + L) % L) * L + x;
+  }
+}
+
+// Canvas
+const canvas = document.getElementById('lattice');
+const ctx = canvas.getContext('2d');
+const imgData = ctx.createImageData(L, L);
+
+let hoverSite = -1;
+
+function renderLattice() {
+  const d = imgData.data;
+  for (let i = 0; i < N; i++) {
+    const s = spins[i];
+    const p = i * 4;
+    const isHover = (i === hoverSite);
+    let isNbr = false;
+    if (hoverSite >= 0) {
+      const hn = hoverSite * 4;
+      isNbr = (i === nbrs[hn] || i === nbrs[hn+1] || i === nbrs[hn+2] || i === nbrs[hn+3]);
+    }
+
+    if (isHover) {
+      d[p] = 230; d[p+1] = 100; d[p+2] = 80; d[p+3] = 255;
+    } else if (isNbr) {
+      d[p] = 80; d[p+1] = 140; d[p+2] = 240; d[p+3] = 255;
+    } else if (s === 1) {
+      // Light / White
+      d[p] = 240; d[p+1] = 238; d[p+2] = 232; d[p+3] = 255;
+    } else {
+      // Dark
+      d[p] = 25; d[p+1] = 27; d[p+2] = 33; d[p+3] = 255;
+    }
+  }
+
+  // Draw scaled
+  createImageBitmap(imgData).then(bmp => {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(bmp, 0, 0, 512, 512);
+  });
+}
+
+function metropolisSweep() {
+  const exp4 = Math.exp(-4.0 / T);
+  const exp8 = Math.exp(-8.0 / T);
+  let accepted = 0;
+
+  for (let step = 0; step < N; step++) {
+    const site = (Math.random() * N) | 0;
+    const s = spins[site];
+    const n_idx = site * 4;
+    const h = spins[nbrs[n_idx]] + spins[nbrs[n_idx + 1]] + spins[nbrs[n_idx + 2]] + spins[nbrs[n_idx + 3]];
+    const de = 2 * s * h;
+
+    let pass = false;
+    if (de <= 0) pass = true;
+    else if (de === 4) pass = Math.random() < exp4;
+    else if (de === 8) pass = Math.random() < exp8;
+
+    if (pass) {
+      spins[site] = -s;
+      accepted++;
+    }
+  }
+  return accepted / N;
+}
+
+const wolffQueue = new Int32Array(N);
+const wolffTag = new Uint32Array(N);
+let wolffCurTag = 1;
+
+function wolffStep() {
+  const pAdd = 1.0 - Math.exp(-2.0 / T);
+  wolffCurTag++;
+  if (wolffCurTag === 0xFFFFFFFF) { wolffTag.fill(0); wolffCurTag = 1; }
+
+  const seed = (Math.random() * N) | 0;
+  const s0 = spins[seed];
+  wolffTag[seed] = wolffCurTag;
+  wolffQueue[0] = seed;
+  let head = 0, tail = 1;
+
+  while (head < tail) {
+    const u = wolffQueue[head++];
+    const n_idx = u * 4;
+    for (let k = 0; k < 4; k++) {
+      const v = nbrs[n_idx + k];
+      if (spins[v] === s0 && wolffTag[v] !== wolffCurTag) {
+        if (Math.random() < pAdd) {
+          wolffTag[v] = wolffCurTag;
+          wolffQueue[tail++] = v;
+        }
+      }
+    }
+  }
+
+  for (let i = 0; i < tail; i++) {
+    spins[wolffQueue[i]] = -s0;
+  }
+  return tail;
+}
+
+function computeStats() {
+  let spinSum = 0;
+  let bondSum = 0;
+  for (let i = 0; i < N; i++) {
+    const s = spins[i];
+    spinSum += s;
+    const n_idx = i * 4;
+    bondSum += s * (spins[nbrs[n_idx]] + spins[nbrs[n_idx + 1]]);
+  }
+  const m = spinSum / N;
+  const e = -bondSum / N;
+  return { m, e };
+}
+
+let lastStat = 0;
+
+function stepSimulation() {
+  let statVal = 0;
+  if (mode === 'metropolis') {
+    for (let i = 0; i < 3; i++) {
+      statVal = metropolisSweep();
+    }
+    lastStat = statVal * 100;
+  } else {
+    let totC = 0;
+    const moves = 4;
+    for (let i = 0; i < moves; i++) {
+      totC += wolffStep();
+    }
+    lastStat = totC / moves;
+  }
+}
+
+function updateUI() {
+  const { m, e } = computeStats();
+  document.getElementById('ro-t').textContent = T.toFixed(2);
+  document.getElementById('ro-m').textContent = (m >= 0 ? '+' : '') + m.toFixed(3);
+  document.getElementById('ro-e').textContent = e.toFixed(3);
+  if (mode === 'metropolis') {
+    document.getElementById('ro-stat-k').textContent = 'Accept.';
+    document.getElementById('ro-stat-v').textContent = lastStat.toFixed(1) + '%';
+  } else {
+    document.getElementById('ro-stat-k').textContent = 'Cluster';
+    document.getElementById('ro-stat-v').textContent = lastStat.toFixed(0);
+  }
+}
+
+function loop() {
+  if (running) {
+    stepSimulation();
+    renderLattice();
+    updateUI();
+  }
+  requestAnimationFrame(loop);
+}
+
+// Event Listeners
+const slider = document.getElementById('temp');
+const tval = document.getElementById('tval');
+
+function setTemp(newT) {
+  T = parseFloat(newT);
+  slider.value = T;
+  tval.textContent = T.toFixed(2);
+  document.querySelectorAll('.preset').forEach(b => b.classList.remove('on'));
+  if (Math.abs(T - 1.8) < 0.02) document.getElementById('p-cold').classList.add('on');
+  else if (Math.abs(T - 2.27) < 0.02) document.getElementById('p-crit').classList.add('on');
+  else if (Math.abs(T - 3.0) < 0.02) document.getElementById('p-hot').classList.add('on');
+}
+
+slider.addEventListener('input', e => setTemp(e.target.value));
+document.getElementById('p-cold').addEventListener('click', () => setTemp(1.80));
+document.getElementById('p-crit').addEventListener('click', () => setTemp(2.27));
+document.getElementById('p-hot').addEventListener('click', () => setTemp(3.00));
+
+const btnRun = document.getElementById('btn-run');
+btnRun.addEventListener('click', () => {
+  running = !running;
+  btnRun.textContent = running ? 'Pause' : 'Resume';
+  btnRun.classList.toggle('on', running);
+});
+
+document.getElementById('btn-step').addEventListener('click', () => {
+  stepSimulation();
+  renderLattice();
+  updateUI();
+});
+
+document.getElementById('btn-reset-up').addEventListener('click', () => {
+  spins.fill(1);
+  renderLattice();
+  updateUI();
+});
+
+document.getElementById('btn-reset-rand').addEventListener('click', () => {
+  for (let i = 0; i < N; i++) spins[i] = Math.random() < 0.5 ? 1 : -1;
+  renderLattice();
+  updateUI();
+});
+
+const btnMetro = document.getElementById('btn-metro');
+const btnWolff = document.getElementById('btn-wolff');
+btnMetro.addEventListener('click', () => {
+  mode = 'metropolis';
+  btnMetro.classList.add('on');
+  btnWolff.classList.remove('on');
+});
+btnWolff.addEventListener('click', () => {
+  mode = 'wolff';
+  btnWolff.classList.add('on');
+  btnMetro.classList.remove('on');
+});
+
+// Canvas hover
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const px = e.clientX - rect.left;
+  const py = e.clientY - rect.top;
+  const x = Math.floor(px / (rect.width / L));
+  const y = Math.floor(py / (rect.height / L));
+  if (x >= 0 && x < L && y >= 0 && y < L) {
+    hoverSite = y * L + x;
+    const s = spins[hoverSite];
+    const n_idx = hoverSite * 4;
+    const sumNbrs = spins[nbrs[n_idx]] + spins[nbrs[n_idx+1]] + spins[nbrs[n_idx+2]] + spins[nbrs[n_idx+3]];
+    const de = 2 * s * sumNbrs;
+    const readout = document.getElementById('hover');
+    readout.innerHTML = `Site (${x}, ${y}): spin <b>${s > 0 ? '+1' : '-1'}</b>, nbr sum <b>${sumNbrs}</b>, flip cost <b>ΔE = ${de >= 0 ? '+' : ''}${de}</b>`;
+  }
+});
+canvas.addEventListener('mouseleave', () => {
+  hoverSite = -1;
+  document.getElementById('hover').textContent = 'Hover a site to see its four bonds and flip cost.';
+});
+
+// Initial
+renderLattice();
+updateUI();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
