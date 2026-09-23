@@ -82,9 +82,45 @@
   .legend .bar { height: 9px; width: 120px; border-radius: 3px;
     background: linear-gradient(90deg, #3a76d8, #56c2c9, #f0c04a, #e8663a); }
   a { color: var(--accent); }
+  .nav-banner {
+    background: #0b0f19;
+    border-bottom: 1px solid var(--line);
+    padding: 10px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+  .nav-banner a {
+    color: var(--muted);
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .nav-banner a:hover { color: var(--ink); background: rgba(255,255,255,0.06); }
+  .nav-banner a.active {
+    color: var(--accent);
+    background: rgba(110, 168, 255, 0.12);
+    font-weight: 600;
+  }
+  .nav-banner .repo-link {
+    margin-left: auto;
+    color: var(--accent);
+    font-weight: 500;
+  }
 </style>
 </head>
 <body>
+<nav class="nav-banner">
+  <span><strong style="color: var(--ink);">AMAT5315:</strong> Scientific Computing</span>
+  <a href="index.html" class="active">Week 2: Molecular Dynamics</a>
+  <a href="week3-ising-lab.html">Week 3: Ising Lattice Lab</a>
+  <a href="week4-fluid-lab.html">Week 4: Fluid Dynamics Lab</a>
+  <a class="repo-link" href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise" target="_blank" rel="noopener">GitHub Repo ↗</a>
+</nav>
 <header>
   <h1>Week 2 — molecular dynamics: four views of one trajectory</h1>
   <span class="sub">2D Lennard-Jones argon · reduced units (k<sub>B</sub>=m=1)</span>

@@ -189,9 +189,46 @@
     padding: 1px 4px;
     border-radius: 2px;
   }
+  .nav-banner {
+    background: var(--paper-2);
+    border-bottom: 1px solid var(--rule);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--ink-2);
+    flex-wrap: wrap;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  .nav-banner a {
+    color: var(--ink-2);
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .nav-banner a:hover { color: var(--ink); background: rgba(0,0,0,0.05); }
+  .nav-banner a.active {
+    color: var(--accent);
+    background: var(--accent-soft);
+    font-weight: 600;
+  }
+  .nav-banner .repo-link {
+    margin-left: auto;
+    color: var(--accent);
+    font-weight: 500;
+  }
 </style>
 </head>
 <body>
+<nav class="nav-banner">
+  <span><strong style="color: var(--ink);">AMAT5315:</strong> Scientific Computing</span>
+  <a href="index.html">Week 2: Molecular Dynamics</a>
+  <a href="week3-ising-lab.html" class="active">Week 3: Ising Lattice Lab</a>
+  <a href="week4-fluid-lab.html">Week 4: Fluid Dynamics Lab</a>
+  <a class="repo-link" href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise" target="_blank" rel="noopener">GitHub Repo ↗</a>
+</nav>
 
 <header class="masthead">
   <div>

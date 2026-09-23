@@ -1,0 +1,1185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 4 — Continuum Fluid Dynamics Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #090d16;
+    --panel: #111726;
+    --panel-border: #1e293b;
+    --card: #161f33;
+    --ink: #f1f5f9;
+    --ink-muted: #94a3b8;
+    --ink-faint: #64748b;
+    --accent: #38bdf8;
+    --accent-glow: rgba(56, 189, 248, 0.25);
+    --good: #34d399;
+    --warn: #fbbf24;
+    --danger: #f87171;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  /* Global Nav Header */
+  .nav-banner {
+    background: #0d121f;
+    border-bottom: 1px solid var(--panel-border);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    flex-wrap: wrap;
+  }
+  .nav-banner a {
+    color: var(--ink-muted);
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+  }
+  .nav-banner a:hover { color: var(--ink); background: rgba(255,255,255,0.06); }
+  .nav-banner a.active {
+    color: var(--accent);
+    background: rgba(56, 189, 248, 0.12);
+    font-weight: 600;
+  }
+  .nav-banner .repo-link {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* Header */
+  header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-left h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+  }
+  .header-left .sub {
+    color: var(--ink-muted);
+    font-size: 12px;
+    margin-top: 3px;
+  }
+  .tab-buttons {
+    display: flex;
+    gap: 6px;
+    background: rgba(0,0,0,0.3);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--panel-border);
+  }
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--ink-muted);
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--card);
+    color: var(--accent);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  /* Main Workspace */
+  .workspace {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    height: calc(100vh - 110px);
+    overflow: hidden;
+  }
+  @media (max-width: 1080px) {
+    .workspace { grid-template-columns: 1fr; height: auto; }
+  }
+
+  /* Simulation Canvas Viewport */
+  .viewport-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 12px;
+    background: #090d16;
+    overflow-y: auto;
+  }
+  .canvas-container {
+    position: relative;
+    background: #05070c;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    min-height: 480px;
+  }
+  canvas#fluidCanvas {
+    display: block;
+    width: 480px;
+    height: 480px;
+    cursor: crosshair;
+    image-rendering: pixelated;
+  }
+  .overlay-stats {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .overlay-stats .stat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .overlay-stats .stat-val { font-weight: 600; color: var(--accent); }
+
+  /* Playback Toolbar */
+  .playback-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--panel-border);
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary {
+    background: var(--accent);
+    color: #04101e;
+    border-color: var(--accent);
+  }
+  .btn.primary:hover { background: #60a5fa; }
+  .btn.danger { color: var(--danger); }
+  .btn.danger:hover { background: rgba(248, 113, 113, 0.1); border-color: var(--danger); }
+
+  /* Charts */
+  .chart-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .chart-title {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ink-muted);
+    display: flex;
+    justify-content: space-between;
+  }
+  canvas#chartCanvas {
+    width: 100%;
+    height: 90px;
+    background: rgba(0,0,0,0.25);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Sidebar Controls */
+  .sidebar {
+    background: var(--panel);
+    border-left: 1px solid var(--panel-border);
+    padding: 18px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .control-group h3 {
+    margin: 0;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    font-weight: 700;
+  }
+  .preset-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .preset-btn {
+    background: var(--card);
+    border: 1px solid var(--panel-border);
+    color: var(--ink);
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 11.5px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .preset-btn.active {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Sliders & Forms */
+  .control-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .control-row .label-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+  }
+  .control-row .label-name { color: var(--ink-muted); }
+  .control-row .label-val { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--accent); }
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+  }
+  select {
+    background: var(--card);
+    border: 1px solid var(--panel-border);
+    color: var(--ink);
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    width: 100%;
+    outline: none;
+  }
+  select:focus { border-color: var(--accent); }
+
+  .stability-alert {
+    background: rgba(248, 113, 113, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-size: 11.5px;
+    color: #fca5a5;
+    display: none;
+    line-height: 1.4;
+  }
+  .stability-alert.visible { display: block; }
+
+  /* Evidence Gallery View */
+  .gallery-view {
+    display: none;
+    padding: 24px;
+    height: calc(100vh - 110px);
+    overflow-y: auto;
+    background: #070a12;
+  }
+  .gallery-view.active { display: block; }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+    gap: 20px;
+  }
+  .gallery-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .gallery-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: #03060d;
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .gallery-card .card-body {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .gallery-card h4 {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .gallery-card p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--ink-muted);
+    line-height: 1.5;
+  }
+  .gallery-card .metric-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent);
+    align-self: flex-start;
+  }
+</style>
+</head>
+<body>
+
+<!-- Global Weekly Nav -->
+<nav class="nav-banner">
+  <span><strong>AMAT5315:</strong> Scientific Computing</span>
+  <a href="index.html">Week 2: Molecular Dynamics</a>
+  <a href="week3-ising-lab.html">Week 3: Ising Lattice Lab</a>
+  <a href="week4-fluid-lab.html" class="active">Week 4: Fluid Dynamics Lab</a>
+  <a class="repo-link" href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise" target="_blank" rel="noopener">
+    GitHub Repo ↗
+  </a>
+</nav>
+
+<!-- Header -->
+<header>
+  <div class="header-left">
+    <h1>
+      Continuum Fluid Dynamics Lab
+      <span class="badge">Week 4 Interactive</span>
+    </h1>
+    <div class="sub">2D Incompressible Navier–Stokes, Vorticity-Streamfunction Formulation & Pseudospectral Integrator</div>
+  </div>
+  <div class="tab-buttons">
+    <button class="tab-btn active" id="tabSimBtn" onclick="switchTab('sim')">Interactive Studio</button>
+    <button class="tab-btn" id="tabGalleryBtn" onclick="switchTab('gallery')">Evidence & Verification (8)</button>
+  </div>
+</header>
+
+<!-- View 1: Interactive Simulation Studio -->
+<div class="workspace" id="simView">
+  <!-- Center Viewport -->
+  <div class="viewport-panel">
+    <div class="canvas-container">
+      <canvas id="fluidCanvas" width="480" height="480"></canvas>
+      <div class="overlay-stats">
+        <div class="stat-row"><span>Time t:</span><span class="stat-val" id="statT">0.00</span></div>
+        <div class="stat-row"><span>Energy E:</span><span class="stat-val" id="statE">0.5000</span></div>
+        <div class="stat-row"><span>Enstrophy Z:</span><span class="stat-val" id="statZ">6.6347</span></div>
+        <div class="stat-row"><span>Max Speed U:</span><span class="stat-val" id="statU">2.46</span></div>
+        <div class="stat-row"><span>Status:</span><span class="stat-val" id="statStatus" style="color:var(--good);">STABLE</span></div>
+      </div>
+    </div>
+
+    <!-- Playback Control Bar -->
+    <div class="playback-bar">
+      <button class="btn primary" id="btnPlayPause" onclick="togglePlay()">Pause</button>
+      <button class="btn" onclick="stepSim()">Single Step</button>
+      <button class="btn danger" onclick="resetSim()">Reset</button>
+      <button class="btn" onclick="injectVortices()">Stir / Inject</button>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 11.5px; color: var(--ink-muted);">Display:</span>
+        <select id="selDisplay" onchange="redrawCanvas()" style="width: 140px; padding: 4px 8px; font-size: 11.5px;">
+          <option value="vorticity" selected>Vorticity (ω)</option>
+          <option value="speed">Speed (|u|)</option>
+          <option value="streamfunction">Streamfunction (ψ)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Live Decay Curves Chart -->
+    <div class="chart-card">
+      <div class="chart-title">
+        <span>Live Energy E(t) & Enstrophy Z(t) Decay Monitor</span>
+        <span id="chartLegend" style="font-family:'JetBrains Mono',monospace; font-size:10.5px;">
+          <span style="color:#38bdf8;">■ Energy E</span> &nbsp; <span style="color:#f87171;">■ Enstrophy Z</span>
+        </span>
+      </div>
+      <canvas id="chartCanvas" width="800" height="90"></canvas>
+    </div>
+  </div>
+
+  <!-- Right Sidebar Controls -->
+  <div class="sidebar">
+    <!-- Presets -->
+    <div class="control-group">
+      <h3>Initial Conditions</h3>
+      <div class="preset-grid">
+        <button class="preset-btn active" id="p_random" onclick="loadPreset('random')">Random Flow (W4)</button>
+        <button class="preset-btn" id="p_tg" onclick="loadPreset('tg')">Taylor–Green</button>
+        <button class="preset-btn" id="p_shear" onclick="loadPreset('shear')">Shear Layer</button>
+        <button class="preset-btn" id="p_dipole" onclick="loadPreset('dipole')">Vortex Dipole</button>
+      </div>
+    </div>
+
+    <!-- Integrator Settings -->
+    <div class="control-group">
+      <h3>Time Integrator</h3>
+      <select id="selMethod" onchange="onMethodChange()">
+        <option value="rk4" selected>Classical RK4 (4th-Order)</option>
+        <option value="rk2">Explicit Midpoint (2nd-Order)</option>
+        <option value="euler">Forward Euler (1st-Order)</option>
+      </select>
+    </div>
+
+    <!-- Time Step Slider -->
+    <div class="control-group">
+      <div class="control-row">
+        <div class="label-row">
+          <span class="label-name">Time Step Δt</span>
+          <span class="label-val" id="valDt">0.0100</span>
+        </div>
+        <input type="range" id="rangeDt" min="0.005" max="0.060" step="0.001" value="0.010" oninput="onDtInput(this.value)">
+      </div>
+      <div class="stability-alert" id="stabilityAlert">
+        ⚠️ <strong>Stability Warning:</strong> Δt exceeds predicted limit (Δt<sub>crit</sub> ≈ 0.032 - 0.038). Notice how short-wave modes amplify into 2-grid-point stripes and trigger numerical blow-up!
+      </div>
+    </div>
+
+    <!-- Viscosity Slider -->
+    <div class="control-group">
+      <div class="control-row">
+        <div class="label-row">
+          <span class="label-name">Kinematic Viscosity ν</span>
+          <span class="label-val" id="valNu">0.0040</span>
+        </div>
+        <input type="range" id="rangeNu" min="0.000" max="0.050" step="0.001" value="0.004" oninput="onNuInput(this.value)">
+      </div>
+    </div>
+
+    <!-- Numerical Dealiasing -->
+    <div class="control-group">
+      <div class="control-row">
+        <div class="label-row">
+          <span class="label-name">Dealiasing (2/3 Rule)</span>
+          <span class="label-val" id="valDealias">ENABLED</span>
+        </div>
+        <select id="selDealias" onchange="onDealiasChange()">
+          <option value="1" selected>Enabled (Cutoff |k| ≤ N/3)</option>
+          <option value="0">Disabled (Aliasing unfiltered)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Info note -->
+    <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--panel-border); border-radius: var(--radius-sm); padding: 10px; font-size: 11.5px; color: var(--ink-muted); line-height: 1.45;">
+      💡 <strong>Interactive Hint:</strong> Click or drag on the canvas to inject local rotation. Switch to <em>Forward Euler</em> or increase <em>Δt &gt; 0.033</em> to witness numerical instability verified in Part 3.
+    </div>
+  </div>
+</div>
+
+<!-- View 2: Evidence & Verification Gallery -->
+<div class="gallery-view" id="galleryView">
+  <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+    <div>
+      <h2 style="margin: 0; font-size: 20px; font-weight: 700;">Week 4 Verification Suite & Evidence Gallery</h2>
+      <p style="margin: 4px 0 0; color: var(--ink-muted); font-size: 13px;">
+        All 8 committed benchmark figures and quantitative data produced by the week's Rust engine and Python verification pipelines.
+      </p>
+    </div>
+
+    <div class="gallery-grid">
+      <!-- 1 -->
+      <div class="gallery-card">
+        <img src="assets/week4/line-stability.png" alt="line-stability.png">
+        <div class="card-body">
+          <div class="metric-tag">Part 1 • Stability Map</div>
+          <h4>1. Integrator Stability Region & Shortest-Wave Blowup</h4>
+          <p>Complex plane showing RK4 growth factor |R(z)|. Left: Modes λ<sub>k</sub>h at h=0.045 (inside) vs h=0.056 (outside). Middle/Right: Clean diagonal stripe vs 2-grid-point eruption before t=6.</p>
+        </div>
+      </div>
+
+      <!-- 2 -->
+      <div class="gallery-card">
+        <img src="assets/week4/line-accuracy.png" alt="line-accuracy.png">
+        <div class="card-body">
+          <div class="metric-tag">Part 1 • Slopes: 1.03, 2.01, 4.00, 2.00</div>
+          <h4>2. Pulse Profiles & Order Convergence Slopes</h4>
+          <p>Left: Pulse after one lap; Fourier RK4 overlaps exact, finite differences lag with wake, Euler grows taller. Right: Measured slopes for Euler (1.03), Midpoint (2.01), RK4 (4.00), and equal weights (2.00).</p>
+        </div>
+      </div>
+
+      <!-- 3 -->
+      <div class="gallery-card">
+        <img src="assets/week4/taylor-green.png" alt="taylor-green.png">
+        <div class="card-body">
+          <div class="metric-tag">Part 2 • Relative Error: 7.04 × 10⁻⁷</div>
+          <h4>3. Taylor–Green Decay & Divergence-Free Flow</h4>
+          <p>Vorticity contours and velocity arrows at t=0 and t=1. Zero advection tests the Poisson solve and viscous decay: energy drops by exactly e⁻⁴ⁿᵗ with 6-decimal agreement.</p>
+        </div>
+      </div>
+
+      <!-- 4 -->
+      <div class="gallery-card">
+        <img src="assets/week4/random.png" alt="random.png">
+        <div class="card-body">
+          <div class="metric-tag">Part 3 • Filaments Fade, Cores Merge</div>
+          <h4>4. Random Flow Decay (t = 0, 2, 5, 10)</h4>
+          <p>Seeded random flow (2 ≤ |k| ≤ 6, Seed 2026). Enstrophy falls by ~7× (6.63 → 0.92) while kinetic energy falls by less than half (0.50 → 0.29), showing selective dissipation of short waves.</p>
+        </div>
+      </div>
+
+      <!-- 5 -->
+      <div class="gallery-card">
+        <img src="assets/week4/blowup.png" alt="blowup.png">
+        <div class="card-body">
+          <div class="metric-tag">Part 3 • Stability Boundaries</div>
+          <h4>5. Numerical Blow-up: Diffusive & Advective Limits</h4>
+          <p>Left: Taylor–Green diffusive limit between 0.032 and 0.033 (predicted 0.0316). Right: Random flow advective limit between 0.035 and 0.038 (~1.8× bound). Euler fails at t=1.4.</p>
+        </div>
+      </div>
+
+      <!-- 6 -->
+      <div class="gallery-card">
+        <img src="assets/week4/sensitivity.png" alt="sensitivity.png">
+        <div class="card-body">
+          <div class="metric-tag">Part 3 • Chaos vs Laminar Damping</div>
+          <h4>6. Perturbation Sensitivity: ||ω₁ - ω₂|| / ||ω₁||</h4>
+          <p>Initial perturbation δω = -7e-5 M cos(3x)cos(4y). Random flow amplifies perturbation exponentially (>100× by t=20), while Taylor–Green damps it to zero (rounding floor).</p>
+        </div>
+      </div>
+
+      <!-- 7 -->
+      <div class="gallery-card">
+        <img src="assets/week4/order.png" alt="order.png">
+        <div class="card-body">
+          <div class="metric-tag">Part 4 • Measured Slope: 4.104</div>
+          <h4>7. Fluid RK4 Accuracy Order on Coarse Grid</h4>
+          <p>Taylor–Green error on 8×8 grid with ν=0.5. Error drops 16.75× from Δt=0.4 to 0.2 (extremely close to 2⁴=16), proving clean 4th-order temporal convergence above machine floor.</p>
+        </div>
+      </div>
+
+      <!-- 8 -->
+      <div class="gallery-card">
+        <img src="assets/week4/convergence.png" alt="convergence.png">
+        <div class="card-body">
+          <div class="metric-tag">Part 4 • Chosen Step: Δt = 0.0125</div>
+          <h4>8. Self-Convergence & Richardson Error Estimation</h4>
+          <p>Random flow refinement against Δt=0.0025 reference: slope 4.028. Fourth-order Richardson estimation selects Δt=0.0125 (predicted 3.96e-6, measured 3.89e-6 &lt; 5e-6).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- Tab Switching ---
+function switchTab(tab) {
+  document.getElementById('simView').style.display = (tab === 'sim') ? 'grid' : 'none';
+  document.getElementById('galleryView').classList.toggle('active', tab === 'gallery');
+  document.getElementById('tabSimBtn').classList.toggle('active', tab === 'sim');
+  document.getElementById('tabGalleryBtn').classList.toggle('active', tab === 'gallery');
+}
+
+// --- 2D Fluid Simulation Engine (64x64) ---
+const N = 64;
+let dt = 0.010;
+let nu = 0.004;
+let method = 'rk4';
+let dealias = true;
+let isRunning = true;
+let simTime = 0.0;
+let simStep = 0;
+
+// Fields: 1D flat Float64Array of size N*N
+let omega = new Float64Array(N * N);
+let uField = new Float64Array(N * N);
+let vField = new Float64Array(N * N);
+let psiField = new Float64Array(N * N);
+
+// History for live chart
+let historyE = [];
+let historyZ = [];
+let historyT = [];
+const MAX_HIST = 120;
+
+// Radix-2 1D FFT implementation
+function fft1d(re, im, invert) {
+  const n = re.length;
+  let j = 0;
+  for (let i = 0; i < n - 1; i++) {
+    if (i < j) {
+      let tr = re[i]; re[i] = re[j]; re[j] = tr;
+      let ti = im[i]; im[i] = im[j]; im[j] = ti;
+    }
+    let k = n >> 1;
+    while (k <= j) { j -= k; k >>= 1; }
+    j += k;
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    let ang = (invert ? 2.0 : -2.0) * Math.PI / len;
+    let wlen_r = Math.cos(ang), wlen_i = Math.sin(ang);
+    for (let i = 0; i < n; i += len) {
+      let wr = 1.0, wi = 0.0;
+      for (let k = 0; k < (len >> 1); k++) {
+        let u_r = re[i + k], u_i = im[i + k];
+        let v_r = re[i + k + (len >> 1)] * wr - im[i + k + (len >> 1)] * wi;
+        let v_i = re[i + k + (len >> 1)] * wi + im[i + k + (len >> 1)] * wr;
+        re[i + k] = u_r + v_r;
+        im[i + k] = u_i + v_i;
+        re[i + k + (len >> 1)] = u_r - v_r;
+        im[i + k + (len >> 1)] = u_i - v_i;
+        let next_wr = wr * wlen_r - wi * wlen_i;
+        wi = wr * wlen_i + wi * wlen_r;
+        wr = next_wr;
+      }
+    }
+  }
+  if (invert) {
+    for (let i = 0; i < n; i++) {
+      re[i] /= n;
+      im[i] /= n;
+    }
+  }
+}
+
+// 2D FFT
+function fft2d(re, im, invert) {
+  // Transform rows
+  const row_r = new Float64Array(N);
+  const row_i = new Float64Array(N);
+  for (let l = 0; l < N; l++) {
+    const off = l * N;
+    for (let j = 0; j < N; j++) { row_r[j] = re[off + j]; row_i[j] = im[off + j]; }
+    fft1d(row_r, row_i, invert);
+    for (let j = 0; j < N; j++) { re[off + j] = row_r[j]; im[off + j] = row_i[j]; }
+  }
+  // Transform columns
+  const col_r = new Float64Array(N);
+  const col_i = new Float64Array(N);
+  for (let j = 0; j < N; j++) {
+    for (let l = 0; l < N; l++) { col_r[l] = re[l * N + j]; col_i[l] = im[l * N + j]; }
+    fft1d(col_r, col_i, invert);
+    for (let l = 0; l < N; l++) { re[l * N + j] = col_r[l]; im[l * N + j] = col_i[l]; }
+  }
+}
+
+// Helper to compute wavenumbers
+function getK(idx) {
+  const half = N / 2;
+  return idx < half ? idx : (idx === half ? -half : idx - N);
+}
+
+// Solve Poisson and recover velocity from vorticity
+function updateVelocity(w) {
+  const wr = new Float64Array(w);
+  const wi = new Float64Array(N * N);
+  fft2d(wr, wi, false);
+
+  const ur_hat = new Float64Array(N * N);
+  const ui_hat = new Float64Array(N * N);
+  const vr_hat = new Float64Array(N * N);
+  const vi_hat = new Float64Array(N * N);
+  const psi_r = new Float64Array(N * N);
+  const psi_i = new Float64Array(N * N);
+
+  const kmax = dealias ? Math.floor(N / 3) : N / 2;
+
+  for (let l = 0; l < N; l++) {
+    const ky = getK(l);
+    for (let j = 0; j < N; j++) {
+      const kx = getK(j);
+      const idx = l * N + j;
+      if (Math.abs(kx) > kmax || Math.abs(ky) > kmax) {
+        wr[idx] = 0; wi[idx] = 0;
+        continue;
+      }
+      const k2 = kx * kx + ky * ky;
+      if (k2 > 0) {
+        const pr = wr[idx] / k2;
+        const pi = wi[idx] / k2;
+        psi_r[idx] = pr;
+        psi_i[idx] = pi;
+        ur_hat[idx] = -ky * pi;
+        ui_hat[idx] = ky * pr;
+        vr_hat[idx] = kx * pi;
+        vi_hat[idx] = -kx * pr;
+      }
+    }
+  }
+
+  fft2d(ur_hat, ui_hat, true);
+  fft2d(vr_hat, vi_hat, true);
+  fft2d(psi_r, psi_i, true);
+
+  for (let i = 0; i < N * N; i++) {
+    uField[i] = ur_hat[i];
+    vField[i] = vr_hat[i];
+    psiField[i] = psi_r[i];
+  }
+}
+
+// Compute rate dw/dt = - (u*wx + v*wy) + nu*Laplacian(w)
+function computeRate(w, outRate) {
+  const wr = new Float64Array(w);
+  const wi = new Float64Array(N * N);
+  fft2d(wr, wi, false);
+
+  const kmax = dealias ? Math.floor(N / 3) : N / 2;
+  const ur_hat = new Float64Array(N * N), ui_hat = new Float64Array(N * N);
+  const vr_hat = new Float64Array(N * N), vi_hat = new Float64Array(N * N);
+  const wx_r = new Float64Array(N * N), wx_i = new Float64Array(N * N);
+  const wy_r = new Float64Array(N * N), wy_i = new Float64Array(N * N);
+
+  for (let l = 0; l < N; l++) {
+    const ky = getK(l);
+    for (let j = 0; j < N; j++) {
+      const kx = getK(j);
+      const idx = l * N + j;
+      if (Math.abs(kx) > kmax || Math.abs(ky) > kmax) {
+        wr[idx] = 0; wi[idx] = 0;
+        continue;
+      }
+      const k2 = kx * kx + ky * ky;
+      if (k2 > 0) {
+        const pr = wr[idx] / k2, pi = wi[idx] / k2;
+        ur_hat[idx] = -ky * pi; ui_hat[idx] = ky * pr;
+        vr_hat[idx] = kx * pi; vi_hat[idx] = -kx * pr;
+      }
+      wx_r[idx] = -kx * wi[idx]; wx_i[idx] = kx * wr[idx];
+      wy_r[idx] = -ky * wi[idx]; wy_i[idx] = ky * wr[idx];
+    }
+  }
+
+  fft2d(ur_hat, ui_hat, true);
+  fft2d(vr_hat, vi_hat, true);
+  fft2d(wx_r, wx_i, true);
+  fft2d(wy_r, wy_i, true);
+
+  const prod_r = new Float64Array(N * N);
+  const prod_i = new Float64Array(N * N);
+  for (let i = 0; i < N * N; i++) {
+    prod_r[i] = ur_hat[i] * wx_r[i] + vr_hat[i] * wy_r[i];
+  }
+
+  fft2d(prod_r, prod_i, false);
+
+  const rate_r = new Float64Array(N * N);
+  const rate_i = new Float64Array(N * N);
+  for (let l = 0; l < N; l++) {
+    const ky = getK(l);
+    for (let j = 0; j < N; j++) {
+      const kx = getK(j);
+      const idx = l * N + j;
+      if (Math.abs(kx) > kmax || Math.abs(ky) > kmax) continue;
+      const k2 = kx * kx + ky * ky;
+      rate_r[idx] = -prod_r[idx] - nu * k2 * wr[idx];
+      rate_i[idx] = -prod_i[idx] - nu * k2 * wi[idx];
+    }
+  }
+
+  fft2d(rate_r, rate_i, true);
+  for (let i = 0; i < N * N; i++) outRate[i] = rate_r[i];
+}
+
+function stepIntegrator() {
+  const k1 = new Float64Array(N * N);
+  if (method === 'euler') {
+    computeRate(omega, k1);
+    for (let i = 0; i < N * N; i++) omega[i] += dt * k1[i];
+  } else if (method === 'rk2') {
+    computeRate(omega, k1);
+    const u_mid = new Float64Array(N * N);
+    for (let i = 0; i < N * N; i++) u_mid[i] = omega[i] + 0.5 * dt * k1[i];
+    const k2 = new Float64Array(N * N);
+    computeRate(u_mid, k2);
+    for (let i = 0; i < N * N; i++) omega[i] += dt * k2[i];
+  } else {
+    computeRate(omega, k1);
+    const u_tmp = new Float64Array(N * N);
+    for (let i = 0; i < N * N; i++) u_tmp[i] = omega[i] + 0.5 * dt * k1[i];
+    const k2 = new Float64Array(N * N);
+    computeRate(u_tmp, k2);
+    for (let i = 0; i < N * N; i++) u_tmp[i] = omega[i] + 0.5 * dt * k2[i];
+    const k3 = new Float64Array(N * N);
+    computeRate(u_tmp, k3);
+    for (let i = 0; i < N * N; i++) u_tmp[i] = omega[i] + dt * k3[i];
+    const k4 = new Float64Array(N * N);
+    computeRate(u_tmp, k4);
+    for (let i = 0; i < N * N; i++) {
+      omega[i] += (dt / 6.0) * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]);
+    }
+  }
+
+  updateVelocity(omega);
+  simTime += dt;
+  simStep++;
+}
+
+function computeDiagnostics() {
+  let sumU2 = 0, sumW2 = 0, maxU = 0;
+  for (let i = 0; i < N * N; i++) {
+    const spd2 = uField[i] * uField[i] + vField[i] * vField[i];
+    sumU2 += spd2;
+    sumW2 += omega[i] * omega[i];
+    if (spd2 > maxU) maxU = spd2;
+  }
+  const E = 0.5 * sumU2 / (N * N);
+  const Z = 0.5 * sumW2 / (N * N);
+  return { E, Z, Umax: Math.sqrt(maxU) };
+}
+
+let curPreset = 'random';
+
+function loadPreset(name) {
+  curPreset = name;
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('p_' + name);
+  if (btn) btn.classList.add('active');
+
+  const dx = 2.0 * Math.PI / N;
+  simTime = 0.0;
+  simStep = 0;
+  historyE = []; historyZ = []; historyT = [];
+
+  if (name === 'tg') {
+    nu = 0.1; dt = 0.01;
+    for (let l = 0; l < N; l++) {
+      const y = l * dx;
+      for (let j = 0; j < N; j++) {
+        const x = j * dx;
+        omega[l * N + j] = -2.0 * Math.cos(x) * Math.cos(y);
+      }
+    }
+  } else if (name === 'shear') {
+    nu = 0.002; dt = 0.01;
+    const delta = 0.05 * 2 * Math.PI;
+    for (let l = 0; l < N; l++) {
+      const y = l * dx;
+      for (let j = 0; j < N; j++) {
+        const x = j * dx;
+        const pert = 0.05 * Math.sin(x);
+        omega[l * N + j] = 5.0 * (1.0 / Math.cosh((y - Math.PI) / delta)**2 - 1.0 / Math.cosh((y - 0.5*Math.PI) / delta)**2) + pert;
+      }
+    }
+  } else if (name === 'dipole') {
+    nu = 0.003; dt = 0.01;
+    for (let i = 0; i < N * N; i++) omega[i] = 0;
+    const addVortex = (cx, cy, r0, gamma) => {
+      for (let l = 0; l < N; l++) {
+        const y = l * dx;
+        for (let j = 0; j < N; j++) {
+          const x = j * dx;
+          const d2 = (x - cx)**2 + (y - cy)**2;
+          omega[l * N + j] += gamma * Math.exp(-d2 / (2 * r0 * r0));
+        }
+      }
+    };
+    addVortex(Math.PI - 0.6, Math.PI, 0.4, 12.0);
+    addVortex(Math.PI + 0.6, Math.PI, 0.4, -12.0);
+  } else {
+    nu = 0.004; dt = 0.01;
+    const wr = new Float64Array(N * N);
+    const wi = new Float64Array(N * N);
+    let seed = 2026;
+    const rand = () => {
+      seed = (seed * 1664525 + 1013904223) % 4294967296;
+      return seed / 4294967296;
+    };
+    for (let ky = 0; ky <= 6; ky++) {
+      for (let kx = -6; kx <= 6; kx++) {
+        if (ky > 0 || (ky === 0 && kx > 0)) {
+          const k = Math.sqrt(kx * kx + ky * ky);
+          if (k >= 2.0 && k <= 6.0) {
+            const phi = rand() * 2.0 * Math.PI;
+            const ix = kx >= 0 ? kx : N + kx;
+            const iy = ky >= 0 ? ky : N + ky;
+            const ix_neg = -kx >= 0 ? -kx : N - kx;
+            const iy_neg = -ky >= 0 ? -ky : N - ky;
+            wr[iy * N + ix] = Math.cos(phi);
+            wi[iy * N + ix] = Math.sin(phi);
+            wr[iy_neg * N + ix_neg] = Math.cos(phi);
+            wi[iy_neg * N + ix_neg] = -Math.sin(phi);
+          }
+        }
+      }
+    }
+    fft2d(wr, wi, true);
+    for (let i = 0; i < N * N; i++) omega[i] = wr[i];
+    updateVelocity(omega);
+    const d0 = computeDiagnostics();
+    const scale = Math.sqrt(0.5 / d0.E);
+    for (let i = 0; i < N * N; i++) omega[i] *= scale;
+  }
+
+  updateVelocity(omega);
+  updateControlsUI();
+  redrawCanvas();
+}
+
+function injectVortices() {
+  const dx = 2.0 * Math.PI / N;
+  const cx = Math.random() * 2 * Math.PI;
+  const cy = Math.random() * 2 * Math.PI;
+  const sgn = Math.random() > 0.5 ? 1 : -1;
+  for (let l = 0; l < N; l++) {
+    const y = l * dx;
+    for (let j = 0; j < N; j++) {
+      const x = j * dx;
+      const d2 = (x - cx)**2 + (y - cy)**2;
+      omega[l * N + j] += sgn * 10.0 * Math.exp(-d2 / 0.15);
+    }
+  }
+  updateVelocity(omega);
+  redrawCanvas();
+}
+
+const canvas = document.getElementById('fluidCanvas');
+let isMouseDown = false;
+canvas.addEventListener('mousedown', (e) => { isMouseDown = true; handleMouse(e); });
+window.addEventListener('mouseup', () => { isMouseDown = false; });
+canvas.addEventListener('mousemove', (e) => { if (isMouseDown) handleMouse(e); });
+
+function handleMouse(e) {
+  const rect = canvas.getBoundingClientRect();
+  const px = (e.clientX - rect.left) / rect.width;
+  const py = 1.0 - (e.clientY - rect.top) / rect.height;
+  const mx = px * 2.0 * Math.PI;
+  const my = py * 2.0 * Math.PI;
+  const dx = 2.0 * Math.PI / N;
+  for (let l = 0; l < N; l++) {
+    const y = l * dx;
+    for (let j = 0; j < N; j++) {
+      const x = j * dx;
+      const d2 = (x - mx)**2 + (y - my)**2;
+      omega[l * N + j] += 6.0 * Math.exp(-d2 / 0.1);
+    }
+  }
+  updateVelocity(omega);
+  redrawCanvas();
+}
+
+const ctx = canvas.getContext('2d');
+const chartCtx = document.getElementById('chartCanvas').getContext('2d');
+
+function colormap(val, minV, maxV) {
+  let norm = (val - minV) / (maxV - minV);
+  norm = Math.max(0, Math.min(1, norm));
+  let r, g, b;
+  if (norm < 0.5) {
+    let t = norm / 0.5;
+    r = Math.floor(40 + t * 215);
+    g = Math.floor(80 + t * 175);
+    b = Math.floor(220 + t * 35);
+  } else {
+    let t = (norm - 0.5) / 0.5;
+    r = Math.floor(255 - t * 35);
+    g = Math.floor(255 - t * 205);
+    b = Math.floor(255 - t * 205);
+  }
+  return [r, g, b];
+}
+
+function redrawCanvas() {
+  const mode = document.getElementById('selDisplay').value;
+  const imgData = ctx.createImageData(N, N);
+  const data = imgData.data;
+
+  let minV = -10.97, maxV = 10.97;
+  if (mode === 'speed') { minV = 0; maxV = 2.5; }
+  else if (mode === 'streamfunction') { minV = -0.5; maxV = 0.5; }
+
+  for (let l = 0; l < N; l++) {
+    for (let j = 0; j < N; j++) {
+      const idx = l * N + j;
+      let val = omega[idx];
+      if (mode === 'speed') val = Math.sqrt(uField[idx]**2 + vField[idx]**2);
+      else if (mode === 'streamfunction') val = psiField[idx];
+
+      const [r, g, b] = colormap(val, minV, maxV);
+      const pIdx = ((N - 1 - l) * N + j) * 4;
+      data[pIdx] = r; data[pIdx + 1] = g; data[pIdx + 2] = b; data[pIdx + 3] = 255;
+    }
+  }
+
+  const offscreen = document.createElement('canvas');
+  offscreen.width = N; offscreen.height = N;
+  offscreen.getContext('2d').putImageData(imgData, 0, 0);
+
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(offscreen, 0, 0, canvas.width, canvas.height);
+}
+
+function redrawChart() {
+  const w = chartCanvas.width;
+  const h = chartCanvas.height;
+  chartCtx.clearRect(0, 0, w, h);
+  if (historyE.length < 2) return;
+
+  chartCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+  chartCtx.lineWidth = 1;
+  chartCtx.beginPath();
+  chartCtx.moveTo(0, h * 0.5); chartCtx.lineTo(w, h * 0.5);
+  chartCtx.stroke();
+
+  chartCtx.strokeStyle = '#38bdf8';
+  chartCtx.lineWidth = 2;
+  chartCtx.beginPath();
+  for (let i = 0; i < historyE.length; i++) {
+    const x = (i / (MAX_HIST - 1)) * w;
+    const y = h - (historyE[i] / 0.6) * (h - 10) - 5;
+    if (i === 0) chartCtx.moveTo(x, y); else chartCtx.lineTo(x, y);
+  }
+  chartCtx.stroke();
+
+  chartCtx.strokeStyle = '#f87171';
+  chartCtx.lineWidth = 1.5;
+  chartCtx.beginPath();
+  for (let i = 0; i < historyZ.length; i++) {
+    const x = (i / (MAX_HIST - 1)) * w;
+    const y = h - (historyZ[i] / 8.0) * (h - 10) - 5;
+    if (i === 0) chartCtx.moveTo(x, y); else chartCtx.lineTo(x, y);
+  }
+  chartCtx.stroke();
+}
+
+function loop() {
+  if (isRunning) {
+    stepIntegrator();
+    const d = computeDiagnostics();
+    const isStable = isFinite(d.E) && isFinite(d.Z) && d.E < 20.0;
+    document.getElementById('statT').textContent = simTime.toFixed(2);
+    document.getElementById('statE').textContent = isFinite(d.E) ? d.E.toFixed(4) : 'NaN (BLOWUP)';
+    document.getElementById('statZ').textContent = isFinite(d.Z) ? d.Z.toFixed(4) : 'NaN';
+    document.getElementById('statU').textContent = isFinite(d.Umax) ? d.Umax.toFixed(2) : 'NaN';
+
+    const statStatus = document.getElementById('statStatus');
+    if (isStable) {
+      statStatus.textContent = 'STABLE';
+      statStatus.style.color = 'var(--good)';
+    } else {
+      statStatus.textContent = 'UNSTABLE BLOWUP!';
+      statStatus.style.color = 'var(--danger)';
+      isRunning = false;
+      document.getElementById('btnPlayPause').textContent = 'Resume';
+    }
+
+    historyE.push(d.E); historyZ.push(d.Z); historyT.push(simTime);
+    if (historyE.length > MAX_HIST) {
+      historyE.shift(); historyZ.shift(); historyT.shift();
+    }
+    redrawCanvas();
+    redrawChart();
+  }
+  requestAnimationFrame(loop);
+}
+
+function togglePlay() {
+  isRunning = !isRunning;
+  document.getElementById('btnPlayPause').textContent = isRunning ? 'Pause' : 'Resume';
+}
+
+function stepSim() {
+  if (!isRunning) {
+    stepIntegrator();
+    redrawCanvas();
+  }
+}
+
+function resetSim() {
+  loadPreset(curPreset);
+}
+
+function onDtInput(val) {
+  dt = parseFloat(val);
+  document.getElementById('valDt').textContent = dt.toFixed(4);
+  document.getElementById('stabilityAlert').classList.toggle('visible', dt > 0.033);
+}
+
+function onNuInput(val) {
+  nu = parseFloat(val);
+  document.getElementById('valNu').textContent = nu.toFixed(4);
+}
+
+function onMethodChange() {
+  method = document.getElementById('selMethod').value;
+}
+
+function onDealiasChange() {
+  dealias = document.getElementById('selDealias').value === '1';
+  document.getElementById('valDealias').textContent = dealias ? 'ENABLED' : 'DISABLED';
+}
+
+function updateControlsUI() {
+  document.getElementById('rangeDt').value = dt;
+  document.getElementById('valDt').textContent = dt.toFixed(4);
+  document.getElementById('rangeNu').value = nu;
+  document.getElementById('valNu').textContent = nu.toFixed(4);
+  document.getElementById('selMethod').value = method;
+  document.getElementById('selDealias').value = dealias ? '1' : '0';
+  document.getElementById('valDealias').textContent = dealias ? 'ENABLED' : 'DISABLED';
+  document.getElementById('stabilityAlert').classList.toggle('visible', dt > 0.033);
+}
+
+loadPreset('random');
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
