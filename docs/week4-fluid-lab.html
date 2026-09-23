@@ -722,19 +722,19 @@
       <!-- Blowup Overlay Modal -->
       <div id="blowupOverlay" class="blowup-overlay" style="display: none;">
         <div class="blowup-card">
-          <div class="blowup-header">⚠️ 数值发散（CFL Blow-up）</div>
+          <div class="blowup-header">⚠️ Numerical Blow-up (CFL Limit Exceeded)</div>
           <div class="blowup-text">
-            流体局部速度过大，击穿了显式积分器的 <strong>CFL 对流稳定性极限</strong>（高频短波模式出现伪谱吉布斯发散）。
+            Local velocity is too high, exceeding the explicit integrator's <strong>CFL advective stability limit</strong> (shortest wavelength modes undergo pseudospectral Gibbs blowup).
             <div style="margin: 9px 0; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--accent-amber); background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px;">
               Umax = <span id="blowupUVal">--</span> · CFL = <span id="blowupCflVal">--</span> &gt; 1.0
             </div>
             <div style="font-size: 11px; color: var(--ink-muted); margin-top: 4px;">
-              💡 <em>这正是作业第 3 部分验证的显式积分数值发散机制！</em>
+              💡 <em>This directly demonstrates the explicit time-stepping instability mechanism verified in Part 3!</em>
             </div>
           </div>
           <div class="blowup-btn-group">
-            <button class="btn primary" onclick="resetSim()">↺ 一键重置 (Reset)</button>
-            <button class="btn" onclick="dampenFluid()">💨 能量平息续跑 (Dampen)</button>
+            <button class="btn primary" onclick="resetSim()">↺ Reset Simulation</button>
+            <button class="btn" onclick="dampenFluid()">💨 Dampen & Resume</button>
           </div>
         </div>
       </div>
@@ -852,7 +852,7 @@
       <div class="gallery-card" onclick="openLightbox(0)">
         <div class="img-wrapper">
           <img src="assets/week4/line-stability.png" alt="line-stability.png">
-          <div class="zoom-hint">🔍 展开大图与深度分析</div>
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
         </div>
         <div class="card-body">
           <div class="metric-tag">Part 1 • Stability Map</div>
@@ -860,8 +860,8 @@
           <p>Complex plane showing RK4 growth factor |R(z)|. Modes at h=0.045 (inside) vs h=0.056 (outside). Periodic stripe vs 2-grid-point eruption.</p>
         </div>
         <div class="card-footer">
-          <span class="view-detail-btn">🔍 展开深度数值报告</span>
-          <a class="view-raw-link" href="assets/week4/line-stability.png" target="_blank" onclick="event.stopPropagation()">原图 ↗</a>
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week4/line-stability.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
         </div>
       </div>
 
@@ -869,7 +869,7 @@
       <div class="gallery-card" onclick="openLightbox(1)">
         <div class="img-wrapper">
           <img src="assets/week4/line-accuracy.png" alt="line-accuracy.png">
-          <div class="zoom-hint">🔍 展开大图与深度分析</div>
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
         </div>
         <div class="card-body">
           <div class="metric-tag">Part 1 • Slopes: 1.03, 2.01, 4.00, 2.00</div>
@@ -877,8 +877,8 @@
           <p>Gaussian pulse after one lap; Fourier RK4 overlaps exact, finite differences lag, Euler grows. Measured slopes: 1.03, 2.01, 4.00, 2.00.</p>
         </div>
         <div class="card-footer">
-          <span class="view-detail-btn">🔍 展开深度数值报告</span>
-          <a class="view-raw-link" href="assets/week4/line-accuracy.png" target="_blank" onclick="event.stopPropagation()">原图 ↗</a>
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week4/line-accuracy.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
         </div>
       </div>
 
@@ -886,7 +886,7 @@
       <div class="gallery-card" onclick="openLightbox(2)">
         <div class="img-wrapper">
           <img src="assets/week4/taylor-green.png" alt="taylor-green.png">
-          <div class="zoom-hint">🔍 展开大图与深度分析</div>
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
         </div>
         <div class="card-body">
           <div class="metric-tag">Part 2 • Relative Error: 7.04 × 10⁻⁷</div>
@@ -894,8 +894,8 @@
           <p>Vorticity contours and velocity streamlines at t=0 and t=1. Exact exponential decay e⁻⁴ⁿᵗ with 6-decimal agreement; error &lt; 10⁻⁵.</p>
         </div>
         <div class="card-footer">
-          <span class="view-detail-btn">🔍 展开深度数值报告</span>
-          <a class="view-raw-link" href="assets/week4/taylor-green.png" target="_blank" onclick="event.stopPropagation()">原图 ↗</a>
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week4/taylor-green.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
         </div>
       </div>
 
@@ -903,7 +903,7 @@
       <div class="gallery-card" onclick="openLightbox(3)">
         <div class="img-wrapper">
           <img src="assets/week4/random.png" alt="random.png">
-          <div class="zoom-hint">🔍 展开大图与深度分析</div>
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
         </div>
         <div class="card-body">
           <div class="metric-tag">Part 3 • Filaments Fade, Cores Merge</div>
@@ -911,8 +911,8 @@
           <p>Seeded random turbulence (Seed 2026). Enstrophy drops ~7× (6.63 → 0.92) while energy drops &lt; 2× (0.50 → 0.29), showing selective decay.</p>
         </div>
         <div class="card-footer">
-          <span class="view-detail-btn">🔍 展开深度数值报告</span>
-          <a class="view-raw-link" href="assets/week4/random.png" target="_blank" onclick="event.stopPropagation()">原图 ↗</a>
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week4/random.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
         </div>
       </div>
 
@@ -920,7 +920,7 @@
       <div class="gallery-card" onclick="openLightbox(4)">
         <div class="img-wrapper">
           <img src="assets/week4/blowup.png" alt="blowup.png">
-          <div class="zoom-hint">🔍 展开大图与深度分析</div>
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
         </div>
         <div class="card-body">
           <div class="metric-tag">Part 3 • Stability Boundaries</div>
@@ -928,8 +928,8 @@
           <p>Diffusive limit between 0.032 and 0.033 (predicted 0.0316). Advective limit between 0.035 and 0.038. Euler blows up at t=1.4.</p>
         </div>
         <div class="card-footer">
-          <span class="view-detail-btn">🔍 展开深度数值报告</span>
-          <a class="view-raw-link" href="assets/week4/blowup.png" target="_blank" onclick="event.stopPropagation()">原图 ↗</a>
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week4/blowup.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
         </div>
       </div>
 
@@ -937,7 +937,7 @@
       <div class="gallery-card" onclick="openLightbox(5)">
         <div class="img-wrapper">
           <img src="assets/week4/sensitivity.png" alt="sensitivity.png">
-          <div class="zoom-hint">🔍 展开大图与深度分析</div>
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
         </div>
         <div class="card-body">
           <div class="metric-tag">Part 3 • Chaos vs Laminar Damping</div>
@@ -945,8 +945,8 @@
           <p>Initial perturbation δω = -7e-5 M cos(3x)cos(4y). Random flow amplifies perturbation &gt;115× (chaos), while Taylor–Green damps to zero.</p>
         </div>
         <div class="card-footer">
-          <span class="view-detail-btn">🔍 展开深度数值报告</span>
-          <a class="view-raw-link" href="assets/week4/sensitivity.png" target="_blank" onclick="event.stopPropagation()">原图 ↗</a>
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week4/sensitivity.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
         </div>
       </div>
 
@@ -954,7 +954,7 @@
       <div class="gallery-card" onclick="openLightbox(6)">
         <div class="img-wrapper">
           <img src="assets/week4/order.png" alt="order.png">
-          <div class="zoom-hint">🔍 展开大图与深度分析</div>
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
         </div>
         <div class="card-body">
           <div class="metric-tag">Part 4 • Measured Slope: 4.104</div>
@@ -962,8 +962,8 @@
           <p>8×8 grid with ν=0.5. Error drops 16.75× from Δt=0.4 to 0.2 (2⁴=16), proving asymptotic 4th-order temporal accuracy without roundoff floor.</p>
         </div>
         <div class="card-footer">
-          <span class="view-detail-btn">🔍 展开深度数值报告</span>
-          <a class="view-raw-link" href="assets/week4/order.png" target="_blank" onclick="event.stopPropagation()">原图 ↗</a>
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week4/order.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
         </div>
       </div>
 
@@ -971,7 +971,7 @@
       <div class="gallery-card" onclick="openLightbox(7)">
         <div class="img-wrapper">
           <img src="assets/week4/convergence.png" alt="convergence.png">
-          <div class="zoom-hint">🔍 展开大图与深度分析</div>
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
         </div>
         <div class="card-body">
           <div class="metric-tag">Part 4 • Chosen Step: Δt = 0.0125</div>
@@ -979,8 +979,8 @@
           <p>Random flow refinement against Δt=0.0025 reference: slope 4.028 ∈ [3.7, 4.3]. Richardson selects Δt=0.0125 with measured error 3.89e-6 &lt; 5e-6.</p>
         </div>
         <div class="card-footer">
-          <span class="view-detail-btn">🔍 展开深度数值报告</span>
-          <a class="view-raw-link" href="assets/week4/convergence.png" target="_blank" onclick="event.stopPropagation()">原图 ↗</a>
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week4/convergence.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
         </div>
       </div>
     </div>
@@ -1003,33 +1003,33 @@
       </div>
       <div class="lightbox-info-pane">
         <div>
-          <div class="lightbox-sec-title">科学发现与分析 (Scientific Findings)</div>
+          <div class="lightbox-sec-title">Scientific Findings</div>
           <div class="lightbox-desc" id="lbDesc">Description text</div>
         </div>
 
         <div>
-          <div class="lightbox-sec-title">理论机制 (Mathematical Theory)</div>
+          <div class="lightbox-sec-title">Mathematical Theory</div>
           <div class="lightbox-theory" id="lbTheory">Theory text</div>
         </div>
 
         <div>
-          <div class="lightbox-sec-title">关键定量指标 (Quantitative Benchmarks)</div>
+          <div class="lightbox-sec-title">Quantitative Benchmarks</div>
           <div class="lightbox-data-table" id="lbMetrics">
             <!-- populated by JS -->
           </div>
         </div>
 
         <div style="font-size: 11px; color: var(--ink-muted); display: flex; align-items: center; gap: 6px;">
-          <span>⚡ 复现脚本：</span>
+          <span>⚡ Reproduction Script:</span>
           <code id="lbScript" style="color: var(--accent); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">week4/scripts/p1_line_accuracy.py</code>
         </div>
 
         <div class="lightbox-footer-nav">
           <div style="display: flex; gap: 8px;">
-            <button class="btn" onclick="prevLightbox()">← 上一张 (Prev)</button>
-            <button class="btn" onclick="nextLightbox()">下一张 (Next) →</button>
+            <button class="btn" onclick="prevLightbox()">← Previous</button>
+            <button class="btn" onclick="nextLightbox()">Next →</button>
           </div>
-          <a id="lbRawLink" href="#" target="_blank" class="btn primary" style="text-decoration: none;">查看原始全分辨率原图 ↗</a>
+          <a id="lbRawLink" href="#" target="_blank" class="btn primary" style="text-decoration: none;">View Image</a>
         </div>
       </div>
     </div>
@@ -1136,123 +1136,123 @@
 const galleryData = [
   {
     id: 1,
-    tag: "Part 1 • 稳定性相图与最短波发散",
-    title: "1. 显式 RK4 稳定性区域与空间最短波爆炸 (line-stability.png)",
+    tag: "Part 1 • Stability Map & Shortest-Wave Blowup",
+    title: "1. Explicit RK4 Stability Region & Shortest-Wave Amplification (line-stability.png)",
     img: "assets/week4/line-stability.png",
-    desc: "复平面上显式 RK4 积分器的增长因子 |R(z)| 等高线相图与对流扩散特征值分布。左图：特征值线段 λ_k h。在步长 h=0.045 时，所有离散模式均严格落在稳定边界 |R(z)| ≤ 1 内部；而在 h=0.056 时，空间最短波模式（k = π/dx = 32）首次穿透边界（|R| = 1.05 > 1）。中图与右图对比了 t ∈ [0, 6] 的时空演化：h=0.045 呈现干净的周期对流条纹，而 h=0.056 在 t ≈ 5 时 2-grid 锯齿噪波发生剧烈指数级爆炸。",
-    theory: "离散线性稳定性由 RK4 多项式 R(z) = 1 + z + z²/2 + z³/6 + z⁴/24 决定。耗散对流算子具有复特征值 λ_k = -ν k² - i c k。由于扩散项正比于 k²，波数最大、网格尺度最小的最短波（2Δx）首先击穿复稳定性边界。",
+    desc: "Complex plane growth factor |R(z)| contour map and advection-diffusion spectrum for explicit RK4. Left: Discrete eigenvalue spectrum λ_k h. At h = 0.045, all spatial modes strictly reside within the stability boundary |R(z)| ≤ 1; at h = 0.056, the shortest wavelength mode (k = π/dx = 32) escapes the boundary (|R| = 1.05 > 1). Middle/Right: Space-time evolution over t ∈ [0, 6] demonstrates clean periodic diagonal advection stripes vs catastrophic 2Δx checkerboard mode eruption before t = 6.",
+    theory: "Linear stability is governed by the RK4 polynomial growth factor R(z) = 1 + z + z²/2 + z³/6 + z⁴/24. The advection-diffusion operator yields complex eigenvalues λ_k = -ν k² - i c k. Because viscous dissipation scales as k², the highest wavenumber mode k_max = N/2 has the largest eigenvalue magnitude and blows up first.",
     metrics: [
-      { k: "RK4 负实轴截距", v: "-2.785" },
-      { k: "RK4 虚轴截距", v: "±2.830 i" },
-      { k: "稳定临界理论步长 (h_crit)", v: "0.045 s" },
-      { k: "失稳测试步长 (h_blow)", v: "0.056 s" },
-      { k: "首要发散模式", v: "k = 32 (2Δx 空间锯齿)" }
+      { k: "RK4 Negative Real Intercept", v: "-2.785" },
+      { k: "RK4 Imaginary Axis Intercept", v: "±2.830 i" },
+      { k: "Theoretical Critical Step (h_crit)", v: "0.045 s" },
+      { k: "Unstable Test Step (h_blow)", v: "0.056 s" },
+      { k: "Dominant Blowup Mode", v: "k = 32 (2Δx spatial wave)" }
     ],
     script: "week4/scripts/plot_line_stability.py"
   },
   {
     id: 2,
-    tag: "Part 1 • 脉冲轮廓与阶数收敛斜率",
-    title: "2. 脉冲演化轮廓比对与时间积分器收敛阶数 (line-accuracy.png)",
+    tag: "Part 1 • Pulse Profiles & Convergence Slopes",
+    title: "2. Advected Pulse Profiles & Temporal Order Convergence Slopes (line-accuracy.png)",
     img: "assets/week4/line-accuracy.png",
-    desc: "左图：高斯脉冲绕行一周（t = 2π）后的空间轮廓对比。Fourier 伪谱微分配合 RK4 积分与解析真解完全重叠（误差 < 10⁻⁶）；二阶中心差分由于数值色散误差（短波相速度偏小）呈现出明显的拖尾波纹；前向 Euler 则导致脉冲振幅虚假增高。右图：双对数误差收敛阶数严格符合理论设计值。",
-    theory: "Fourier 空间导数具有无穷阶谱精度（Spectral Accuracy），消除了空间截断误差的干扰，使得双对数拟合能够精确测出纯时间积分器的阶数。Equal-weights Butcher 阵由于 c₂ b₂ + c₃ b₃ + c₄ b₄ = 1/2 ≠ 1/6，高阶项无法消去，退化为 2 阶。",
+    desc: "Left: Gaussian pulse spatial profile after exactly one full revolution (t = 2π). Pseudospectral spatial derivatives with RK4 match the analytical exact solution with sub-microscopic error (< 10⁻⁶); 2nd-order centred finite differences lag significantly with dispersive wake oscillations; Forward Euler exhibits artificial amplitude growth. Right: Log-log temporal error convergence slopes confirm theoretical design orders.",
+    theory: "Fourier pseudospectral derivatives possess infinite spectral accuracy, completely eliminating spatial discretization error and enabling exact measurement of pure temporal integrator convergence order. The equal-weights Butcher tableau degenerates to 2nd order because c₂ b₂ + c₃ b₃ + c₄ b₄ = 1/2 ≠ 1/6.",
     metrics: [
-      { k: "Forward Euler 实测斜率", v: "1.03 (理论 1 阶)" },
-      { k: "Explicit Midpoint 实测斜率", v: "2.01 (理论 2 阶)" },
-      { k: "Standard RK4 实测斜率", v: "4.00 (理论 4 阶)" },
-      { k: "Equal-Weights RK4 实测斜率", v: "2.00 (退化为 2 阶)" }
+      { k: "Forward Euler Fitted Slope", v: "1.03 (Theoretical: 1)" },
+      { k: "Explicit Midpoint Fitted Slope", v: "2.01 (Theoretical: 2)" },
+      { k: "Standard RK4 Fitted Slope", v: "4.00 (Theoretical: 4)" },
+      { k: "Equal-Weights RK4 Fitted Slope", v: "2.00 (Degenerated: 2)" }
     ],
-    script: "week4/scripts/plot_line_stability.py"
+    script: "week4/scripts/plot_line_accuracy.py"
   },
   {
     id: 3,
-    tag: "Part 2 • 相对误差 7.04 × 10⁻⁷ < 10⁻⁵",
-    title: "3. Taylor–Green 涡解析衰减与无散度验证 (taylor-green.png)",
+    tag: "Part 2 • Relative Error: 7.04 × 10⁻⁷ < 10⁻⁵",
+    title: "3. Taylor–Green Vortex Viscous Decay & Divergence-Free Flow (taylor-green.png)",
     img: "assets/week4/taylor-green.png",
-    desc: "Taylor–Green 涡在 t=0 与 t=1 时的涡量等高线及速度矢量流线图。在该流动中，非线性对流项 (u·∇)ω 恒等于零，因此本实验严格独立地检验了流函数泊松方程求解器 ∇²ψ = -ω 以及黏性扩散项的准确性。在 t=1.0, ν=0.1 下，系统动能严格按精确指数规律衰减。",
-    theory: "解析解为 ω(x,y,t) = -2 cos(x)cos(y) e^{-2νt}，动能衰减规律为 E(t) = E(0) e^{-4νt}。理论衰减因子 e^{-0.4} = 0.670320046，数值结果为 0.670320，精确吻合到小数点后 6 位。",
+    desc: "Vorticity contours and velocity streamlines at t = 0 and t = 1.0 for the Taylor–Green vortex ω(x,y) = -2 cos(x)cos(y). The non-linear advection term (u·∇)ω is identically zero, rigorously isolating and verifying the streamfunction Poisson solver ∇²ψ = -ω and viscous dissipation operator. Kinetic energy decays exponentially with exact analytical agreement.",
+    theory: "Analytical solution: ω(x,y,t) = -2 cos(x)cos(y) e^{-2νt}, yielding kinetic energy decay E(t) = E₀ e^{-4νt}. At ν = 0.1, t = 1: theoretical decay ratio is e^{-0.4} = 0.670320046, matching the numerical result 0.670320 across 6 significant digits.",
     metrics: [
-      { k: "数值动能衰减比 E(1)/E(0)", v: "0.670320" },
-      { k: "理论精确衰减比 exp(-4νt)", v: "0.670320 (6位严格一致)" },
-      { k: "速度场相对 L2 误差", v: "7.04 × 10⁻⁷" },
-      { k: "作业要求容差上限", v: "< 1.0 × 10⁻⁵ (完美通过)" }
+      { k: "Numerical Energy Ratio E(1)/E(0)", v: "0.670320" },
+      { k: "Analytical Energy Ratio exp(-4νt)", v: "0.670320 (6-decimal match)" },
+      { k: "Relative L2 Velocity Error", v: "7.04 × 10⁻⁷" },
+      { k: "Assignment Tolerance Threshold", v: "< 1.0 × 10⁻⁵ (Passed)" }
     ],
     script: "week4/scripts/plot_taylor_green.py"
   },
   {
     id: 4,
-    tag: "Part 3 • 涡丝消散与涡核合并",
-    title: "4. 随机湍流四时刻演化切片 (random.png)",
+    tag: "Part 3 • Filaments Fade, Cores Merge",
+    title: "4. Random Flow Decay at t = 0, 2, 5, 10 (random.png)",
     img: "assets/week4/random.png",
-    desc: "基于 Seed 2026 生成的二维不可压缩湍流演化切片（t = 0, 2, 5, 10），统一采用 [-10.97, 10.97] 颜色标尺。展示了二维流体典型的物理图像：初始细碎随机的涡量在剪切拉伸作用下形成细丝并被黏性迅速耗散；同号涡核相互吸引碰撞并合并（Vortex Merging），大尺度相干结构随时间逐渐占据主导地位。",
-    theory: "二维流体不存在三维涡拉伸机制，存在能量与拟涡能双守恒。拟涡能 Z(t) 大幅耗散约 7 倍（6.635 → 0.923），而动能 E(t) 下降不到一半（0.500 → 0.294），生动展现了二维湍流的选择性衰减（Selective Decay）与逆能量级联机制。",
+    desc: "Evolution of 2D decaying turbulence initialized from Seed 2026 (band 2 ≤ |k| ≤ 6, E₀ = 0.50) on a shared color scale [-10.97, 10.97]. Displays classic 2D turbulence phenomenology: thin vorticity filaments are stretched by shear and rapidly dissipated by viscosity, while coherent like-signed vortex cores merge into larger structures over time.",
+    theory: "Unlike 3D fluids with vortex stretching, 2D incompressible Navier-Stokes conserves both energy and enstrophy in the inviscid limit. Viscosity selectively dissipates enstrophy Z(t) by ~7× (6.635 → 0.923) while kinetic energy E(t) falls by less than half (0.500 → 0.294), illustrating the 2D inverse energy cascade.",
     metrics: [
-      { k: "初始动能 E(0) / 终态 E(10)", v: "0.500 → 0.294" },
-      { k: "初始拟涡能 Z(0) / 终态 Z(10)", v: "6.635 → 0.923" },
-      { k: "拟涡能耗散倍数", v: "7.19 倍强耗散" },
-      { k: "动能耗散倍数", v: "1.70 倍缓衰减" }
+      { k: "Initial / Final Energy E", v: "0.500 → 0.294" },
+      { k: "Initial / Final Enstrophy Z", v: "6.635 → 0.923" },
+      { k: "Enstrophy Dissipation Ratio", v: "7.19× strong dissipation" },
+      { k: "Energy Dissipation Ratio", v: "1.70× slow decay" }
     ],
     script: "week4/scripts/plot_random.py"
   },
   {
     id: 5,
-    tag: "Part 3 • 扩散与对流发散极限",
-    title: "5. 数值发散极限：黏性扩散与对流 CFL 边界 (blowup.png)",
+    tag: "Part 3 • Diffusive & Advective Stability Limits",
+    title: "5. Numerical Blow-up: Diffusive & Advective Limits (blowup.png)",
     img: "assets/week4/blowup.png",
-    desc: "定量扫描显式 RK4 积分器的数值发散临界步长。左图：扩散主导流（Taylor–Green, ν=0.5），在理论临界步长 0.0316 附近，h=0.032 时严格稳定，而 h=0.033 时动能暴涨至 10¹³⁰；右图：对流主导流（Random Flow, ν=0.004），由于流速引起的非线性对流项主导，稳定步长达 0.035，而在 0.038 时于 t ≈ 3.7 发生对流 CFL 爆炸。",
-    theory: "黏性扩散极限条件为 h ≤ 2.785 / (ν k_max²)。由于 2/3 去混叠滤波使有效 k_max = 64/3 ≈ 21.33，预测极限定为 h_diff = 0.0316。测试所得稳定区间 [0.032, 0.033] 与理论误差小于 3%。",
+    desc: "Quantitative time-step scans identifying the precise stability boundaries where explicit RK4 blows up. Left: Viscous diffusion-dominated regime (Taylor–Green, ν = 0.5), showing stability at h = 0.032 vs catastrophic divergence at h = 0.033 (E ~ 10¹³⁰). Right: Advection-dominated regime (Random flow, ν = 0.004), showing stability up to h = 0.035 and CFL blowup at h = 0.038.",
+    theory: "Diffusive stability requires h ≤ 2.785 / (ν k_max²). With 2/3 dealiasing cutoff k_max = 64/3 ≈ 21.33 and ν = 0.5, the predicted limit is h_diff = 0.0316. Measured stability boundary [0.032, 0.033] matches theory within 3%.",
     metrics: [
-      { k: "扩散主导理论极限 (Taylor-Green)", v: "h ≤ 0.0316" },
-      { k: "扩散主导实测发散边界", v: "0.032 (稳) vs 0.033 (炸)" },
-      { k: "对流主导实测稳定步长 (Random)", v: "h = 0.035 (CFL ≈ 0.65)" },
-      { k: "对流主导实测发散步长", v: "h = 0.038 (t ≈ 3.7 爆炸)" }
+      { k: "Diffusive Theoretical Bound", v: "h ≤ 0.0316" },
+      { k: "Diffusive Measured Boundary", v: "0.032 (stable) vs 0.033 (blowup)" },
+      { k: "Advective Measured Stable Step", v: "h = 0.035 (CFL ≈ 0.65)" },
+      { k: "Advective Measured Blowup Step", v: "h = 0.038 (t ≈ 3.7 explosion)" }
     ],
     script: "week4/scripts/plot_blowup.py"
   },
   {
     id: 6,
-    tag: "Part 3 • 初始微扰敏感度：混沌 vs 层流",
-    title: "6. 初始微小扰动的指数放大与耗散对比 (sensitivity.png)",
+    tag: "Part 3 • Chaos vs Laminar Damping",
+    title: "6. Perturbation Sensitivity: Chaos vs Laminar Flow (sensitivity.png)",
     img: "assets/week4/sensitivity.png",
-    desc: "在流场中注入微小扰动 δω = -7×10⁻⁵ max(|ω₀|) cos(3x)cos(4y)，监测相对扰动 L2 范数 ||ω₁ - ω₂|| / ||ω₁|| 的演化曲线。随机湍流由于非线性对流项的混沌拉伸效应，相对微扰呈指数级急剧放大（由 3.3×10⁻⁵ 暴增至 3.8×10⁻³，放大超过 115 倍）；而 Taylor–Green 层流则单调衰减并迅速跌入浮点截断下限（< 10⁻¹⁴）。",
-    theory: "二维湍流相空间中具有正的李雅普诺夫指数（Lyapunov Exponents），非线性对流项 (u·∇)ω 引起流体微元的混沌形变，展现出对初始条件的极度敏感依赖（蝴蝶效应）；而层流中对流项为零，黏性起决定性衰减作用。",
+    desc: "Evolution of the relative perturbation L2 norm ||ω₁ - ω₂|| / ||ω₁|| after injecting an infinitesimal initial disturbance δω = -7×10⁻⁵ max(|ω₀|) cos(3x)cos(4y). Random turbulent flow exponentially amplifies the perturbation from 3.3×10⁻⁵ to 3.8×10⁻³ (> 115× growth), whereas Taylor–Green laminar flow steadily damps it toward machine precision floor.",
+    theory: "Chaotic advection in 2D turbulence features positive Lyapunov exponents in phase space. The non-linear advection term (u·∇)ω causes exponential separation of nearby phase-space trajectories, while laminar flow lacks advective deformation and damps disturbances viscously.",
     metrics: [
-      { k: "初始相对扰动 L2 范数", v: "3.28 × 10⁻⁵" },
-      { k: "湍流在 t = 20 相对微扰范数", v: "3.80 × 10⁻³" },
-      { k: "湍流扰动放大倍数", v: "> 115 倍指数放大 (混沌)" },
-      { k: "Taylor–Green 微扰终态", v: "< 10⁻¹⁴ (层流指数衰减)" }
+      { k: "Initial Perturbation Relative Norm", v: "3.28 × 10⁻⁵" },
+      { k: "Turbulent Relative Norm at t = 20", v: "3.80 × 10⁻³" },
+      { k: "Turbulent Perturbation Amplification", v: "> 115× growth (Chaos)" },
+      { k: "Taylor–Green Final State", v: "< 10⁻¹⁴ (Laminar decay)" }
     ],
     script: "week4/scripts/run_sensitivity.py"
   },
   {
     id: 7,
-    tag: "Part 4 • 实测斜率 4.104 ≈ 4",
-    title: "7. 粗网格下流体 RK4 四阶时间精度验证 (order.png)",
+    tag: "Part 4 • Measured Slope: 4.104 ≈ 4",
+    title: "7. Fluid RK4 Accuracy Order on Coarse Grid (order.png)",
     img: "assets/week4/order.png",
-    desc: "在 8×8 粗网格、ν=0.5 下验证流体 RK4 积分器的时间收敛阶数。采用粗网格可以避免双精度舍入误差下限与空间离散误差的干扰，使得纯时间离散截断误差处于可观测的渐近区。步长每减半，误差严格缩小约 16 倍，完美证明流体时间推进的四阶精度。",
-    theory: "当时间步长 h 减半时，四阶方法的截断误差理论上缩小 2⁴ = 16 倍。实测中步长由 h=0.4 降至 0.2 时，误差由 4.73×10⁻³ 降至 2.82×10⁻⁴，误差缩小比值为 16.75 倍，与 16 惊人一致。",
+    desc: "Verification of fluid RK4 temporal convergence order using an 8×8 coarse grid with ν = 0.5. Operating on a coarse grid prevents spatial aliasing and floating-point roundoff floors from contaminating the temporal truncation error. Halving the time step reduces error by ~16×, strictly confirming 4th-order asymptotic accuracy.",
+    theory: "When temporal step h is halved, a 4th-order scheme reduces truncation error by 2⁴ = 16. The measured error drop from h = 0.4 (4.73×10⁻³) to h = 0.2 (2.82×10⁻⁴) is a factor of 16.75×, in outstanding agreement with theoretical 16.",
     metrics: [
-      { k: "测试粗网格分辨率", v: "8 × 8 (ν = 0.5)" },
-      { k: "步长减半误差缩小比 (0.4→0.2)", v: "16.75 倍 (理论 16 倍)" },
-      { k: "双对数回归拟合斜率", v: "4.104" },
-      { k: "时间精度验证结论", v: "严格符合 O(Δt⁴) 四阶收敛" }
+      { k: "Coarse Grid Resolution", v: "8 × 8 (ν = 0.5)" },
+      { k: "Step Halving Reduction (0.4 → 0.2)", v: "16.75× (Theory: 16×)" },
+      { k: "Log-Log Regression Slope", v: "4.104" },
+      { k: "Order Confirmation", v: "O(Δt⁴) Confirmed" }
     ],
     script: "week4/scripts/run_order.py"
   },
   {
     id: 8,
-    tag: "Part 4 • 选定步长 Δt = 0.0125",
-    title: "8. 随机流自收敛检验与 Richardson 误差外推 (convergence.png)",
+    tag: "Part 4 • Chosen Step: Δt = 0.0125",
+    title: "8. Self-Convergence & Richardson Error Estimation (convergence.png)",
     img: "assets/week4/convergence.png",
-    desc: "针对无解析真解的随机衰减流动，以超精细步长 Δt = 0.0025 为基准进行时间自收敛分析。拟合斜率为 4.028，严格落在作业规范要求的 [3.7, 4.3] 区间内。进一步利用四阶 Richardson 外推法预测并选取满足误差门限 ε < 5×10⁻⁶ 的最大经济时间步长，选取 Δt = 0.0125，预测误差 3.96×10⁻⁶ 与实测误差 3.89×10⁻⁶ 吻合极佳。",
-    theory: "自收敛误差定义为 e(h) = ||ω_h - ω_ref|| / ||ω_ref||。Richardson 误差外推公式为 ε(h) ≈ ||ω_2h - ω_h|| / (2⁴ - 1)。利用该式可自适应挑选在计算成本与精度约束之间的最优折中步长。",
+    desc: "Self-convergence analysis for random decaying turbulence against a high-resolution benchmark solution (Δt = 0.0025). The fitted convergence slope is 4.028, firmly within the required [3.7, 4.3] band. Fourth-order Richardson extrapolation selects Δt = 0.0125 to satisfy the error tolerance ε < 5.0×10⁻⁶ at t = 0.1.",
+    theory: "Self-convergence error is defined as e(h) = ||ω_h - ω_ref|| / ||ω_ref||. Fourth-order Richardson extrapolation estimates error as ε(h) ≈ ||ω_2h - ω_h|| / (2⁴ - 1), accurately balancing computational cost and error bounds.",
     metrics: [
-      { k: "高精基准解步长", v: "Δt = 0.0025" },
-      { k: "自收敛双对数拟合斜率", v: "4.028 (落在 [3.7, 4.3] 内)" },
-      { k: "作业设计容差目标", v: "ε < 5.0 × 10⁻⁶" },
-      { k: "Richardson 外推挑选步长", v: "Δt = 0.0125" },
-      { k: "预测误差 / 实际测量误差", v: "3.96 × 10⁻⁶ / 3.89 × 10⁻⁶" }
+      { k: "Benchmark Reference Step", v: "Δt = 0.0025" },
+      { k: "Fitted Self-Convergence Slope", v: "4.028 (Within [3.7, 4.3])" },
+      { k: "Target Error Tolerance", v: "ε < 5.0 × 10⁻⁶" },
+      { k: "Richardson Selected Step", v: "Δt = 0.0125" },
+      { k: "Predicted vs Measured Error", v: "3.96 × 10⁻⁶ vs 3.89 × 10⁻⁶" }
     ],
     script: "week4/scripts/run_convergence.py"
   }
