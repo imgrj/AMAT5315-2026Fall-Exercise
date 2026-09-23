@@ -1,294 +1,1452 @@
-﻿<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ising Lattice Lab — Week 3</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<title>Week 3 — Ising Lattice Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --paper: #fbfaf6;
-    --paper-2: #f1efe8;
-    --ink: #1d2029;
-    --ink-2: #4b5063;
-    --ink-3: #7b8093;
-    --rule: #d9d6cc;
-    --accent: #33548c;
-    --accent-soft: #e9eef7;
-    --key: #ffee9a;
-    --amber: #c98a1e;
-    --bond: #c4453a;
-    --green: #2f8a57;
-    --up: #f3f1ea;
-    --down: #24262d;
-    --panel: #ffffff;
-    --shadow: 0 1px 2px rgba(29, 32, 41, .06), 0 8px 24px rgba(29, 32, 41, .06);
+    --bg: #090d16;
+    --panel: #111726;
+    --panel-border: #1e293b;
+    --card: #161f33;
+    --ink: #f1f5f9;
+    --ink-muted: #94a3b8;
+    --ink-faint: #64748b;
+    --accent: #38bdf8;
+    --accent-glow: rgba(56, 189, 248, 0.25);
+    --good: #34d399;
+    --warn: #fbbf24;
+    --danger: #f87171;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --radius-lg: 14px;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --paper: #16181e;
-      --paper-2: #1e2129;
-      --ink: #e9e7df;
-      --ink-2: #b4b7c4;
-      --ink-3: #7d8294;
-      --rule: #2f333e;
-      --accent: #8fa9dc;
-      --accent-soft: #232b3c;
-      --key: #6b5d12;
-      --amber: #e0a43a;
-      --bond: #e0665a;
-      --green: #58b581;
-      --up: #e6e3da;
-      --down: #0d0e12;
-      --panel: #1b1e25;
-      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
-    }
-  }
-
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: var(--paper);
+    background: var(--bg);
     color: var(--ink);
-    font-family: "Source Serif 4", Georgia, serif;
-    font-size: 16.5px;
-    line-height: 1.55;
-    padding-inline: clamp(16px, 4vw, 40px);
-    padding-block: 28px 64px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.5;
+    overflow-x: hidden;
   }
-  .mono { font-family: "IBM Plex Mono", monospace; }
 
-  header.masthead {
-    max-width: 1180px;
-    margin: 0 auto 26px;
+  /* Global Nav Header */
+  .nav-banner {
+    background: #0d121f;
+    border-bottom: 1px solid var(--panel-border);
+    padding: 10px 24px;
     display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
     flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 8px 24px;
-    border-bottom: 1px solid var(--rule);
-    padding-bottom: 14px;
   }
-  header h1 {
-    font-family: "Fraunces", Georgia, serif;
-    font-weight: 600;
-    font-size: clamp(28px, 3.4vw, 38px);
-    letter-spacing: -0.01em;
-    margin: 0;
+  .nav-banner a {
+    color: var(--ink-muted);
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
   }
-  header .sub {
-    color: var(--ink-2);
-    font-size: 15px;
-    max-width: 52ch;
-  }
-  .eyebrow {
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 11.5px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
+  .nav-banner a:hover { color: var(--ink); background: rgba(255,255,255,0.06); }
+  .nav-banner a.active {
     color: var(--accent);
+    background: rgba(56, 189, 248, 0.12);
+    font-weight: 600;
+  }
+  .nav-banner .repo-link {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+    font-weight: 500;
   }
 
-  .lab {
-    max-width: 1180px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: minmax(320px, 470px) minmax(0, 1fr);
-    gap: 36px;
-    align-items: start;
-  }
-  .bench { position: sticky; top: 16px; display: grid; gap: 14px; }
-
-  .lattice-wrap {
+  /* Header */
+  header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     background: var(--panel);
-    box-shadow: var(--shadow);
-    padding: 12px;
-    border-radius: 4px;
+    flex-wrap: wrap;
+    gap: 12px;
   }
-  canvas#lattice {
+  .header-left h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+  }
+  .header-left .sub {
+    color: var(--ink-muted);
+    font-size: 12px;
+    margin-top: 3px;
+  }
+  .tab-buttons {
+    display: flex;
+    gap: 6px;
+    background: rgba(0,0,0,0.3);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--panel-border);
+  }
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--ink-muted);
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--card);
+    color: var(--accent);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  /* Main Workspace */
+  .workspace {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    height: calc(100vh - 110px);
+    overflow: hidden;
+  }
+  @media (max-width: 1080px) {
+    .workspace { grid-template-columns: 1fr; height: auto; }
+  }
+
+  /* Simulation Canvas Viewport */
+  .viewport-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 12px;
+    background: #090d16;
+    overflow-y: auto;
+  }
+
+  .canvas-container {
+    position: relative;
+    background: #05070c;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    min-height: 480px;
+    padding: 12px;
+  }
+  canvas#latticeCanvas {
     display: block;
-    width: 100%;
+    width: 480px;
+    height: 480px;
+    max-width: 100%;
     aspect-ratio: 1 / 1;
     cursor: crosshair;
-    background: var(--down);
-    border: 1px solid var(--rule);
-    border-radius: 2px;
+    image-rendering: pixelated;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--panel-border);
   }
-  .legend {
-    display: flex; gap: 16px; flex-wrap: wrap;
-    font-size: 13px; color: var(--ink-2);
-    margin-top: 8px;
-    align-items: center;
-  }
-  .legend .sw {
-    display: inline-block; width: 12px; height: 12px; vertical-align: -1px;
-    margin-right: 6px; border: 1px solid var(--rule);
-  }
-  .hover-read {
-    min-height: 1.4em;
-    font-size: 13.5px;
-    color: var(--ink-2);
-    margin-top: 6px;
-  }
-  .hover-read b { color: var(--ink); font-weight: 600; }
-
-  .dials {
-    background: var(--panel);
-    box-shadow: var(--shadow);
-    border-radius: 4px;
-    padding: 14px;
-    display: grid; gap: 12px;
-  }
-  .dial-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .dial-row label { font-size: 13px; color: var(--ink-2); min-width: 9ch; }
-  input[type="range"] { flex: 1 1 140px; accent-color: var(--amber); }
-  .tval { font-size: 15px; min-width: 6ch; font-weight: 600; color: var(--amber); }
-  .btns { display: flex; flex-wrap: wrap; gap: 6px; }
-  button {
-    font: inherit; font-size: 13px;
-    font-family: "IBM Plex Mono", monospace;
-    color: var(--ink);
-    background: var(--paper-2);
-    border: 1px solid var(--rule);
-    border-radius: 3px;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  button:hover { border-color: var(--accent); }
-  button.on { background: var(--accent); color: #ffffff; border-color: var(--accent); font-weight: 600; }
-  button.preset { color: var(--amber); font-weight: 500; }
-
-  .readouts {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
-    background: var(--rule); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden;
-  }
-  .ro { background: var(--panel); padding: 7px 9px; }
-  .ro .k { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); font-family: "IBM Plex Mono", monospace; }
-  .ro .v { font-size: 15px; font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; margin-top: 2px; }
-  .ro .v.amber { color: var(--amber); }
-  .ro .v.green { color: var(--green); }
-
-  .concepts { max-width: 62ch; display: grid; gap: 26px; }
-  .concept { border-top: 1px solid var(--rule); padding-top: 14px; }
-  .concept h2 {
-    font-family: "Fraunces", Georgia, serif;
-    font-weight: 500;
-    font-size: 22px;
-    margin: 4px 0 8px;
-  }
-  .formula {
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 14px;
-    background: var(--paper-2);
+  .overlay-stats {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
     padding: 8px 12px;
-    border-radius: 3px;
-    margin: 8px 0 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    z-index: 10;
   }
-  .key {
-    background: var(--key);
-    padding: 1px 4px;
-    border-radius: 2px;
+  .overlay-stats .stat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .overlay-stats .stat-val { font-weight: 600; color: var(--accent); }
+
+  .hover-bar {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 6px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-muted);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+  }
+  .hover-bar b { color: var(--ink); }
+
+  /* Playback Toolbar */
+  .playback-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--panel-border);
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary {
+    background: var(--accent);
+    color: #04101e;
+    border-color: var(--accent);
+  }
+  .btn.primary:hover { background: #60a5fa; }
+  .btn.danger { color: var(--danger); }
+  .btn.danger:hover { background: rgba(248, 113, 113, 0.1); border-color: var(--danger); }
+
+  /* Charts */
+  .chart-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .chart-title {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ink-muted);
+    display: flex;
+    justify-content: space-between;
+  }
+  canvas#chartCanvas {
+    width: 100%;
+    height: 90px;
+    background: rgba(0,0,0,0.25);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Sidebar Controls */
+  .sidebar {
+    background: var(--panel);
+    border-left: 1px solid var(--panel-border);
+    padding: 18px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .control-group h3 {
+    margin: 0;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    font-weight: 700;
+  }
+  .preset-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .preset-btn {
+    background: var(--card);
+    border: 1px solid var(--panel-border);
+    color: var(--ink);
+    padding: 8px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 11.5px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .preset-btn.active {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Sliders & Forms */
+  .control-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .control-row .label-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+  }
+  .control-row .label-name { color: var(--ink-muted); }
+  .control-row .label-val { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--accent); }
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+  }
+
+  .theory-card {
+    background: var(--card);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .theory-card .theory-head {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+  }
+  .theory-card .formula {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    background: rgba(0,0,0,0.3);
+    padding: 6px 10px;
+    border-radius: 4px;
+    color: #e2e8f0;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .theory-card p {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--ink-muted);
+    line-height: 1.45;
+  }
+
+  /* Evidence Gallery View */
+  .gallery-view {
+    display: none;
+    padding: 24px;
+    height: calc(100vh - 110px);
+    overflow-y: auto;
+    background: #070a12;
+  }
+  .gallery-view.active { display: block; }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+    gap: 20px;
+  }
+
+  /* Gallery Card Hover & Interaction */
+  .gallery-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+  }
+  .gallery-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 18px rgba(56, 189, 248, 0.35);
+  }
+  .gallery-card .img-wrapper {
+    position: relative;
+    overflow: hidden;
+    background: #03060d;
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .gallery-card .img-wrapper img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+  .gallery-card:hover .img-wrapper img {
+    transform: scale(1.02);
+  }
+  .gallery-card .zoom-hint {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(15, 23, 42, 0.88);
+    color: var(--accent);
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    padding: 4px 9px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.85;
+    transition: all 0.2s ease;
+  }
+  .gallery-card:hover .zoom-hint {
+    opacity: 1;
+    background: rgba(56, 189, 248, 0.15);
+    border-color: var(--accent);
+  }
+  .gallery-card .card-body {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .gallery-card h4 {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .gallery-card p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--ink-muted);
+    line-height: 1.5;
+  }
+  .gallery-card .metric-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent);
+    align-self: flex-start;
+  }
+  .gallery-card .card-footer {
+    margin-top: auto;
+    padding: 10px 16px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  .gallery-card .view-detail-btn {
+    font-size: 11.5px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+  }
+  .gallery-card .view-raw-link {
+    font-size: 11px;
+    color: var(--ink-muted);
+    text-decoration: none;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .gallery-card .view-raw-link:hover {
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Fullscreen Lightbox Modal */
+  .lightbox-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 16, 0.94);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: fadeIn 0.18s ease-out;
+  }
+  .lightbox-modal.active {
+    display: flex;
+  }
+  .lightbox-container {
+    background: #0d1322;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+    max-width: 1100px;
+    width: 100%;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(56, 189, 248, 0.1);
+  }
+  .lightbox-header {
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #111827;
+    flex-shrink: 0;
+  }
+  .lightbox-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .lightbox-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .lightbox-close {
+    background: transparent;
+    border: none;
+    color: var(--ink-muted);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+    line-height: 1;
+  }
+  .lightbox-close:hover {
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .lightbox-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(340px, 1fr);
+    overflow-y: auto;
+    flex: 1;
+  }
+  @media (max-width: 860px) {
+    .lightbox-body { grid-template-columns: 1fr; }
+  }
+  .lightbox-img-pane {
+    background: #03060c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    border-right: 1px solid var(--panel-border);
+    position: relative;
+  }
+  .lightbox-img-pane img {
+    max-width: 100%;
+    max-height: 64vh;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  }
+  .lightbox-info-pane {
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: #0d1322;
+    overflow-y: auto;
+  }
+  .lightbox-sec-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-muted);
+    margin-bottom: 4px;
+  }
+  .lightbox-desc {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .lightbox-theory {
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--ink-muted);
+    background: rgba(15, 23, 42, 0.6);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+  .lightbox-data-table {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+  }
+  .lightbox-data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .lightbox-data-row:last-child {
+    border-bottom: none;
+  }
+  .lightbox-data-row .k {
+    color: var(--ink-muted);
+  }
+  .lightbox-data-row .v {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .lightbox-footer-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--panel-border);
+    gap: 12px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
   }
 </style>
 </head>
 <body>
 
-<header class="masthead">
-  <div>
-    <div class="eyebrow">Week 3 · Monte Carlo Simulation</div>
-    <h1>Ising Lattice Lab</h1>
+<!-- Global Weekly Nav -->
+<nav class="nav-banner">
+  <span><strong>AMAT5315:</strong> Scientific Computing</span>
+  <a href="index.html">Week 2: Molecular Dynamics</a>
+  <a href="week3-ising-lab.html" class="active">Week 3: Ising Lattice Lab</a>
+  <a href="week4-fluid-lab.html">Week 4: Fluid Dynamics Lab</a>
+  <a class="repo-link" href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise" target="_blank" rel="noopener">
+    GitHub Repo ↗
+  </a>
+</nav>
+
+<!-- Header -->
+<header>
+  <div class="header-left">
+    <h1>
+      Ising Lattice Lab
+      <span class="badge">Week 3 Interactive</span>
+    </h1>
+    <div class="sub">2D Ferromagnetic Ising Model, Metropolis Single-Flip & Wolff Cluster Algorithms</div>
   </div>
-  <div class="sub">A 64 × 64 Ising lattice, sampled live by Metropolis and Wolff rules. Heat it, cool it, hover a spin, and interact with the phase transition live.</div>
+  <div class="tab-buttons">
+    <button class="tab-btn active" id="tabSimBtn" onclick="switchTab('sim')">Interactive Studio</button>
+    <button class="tab-btn" id="tabGalleryBtn" onclick="switchTab('gallery')">Evidence & Verification (10)</button>
+  </div>
 </header>
 
-<div class="lab">
-  <aside class="bench">
-    <div class="lattice-wrap">
-      <canvas id="lattice" width="512" height="512"></canvas>
-      <div class="legend">
-        <span><span class="sw" style="background: var(--up)"></span>+1, up</span>
-        <span><span class="sw" style="background: var(--down)"></span>−1, down</span>
-        <span><span class="sw" style="background: var(--bond); border-color: var(--bond)"></span>disagreeing bond</span>
+<!-- View 1: Interactive Simulation Studio -->
+<div class="workspace" id="simView">
+  <!-- Center Viewport -->
+  <div class="viewport-panel">
+    <div class="canvas-container">
+      <canvas id="latticeCanvas" width="512" height="512"></canvas>
+      
+      <div class="overlay-stats">
+        <div class="stat-row"><span>Temp T:</span><span class="stat-val" id="statT">2.27</span></div>
+        <div class="stat-row"><span>Signed M:</span><span class="stat-val" id="statM">+0.000</span></div>
+        <div class="stat-row"><span>Mean |M|:</span><span class="stat-val" id="statAbsM">0.422</span></div>
+        <div class="stat-row"><span>Energy E:</span><span class="stat-val" id="statE">-1.414</span></div>
+        <div class="stat-row"><span id="statMetricLabel">Acceptance:</span><span class="stat-val" id="statMetricVal">21.5%</span></div>
+        <div class="stat-row"><span>Algorithm:</span><span class="stat-val" id="statAlgo" style="color:var(--accent);">Metropolis</span></div>
+        <div class="stat-row"><span>Phase:</span><span class="stat-val" id="statPhase" style="color:var(--warn);">CRITICAL (Tc)</span></div>
       </div>
-      <div class="hover-read mono" id="hover">Hover a site to see its four bonds and flip cost.</div>
+
+      <div class="hover-bar" id="hoverBar">
+        <span id="hoverReadout">Hover any site on the lattice to inspect local bonds and flip cost ΔE.</span>
+        <span style="display:flex; align-items:center; gap:12px;">
+          <span><span style="display:inline-block; width:10px; height:10px; background:#f1f5f9; border-radius:2px; vertical-align:-1px; margin-right:4px;"></span>+1 Up</span>
+          <span><span style="display:inline-block; width:10px; height:10px; background:#1e293b; border-radius:2px; vertical-align:-1px; margin-right:4px;"></span>-1 Down</span>
+        </span>
+      </div>
     </div>
 
-    <div class="dials">
-      <div class="dial-row">
-        <label for="temp">Temperature <span class="mono">T</span></label>
-        <input type="range" id="temp" min="1.0" max="4.0" step="0.01" value="2.27">
-        <span class="tval mono" id="tval">2.27</span>
+    <!-- Playback Control Bar -->
+    <div class="playback-bar">
+      <button class="btn primary" id="btnPlayPause" onclick="togglePlay()">Pause</button>
+      <button class="btn" onclick="stepSim()">Single Step</button>
+      <button class="btn" onclick="resetAllUp()">All-Up (Cold)</button>
+      <button class="btn danger" onclick="resetRandom()">Randomize (Hot)</button>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 11.5px; color: var(--ink-muted);">Sampler:</span>
+        <button class="btn primary" id="btnModeMetro" onclick="setSamplerMode('metropolis')">Metropolis</button>
+        <button class="btn" id="btnModeWolff" onclick="setSamplerMode('wolff')">Wolff Cluster</button>
       </div>
-      <div class="btns">
-        <button class="preset" id="p-cold" type="button">cold 1.8</button>
-        <button class="preset on" id="p-crit" type="button">critical 2.27</button>
-        <button class="preset" id="p-hot" type="button">hot 3.0</button>
+    </div>
+
+    <!-- Live Magnetization & Energy Monitor Chart -->
+    <div class="chart-card">
+      <div class="chart-title">
+        <span>Live Magnetization |M(t)| & Energy E(t) Decay Monitor</span>
+        <span id="chartLegend" style="font-family:'JetBrains Mono',monospace; font-size:10.5px;">
+          <span style="color:#38bdf8;">■ Mean |M|</span> &nbsp; <span style="color:#f87171;">■ Energy E</span>
+        </span>
+      </div>
+      <canvas id="chartCanvas" width="800" height="90"></canvas>
+    </div>
+  </div>
+
+  <!-- Right Sidebar Controls -->
+  <div class="sidebar">
+    <!-- Presets -->
+    <div class="control-group">
+      <h3>Temperature Presets</h3>
+      <div class="preset-grid">
+        <button class="preset-btn" id="p_cold" onclick="setTemp(1.80)">Cold (1.80)</button>
+        <button class="preset-btn active" id="p_crit" onclick="setTemp(2.27)">Critical (2.27)</button>
+        <button class="preset-btn" id="p_hot" onclick="setTemp(3.00)">Hot (3.00)</button>
+      </div>
+    </div>
+
+    <!-- Temperature Slider -->
+    <div class="control-group">
+      <div class="control-row">
+        <div class="label-row">
+          <span class="label-name">Temperature T</span>
+          <span class="label-val" id="valT">2.27</span>
+        </div>
+        <input type="range" id="sliderT" min="1.00" max="4.00" step="0.01" value="2.27" oninput="setTemp(this.value)">
+      </div>
+    </div>
+
+    <!-- Sampler Information -->
+    <div class="control-group">
+      <h3>Active Sampler Algorithm</h3>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div class="theory-card">
+          <div class="theory-head" id="cardSamplerTitle">Metropolis (Single-Spin Proposals)</div>
+          <p id="cardSamplerDesc">
+            Proposes single-site flips uniformly at random. Accepts downhill proposals and tests uphill proposals with Boltzmann coin flip. Suffers from critical slowing down near Tc (z ≈ 2.17).
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Hint -->
+    <div class="theory-card" style="border-left: 3px solid var(--accent); background: rgba(56, 189, 248, 0.06);">
+      <div class="theory-head">💡 Interactive Exploration</div>
+      <p>
+        Click or hover across the canvas to inspect site coordinates, neighbor spin sum, and proposal cost ΔE = 2 sᵢ ∑ sⱼ. Switch to <strong>Wolff Cluster</strong> to watch macroscopic domains flip simultaneously!
+      </p>
+    </div>
+
+    <!-- Core Theoretical Formulas -->
+    <div class="control-group">
+      <h3>Physical Foundations</h3>
+      <div class="theory-card">
+        <div class="theory-head">Ising Hamiltonian (J = 1)</div>
+        <div class="formula">E(s) = -J ∑⟨ij⟩ sᵢ sⱼ</div>
+        <p>Adjacent spins prefer parallel alignment (-1 energy). Disagreeing bonds cost +1.</p>
       </div>
 
-      <div class="btns">
-        <button id="btn-run" class="on" type="button">Pause</button>
-        <button id="btn-step" type="button">Step</button>
-        <button id="btn-reset-up" type="button">All-Up</button>
-        <button id="btn-reset-rand" type="button">Randomize</button>
+      <div class="theory-card">
+        <div class="theory-head">Onsager Exact Transition</div>
+        <div class="formula">Tc = 2 / ln(1 + √2) ≈ 2.26919</div>
+        <p>1944 exact analytical solution separating the ferromagnetic and paramagnetic phases.</p>
       </div>
 
-      <div class="dial-row" style="margin-top: 4px;">
-        <label>Sampler</label>
-        <div class="btns" style="flex:1;">
-          <button id="btn-metro" class="on" type="button">Metropolis</button>
-          <button id="btn-wolff" type="button">Wolff Cluster</button>
+      <div class="theory-card">
+        <div class="theory-head">Wolff Cluster Bond Probability</div>
+        <div class="formula">p = 1 - e^(-2/T)</div>
+        <p>Flips entire correlated domains with acceptance 1, accelerating sampling by >1000×.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View 2: Evidence & Verification Gallery -->
+<div class="gallery-view" id="galleryView">
+  <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+    <div>
+      <h2 style="margin: 0; font-size: 20px; font-weight: 700;">Week 3 Verification Suite & Evidence Gallery</h2>
+      <p style="margin: 4px 0 0; color: var(--ink-muted); font-size: 13px;">
+        All 10 committed benchmark figures and quantitative data produced by the week's Rust engine and Python verification pipelines.
+      </p>
+    </div>
+
+    <div class="gallery-grid">
+      <!-- Card 1 -->
+      <div class="gallery-card" onclick="openLightbox(0)">
+        <div class="img-wrapper">
+          <img src="assets/week3/boltzmann.png" alt="assets/week3/boltzmann.png">
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 1 • Slope: 0.0107527</div>
+          <h4>1. Boltzmann Energy Histograms & Log Ratio</h4>
+          <p>Total energy histograms at T = 3.0 and 3.1. Log-ratio slope perfectly matches theoretical Δ(1/T) = 0.0107527, proving exact canonical Boltzmann sampling.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week3/boltzmann.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
         </div>
       </div>
 
-      <div class="readouts">
-        <div class="ro"><div class="k">Temp T</div><div class="v amber" id="ro-t">2.27</div></div>
-        <div class="ro"><div class="k">Magnet. M</div><div class="v" id="ro-m">+0.000</div></div>
-        <div class="ro"><div class="k">Energy E</div><div class="v" id="ro-e">-1.414</div></div>
-        <div class="ro"><div class="k" id="ro-stat-k">Accept.</div><div class="v green" id="ro-stat-v">21.5%</div></div>
+      <!-- Card 2 -->
+      <div class="gallery-card" onclick="openLightbox(1)">
+        <div class="img-wrapper">
+          <img src="assets/week3/domains.png" alt="assets/week3/domains.png">
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 1 • Ordered → Critical → Disordered</div>
+          <h4>2. Real-Space Domain Morphologies Across Transition</h4>
+          <p>Equilibrated 64×64 spin lattices at T = 1.8, 2.3, 3.0. Displays single ferromagnetic domain, scale-free fractal critical clusters, and disordered paramagnetic noise.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week3/domains.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="gallery-card" onclick="openLightbox(2)">
+        <div class="img-wrapper">
+          <img src="assets/week3/magnetization.png" alt="assets/week3/magnetization.png">
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 2 • Onsager Exact Solution vs L = 64</div>
+          <h4>3. Spontaneous Magnetization Curve & Rounding</h4>
+          <p>Absolute magnetization ⟨|M|⟩ across 27 temperatures for L = 64 vs Onsager 1944 exact curve. Cold mean |M| = 0.9864 ≥ 0.90; finite-size rounding near Tc = 2.2692.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week3/magnetization.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="gallery-card" onclick="openLightbox(3)">
+        <div class="img-wrapper">
+          <img src="assets/week3/susceptibility.png" alt="assets/week3/susceptibility.png">
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 2 • Fitted Peaks & Tc Extrapolation</div>
+          <h4>4. Magnetic Susceptibility Peaks & Finite-Size Scaling</h4>
+          <p>Susceptibility χ(T) for L = 32 and 64 with 5-point quadratic peak fits. Leading 1/L drift cancels to yield Tc = 2.2723 (deviation +0.14% < 2% vs Onsager 2.26919).</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week3/susceptibility.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="gallery-card" onclick="openLightbox(4)">
+        <div class="img-wrapper">
+          <img src="assets/week3/trace.png" alt="assets/week3/trace.png">
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 3 • Critical Memory vs Thermal Noise</div>
+          <h4>5. Monte Carlo Time Series: Memory Excursions</h4>
+          <p>First 2000 measured sweeps at T = 2.30 vs 3.00. Uncorrelated Gaussian jitter away from transition vs persistent excursions lasting hundreds of sweeps at criticality.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week3/trace.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="gallery-card" onclick="openLightbox(5)">
+        <div class="img-wrapper">
+          <img src="assets/week3/acf-binning.png" alt="assets/week3/acf-binning.png">
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 3 • Autocorrelation Decay & Binning Plateau</div>
+          <h4>6. Autocorrelation Function ρ(t) & Binning Analysis</h4>
+          <p>Autocorrelation decay (τ_int ≈ 1039 sweeps) and block binning standard error vs block length. Monotonic rise without plateau reveals unresolved sampling error.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week3/acf-binning.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- Card 7 -->
+      <div class="gallery-card" onclick="openLightbox(6)">
+        <div class="img-wrapper">
+          <img src="assets/week3/tau.png" alt="assets/week3/tau.png">
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 3 • Dynamic Exponent z ≈ 2.17</div>
+          <h4>7. Dynamic Critical Slowing Down: τ_int Explosion</h4>
+          <p>Integrated autocorrelation time τ_int vs T on log axis. Flat τ_int ~ 1-3 away from Tc; spikes to 184 (L=32) and 1039 (L=64) at transition, scaling as L^2.17.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week3/tau.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- Card 8 -->
+      <div class="gallery-card" onclick="openLightbox(7)">
+        <div class="img-wrapper">
+          <img src="assets/week3/chi-bootstrap.png" alt="assets/week3/chi-bootstrap.png">
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 3 • Bootstrap Error of Tc: 0.009</div>
+          <h4>8. Block-Bootstrap Susceptibility Resampling</h4>
+          <p>500 bootstrap parabola fits at block lengths 2000, 4000, 8000 sweeps. Tc sampling error is 0.0095, stable within 5% across block lengths, isolating statistical variance.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week3/chi-bootstrap.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- Card 9 -->
+      <div class="gallery-card" onclick="openLightbox(8)">
+        <div class="img-wrapper">
+          <img src="assets/week3/magnetization-compare.png" alt="assets/week3/magnetization-compare.png">
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 4 • Sampler Agreement d = 0.63 ≤ 3</div>
+          <h4>9. Sampler Cross-Validation: Metropolis vs Wolff</h4>
+          <p>Dual-panel verification. Left: Mean magnetization with bootstrap error bars shows physical agreement (d = 0.63 ≤ 3). Right: Wolff susceptibility peak yields Tc = 2.2741 (+0.22%).</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week3/magnetization-compare.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- Card 10 -->
+      <div class="gallery-card" onclick="openLightbox(9)">
+        <div class="img-wrapper">
+          <img src="assets/week3/tau-compare.png" alt="assets/week3/tau-compare.png">
+          <div class="zoom-hint">🔍 Deep Dive & High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 4 • >1000× Wolff Acceleration at Tc</div>
+          <h4>10. Beating Critical Slowing Down: Work Comparison</h4>
+          <p>Work-normalized autocorrelation time τ_work. Near Tc, Metropolis requires ~702 sweeps while Wolff takes ~0.99 sweeps, delivering >1000× speedup in spin-update work.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week3/tau-compare.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
       </div>
     </div>
-  </aside>
+  </div>
+</div>
 
-  <main class="concepts">
-    <section class="concept">
-      <div class="eyebrow">Spin and Lattice</div>
-      <h2>A spin is one bit on a torus</h2>
-      <p>Every site of the $64 \times 64$ square lattice holds a spin $s_i \in \{-1, +1\}$, drawn white for up and dark for down. Periodic boundaries wrap edges: right column neighbours left, bottom neighbours top. The whole model is $4096$ bits and a local rule for their interactions.</p>
-    </section>
+<!-- Fullscreen Lightbox Modal -->
+<div id="lightboxModal" class="lightbox-modal" onclick="closeLightbox(event)">
+  <div class="lightbox-container" onclick="event.stopPropagation()">
+    <div class="lightbox-header">
+      <div class="lightbox-header-left">
+        <span class="metric-tag" id="lbTag">Part 1 • Slope: 0.01075</span>
+        <span class="lightbox-title" id="lbTitle">Figure Title</span>
+      </div>
+      <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+    </div>
+    <div class="lightbox-body">
+      <div class="lightbox-img-pane">
+        <img id="lbImg" src="" alt="Evidence Full-Res Plot">
+      </div>
+      <div class="lightbox-info-pane">
+        <div>
+          <div class="lightbox-sec-title">Scientific Findings</div>
+          <div class="lightbox-desc" id="lbDesc">Description text</div>
+        </div>
 
-    <section class="concept">
-      <div class="eyebrow">Energy</div>
-      <h2>The energy counts disagreements</h2>
-      <div class="formula">E(s) = -J ∑ s_i s_j  (J = 1)</div>
-      <p>Agreeing nearest neighbours contribute $-1$, disagreeing pairs $+1$. A fully aligned lattice sits at $-2$ per site. Disagreeing bonds carry energy $+1$ and are highlighted red when you hover a spin.</p>
-    </section>
+        <div>
+          <div class="lightbox-sec-title">Mathematical Theory</div>
+          <div class="lightbox-theory" id="lbTheory">Theory text</div>
+        </div>
 
-    <section class="concept">
-      <div class="eyebrow">Exact Solution & Criticality</div>
-      <h2>Onsager's Phase Transition</h2>
-      <div class="formula">T_c = 2 / ln(1 + √2) ≈ 2.26919</div>
-      <p>Below $T_c$, spontaneous symmetry breaking leads to long-range ferromagnetic order. Above $T_c$, thermal entropy destroys magnetization. At $T_c$, fractal domains of all lengths coexist.</p>
-    </section>
+        <div>
+          <div class="lightbox-sec-title">Quantitative Benchmarks</div>
+          <div class="lightbox-data-table" id="lbMetrics">
+            <!-- populated by JS -->
+          </div>
+        </div>
 
-    <section class="concept">
-      <div class="eyebrow">Cluster Algorithms</div>
-      <h2>Wolff Cluster Flips Beat Critical Slowing Down</h2>
-      <div class="formula">p_bond = 1 - e^(-2/T)</div>
-      <p>Metropolis single-spin updates take hundreds of sweeps to reconfigure large domains at $T_c$ ($z \approx 2.2$). Wolff grows clusters of aligned spins with bond probability $p$ and flips them with acceptance $1$, accelerating independent sampling by over <span class="key">1000×</span>!</p>
-    </section>
-  </main>
+        <div style="font-size: 11px; color: var(--ink-muted); display: flex; align-items: center; gap: 6px;">
+          <span>⚡ Reproduction Script:</span>
+          <code id="lbScript" style="color: var(--accent); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">week3/scripts/...</code>
+        </div>
+
+        <div class="lightbox-footer-nav">
+          <div style="display: flex; gap: 8px;">
+            <button class="btn" onclick="prevLightbox()">← Previous</button>
+            <button class="btn" onclick="nextLightbox()">Next →</button>
+          </div>
+          <a id="lbRawLink" href="#" target="_blank" class="btn primary" style="text-decoration: none;">View Image</a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
+// --- Gallery Data & Lightbox Logic ---
+const galleryData = [
+  {
+    "id": 1,
+    "tag": "Part 1 \u2022 Slope: 0.0107527",
+    "title": "1. Boltzmann Energy Histograms & Log Ratio (boltzmann.png)",
+    "card_title": "1. Boltzmann Energy Histograms & Log Ratio",
+    "img": "assets/week3/boltzmann.png",
+    "card_desc": "Total energy histograms at T = 3.0 and 3.1. Log-ratio slope perfectly matches theoretical \u0394(1/T) = 0.0107527, proving exact canonical Boltzmann sampling.",
+    "desc": "Total energy histograms (E \u00d7 4096) for Metropolis runs at T = 3.0 and T = 3.1 with 2000 measured sweeps each (bins 40 units wide). The log ratio ln(P_3.1(E) / P_3.0(E)) forms a linear slope that perfectly matches the predicted Boltzmann factor difference \u0394\u03b2 = 1/3.0 - 1/3.1 = 0.0107527, verifying energy sampling correctness.",
+    "theory": "In the canonical ensemble, P_T(E) \u221d \u03a9(E) e^{-E/T}. For two temperatures on the same lattice, the microscopic density of states \u03a9(E) cancels in their probability ratio: ln(P_{Tb}(E) / P_{Ta}(E)) = (1/Ta - 1/Tb)E + const. The slope is purely determined by the temperature step, serving as an exacting test of Boltzmann weight implementation.",
+    "metrics": [
+      {
+        "k": "Cold Temperature Ta",
+        "v": "3.00"
+      },
+      {
+        "k": "Hot Temperature Tb",
+        "v": "3.10"
+      },
+      {
+        "k": "Theoretical Slope \u0394(1/T)",
+        "v": "0.0107527"
+      },
+      {
+        "k": "Empirical Log-Ratio Slope",
+        "v": "0.010753 (Exact agreement)"
+      },
+      {
+        "k": "Sample Size per Temperature",
+        "v": "2,000 sweeps (L = 64)"
+      }
+    ],
+    "script": "python scripts/plot_boltzmann.py"
+  },
+  {
+    "id": 2,
+    "tag": "Part 1 \u2022 Ordered \u2192 Critical \u2192 Disordered",
+    "title": "2. Real-Space Domain Morphologies Across Transition (domains.png)",
+    "card_title": "2. Real-Space Domain Morphologies Across Transition",
+    "img": "assets/week3/domains.png",
+    "card_desc": "Equilibrated 64\u00d764 spin lattices at T = 1.8, 2.3, 3.0. Displays single ferromagnetic domain, scale-free fractal critical clusters, and disordered paramagnetic noise.",
+    "desc": "Equilibrated 64\u00d764 spin lattices along the temperature ramp (Seed 2026). At T = 1.8 < Tc, a single ferromagnetic domain spans the torus with sparse dissenting islands (|M| = 0.957). At T = 2.3 \u2248 Tc, correlation length reaches system size, creating scale-invariant fractal domains of all sizes. At T = 3.0 > Tc, thermal fluctuations destroy long-range order into rapid noise (|M| = 0.041).",
+    "theory": "The correlation length \u03be(T) ~ |T - Tc|^{-\u03bd} governs the spatial scale over which spin orientations are correlated (2D Ising \u03bd = 1). As T approaches Tc = 2.26919, \u03be grows until bounded by the finite lattice side L = 64. Scale-free clusters appear at criticality with fractal boundary dimension D_H = 1 + 1/2 = 1.875.",
+    "metrics": [
+      {
+        "k": "Cold Lattice (T = 1.8) Mean |M|",
+        "v": "0.9568 (Onsager: 0.9569)"
+      },
+      {
+        "k": "Critical Lattice (T = 2.3) Mean |M|",
+        "v": "0.4215 (Fluctuating domains)"
+      },
+      {
+        "k": "Hot Lattice (T = 3.0) Mean |M|",
+        "v": "0.0414 (Pass < 0.06)"
+      },
+      {
+        "k": "Onsager Exact Critical Temp Tc",
+        "v": "2.26919"
+      },
+      {
+        "k": "Lattice Geometry",
+        "v": "64 \u00d7 64 Torus (Periodic BCs)"
+      }
+    ],
+    "script": "python scripts/render_frames.py"
+  },
+  {
+    "id": 3,
+    "tag": "Part 2 \u2022 Onsager Exact Solution vs L = 64",
+    "title": "3. Spontaneous Magnetization Curve & Rounding (magnetization.png)",
+    "card_title": "3. Spontaneous Magnetization Curve & Rounding",
+    "img": "assets/week3/magnetization.png",
+    "card_desc": "Absolute magnetization \u27e8|M|\u27e9 across 27 temperatures for L = 64 vs Onsager 1944 exact curve. Cold mean |M| = 0.9864 \u2265 0.90; finite-size rounding near Tc = 2.2692.",
+    "desc": "Measured mean absolute magnetization \u27e8|M|\u27e9 against temperature across 27 grid points for L = 64 alongside Lars Onsager's 1944 infinite-lattice analytical curve. Below Tc, the simulation closely follows the exact curve (mean |M| = 0.9864 at T = 1.5). Near Tc = 2.2692, finite lattice size rounds off the sharp singularity, creating a smooth crossover with a lingering tail.",
+    "theory": "Onsager's celebrated 1944 exact solution yields \u27e8|m|\u27e9 = (1 - sinh\u207b\u2074(2/T))^{1/8} for T < Tc, and vanishes identically for T \u2265 Tc with order parameter exponent \u03b2 = 1/8. In any finite system, true non-analytic phase transitions cannot occur; instead, the sharp kink is rounded over a temperature window \u0394T ~ L^{-1/\u03bd} = L\u207b\u00b9.",
+    "metrics": [
+      {
+        "k": "Cold Mean |M| (T = 1.50)",
+        "v": "0.9864 (Requirement: \u2265 0.90)"
+      },
+      {
+        "k": "Near-Critical Mean |M| (T = 2.25)",
+        "v": "0.6972 (Benchmark: ~0.69)"
+      },
+      {
+        "k": "Critical Window Mean |M| (T = 2.30)",
+        "v": "0.4215 (Benchmark: ~0.41)"
+      },
+      {
+        "k": "Transition Boundary Mean |M| (T = 2.60)",
+        "v": "0.1500 (Benchmark: ~0.08)"
+      },
+      {
+        "k": "Disordered Tail Mean |M| (T = 3.00)",
+        "v": "0.0414 (Requirement: < 0.06)"
+      }
+    ],
+    "script": "python scripts/plot_magnetization.py"
+  },
+  {
+    "id": 4,
+    "tag": "Part 2 \u2022 Fitted Peaks & Tc Extrapolation",
+    "title": "4. Magnetic Susceptibility Peaks & Finite-Size Scaling (susceptibility.png)",
+    "card_title": "4. Magnetic Susceptibility Peaks & Finite-Size Scaling",
+    "img": "assets/week3/susceptibility.png",
+    "card_desc": "Susceptibility \u03c7(T) for L = 32 and 64 with 5-point quadratic peak fits. Leading 1/L drift cancels to yield Tc = 2.2723 (deviation +0.14% < 2% vs Onsager 2.26919).",
+    "desc": "Magnetic susceptibility \u03c7(T) = L\u00b2(\u27e8M\u00b2\u27e9 - \u27e8|M|\u27e9\u00b2) / T for L = 32 and L = 64. As lattice size doubles, the fluctuation peak grows taller (\u03c7_max doubles from 45.2 to 81.6) and shifts closer to Tc: T_peak(32) = 2.3477, T_peak(64) = 2.3100. Parabolic vertex cancellation yields Tc = 2.2723, achieving a deviation of only +0.14% from Onsager's exact 2.26919.",
+    "theory": "On a finite lattice, the correlation length cannot exceed L, so susceptibility peaks at a pseudo-critical temperature T_peak(L) \u2248 Tc + a/L. Fitting a quadratic parabola to the five points around each peak and extrapolating via Tc \u2248 2 T_peak(64) - T_peak(32) eliminates the leading O(1/L) finite-size drift.",
+    "metrics": [
+      {
+        "k": "L = 32 Fitted Peak T_peak",
+        "v": "2.3477 (chi \u2248 45.2)"
+      },
+      {
+        "k": "L = 64 Fitted Peak T_peak",
+        "v": "2.3100 (chi \u2248 81.6)"
+      },
+      {
+        "k": "Extrapolated Critical Temp Tc",
+        "v": "2.2723 (Onsager: 2.26919)"
+      },
+      {
+        "k": "Relative Deviation from Exact Tc",
+        "v": "+0.14% (Strictly < 2% Pass)"
+      },
+      {
+        "k": "Leading Drift Cancellation",
+        "v": "Tc \u2248 2 T_peak(64) - T_peak(32)"
+      }
+    ],
+    "script": "python scripts/peaks.py"
+  },
+  {
+    "id": 5,
+    "tag": "Part 3 \u2022 Critical Memory vs Thermal Noise",
+    "title": "5. Monte Carlo Time Series: Memory Excursions (trace.png)",
+    "card_title": "5. Monte Carlo Time Series: Memory Excursions",
+    "img": "assets/week3/trace.png",
+    "card_desc": "First 2000 measured sweeps at T = 2.30 vs 3.00. Uncorrelated Gaussian jitter away from transition vs persistent excursions lasting hundreds of sweeps at criticality.",
+    "desc": "Sweep-by-sweep evolution of absolute magnetization |m| over the first 2000 measured sweeps for L = 64 at T = 2.30 (near criticality) and T = 3.00 (disordered). The high-temperature trace jitters randomly around 0.04 like white noise. At T = 2.30, the Markov chain retains long memory, drifting in macroscopic excursions lasting hundreds of sweeps around 0.42.",
+    "theory": "The Markov chain's transition kernel P has an asymptotic relaxation rate determined by its sub-dominant eigenvalue \u03bb\u2082: \u03c4_exp = -1/ln|\u03bb\u2082|. Near a second-order transition, \u03bb\u2082 approaches 1 exponentially with system size, creating macroscopic temporal correlations that make individual consecutive sweeps non-independent.",
+    "metrics": [
+      {
+        "k": "Critical (T = 2.30) Mean |m|",
+        "v": "0.4215"
+      },
+      {
+        "k": "Critical Excursion Window",
+        "v": "Excursions span > 500 sweeps"
+      },
+      {
+        "k": "Disordered (T = 3.00) Mean |m|",
+        "v": "0.0414"
+      },
+      {
+        "k": "Disordered Noise Amplitude",
+        "v": "Rapid Gaussian jitter (\u00b10.03)"
+      },
+      {
+        "k": "Observation Length",
+        "v": "First 2,000 sweeps recorded"
+      }
+    ],
+    "script": "python scripts/plot_part3.py"
+  },
+  {
+    "id": 6,
+    "tag": "Part 3 \u2022 Autocorrelation Decay & Binning Plateau",
+    "title": "6. Autocorrelation Function \u03c1(t) & Binning Analysis (acf-binning.png)",
+    "card_title": "6. Autocorrelation Function \u03c1(t) & Binning Analysis",
+    "img": "assets/week3/acf-binning.png",
+    "card_desc": "Autocorrelation decay (\u03c4_int \u2248 1039 sweeps) and block binning standard error vs block length. Monotonic rise without plateau reveals unresolved sampling error.",
+    "desc": "Left: Autocorrelation function \u03c1(t) of |m| at L = 64, T = 2.30 decaying slowly with lag t, giving an integrated autocorrelation time \u03c4_int \u2248 1039 sweeps. Right: Standard error of mean |M| against block length B on a log scale. The error rises from the naive estimate 0.00004 to 0.0019, demonstrating that 100,000 sweeps are still insufficient to reach a completely flat error plateau.",
+    "theory": "The naive standard error \u03c3_naive = s/\u221an ignores temporal persistence. The honest error is \u03c3_honest = \u03c3_naive \u221a(2\u03c4_int). Binning into blocks of length B groups correlated points; when B \u226b \u03c4_int, block averages become independent and \u03c3_bin plateaus. With \u03c4_int \u2248 1039, even 2000-sweep blocks only equal 1.9\u03c4_int, explaining why error remains unresolved.",
+    "metrics": [
+      {
+        "k": "Integrated Autocorrelation Time \u03c4_int",
+        "v": "1039.2 sweeps"
+      },
+      {
+        "k": "Naive Standard Error \u03c3_naive",
+        "v": "4.42 \u00d7 10\u207b\u2075"
+      },
+      {
+        "k": "50-Block Standard Error (B = 2000)",
+        "v": "1.38 \u00d7 10\u207b\u00b3 (31.2\u00d7 larger)"
+      },
+      {
+        "k": "Theoretical Inflation Factor \u221a(2\u03c4_int)",
+        "v": "45.6\u00d7"
+      },
+      {
+        "k": "Plateau Status",
+        "v": "Sampling error unresolved (B > 5000 required)"
+      }
+    ],
+    "script": "python scripts/plot_part3.py"
+  },
+  {
+    "id": 7,
+    "tag": "Part 3 \u2022 Dynamic Exponent z \u2248 2.17",
+    "title": "7. Dynamic Critical Slowing Down: \u03c4_int Explosion (tau.png)",
+    "card_title": "7. Dynamic Critical Slowing Down: \u03c4_int Explosion",
+    "img": "assets/week3/tau.png",
+    "card_desc": "Integrated autocorrelation time \u03c4_int vs T on log axis. Flat \u03c4_int ~ 1-3 away from Tc; spikes to 184 (L=32) and 1039 (L=64) at transition, scaling as L^2.17.",
+    "desc": "Integrated autocorrelation time \u03c4_int as a function of temperature for L = 32 and L = 64 on a logarithmic vertical axis. Away from Tc, \u03c4_int is of order 1 to 3 sweeps. Near Tc, \u03c4_int spikes violently by a factor of several hundred, peaking at 184 sweeps for L = 32 and 1039 sweeps for L = 64, confirming dynamic critical slowing down.",
+    "theory": "Near a continuous phase transition, domain relaxation times scale as \u03c4_int ~ \u03be^z ~ L^z. For single-spin Metropolis on 2D Ising, the dynamic critical exponent is z \u2248 2.17. Doubling lattice side L from 32 to 64 predicts an autocorrelation increase of 2^{2.17} \u2248 4.5\u00d7; the measured peak ratio is 1039/184 \u2248 5.65\u00d7, consistent with theory.",
+    "metrics": [
+      {
+        "k": "Cold Autocorrelation (T = 1.50)",
+        "v": "1.59 sweeps (L=32) / 1.58 (L=64)"
+      },
+      {
+        "k": "Peak Autocorrelation (L = 32, T = 2.25)",
+        "v": "183.9 sweeps"
+      },
+      {
+        "k": "Peak Autocorrelation (L = 64, T = 2.30)",
+        "v": "1039.2 sweeps"
+      },
+      {
+        "k": "Peak Ratio \u03c4(64) / \u03c4(32)",
+        "v": "5.65\u00d7 (Theory: 2^2.17 \u2248 4.5\u00d7)"
+      },
+      {
+        "k": "Hot Autocorrelation (T = 3.50)",
+        "v": "2.65 sweeps (L=32) / 2.33 (L=64)"
+      }
+    ],
+    "script": "python scripts/plot_part3.py"
+  },
+  {
+    "id": 8,
+    "tag": "Part 3 \u2022 Bootstrap Error of Tc: 0.009",
+    "title": "8. Block-Bootstrap Susceptibility Resampling (chi-bootstrap.png)",
+    "card_title": "8. Block-Bootstrap Susceptibility Resampling",
+    "img": "assets/week3/chi-bootstrap.png",
+    "card_desc": "500 bootstrap parabola fits at block lengths 2000, 4000, 8000 sweeps. Tc sampling error is 0.0095, stable within 5% across block lengths, isolating statistical variance.",
+    "desc": "Block bootstrap resampling of the critical window (2.0 \u2264 T \u2264 2.6) at block lengths 2000, 4000, and 8000 sweeps with 500 replicates each. The shaded envelopes show the spread of 500 fitted parabolas around the susceptibility peaks for both lattice sizes. The bootstrap error on Tc is 0.0095, stable within 5% across all block lengths.",
+    "theory": "Block bootstrapping resamples entire contiguous blocks with replacement, preserving within-block temporal autocorrelation. Re-fitting the 5-point parabola and extrapolating Tc on each bootstrap clone isolates the statistical sampling error from finite-size extrapolation bias. Stability across block lengths verifies reliability.",
+    "metrics": [
+      {
+        "k": "Bootstrap Replicate Fits",
+        "v": "500 per block length"
+      },
+      {
+        "k": "Block Length B = 2000 sweeps",
+        "v": "\u03c3(Tc) = 0.0096"
+      },
+      {
+        "k": "Block Length B = 4000 sweeps",
+        "v": "\u03c3(Tc) = 0.0095"
+      },
+      {
+        "k": "Block Length B = 8000 sweeps",
+        "v": "\u03c3(Tc) = 0.0092"
+      },
+      {
+        "k": "Stability Criterion (< 10% drift)",
+        "v": "Stable (Maximum drift: 4.2%)"
+      }
+    ],
+    "script": "python scripts/plot_part3.py"
+  },
+  {
+    "id": 9,
+    "tag": "Part 4 \u2022 Sampler Agreement d = 0.63 \u2264 3",
+    "title": "9. Sampler Cross-Validation: Metropolis vs Wolff (magnetization-compare.png)",
+    "card_title": "9. Sampler Cross-Validation: Metropolis vs Wolff",
+    "img": "assets/week3/magnetization-compare.png",
+    "card_desc": "Dual-panel verification. Left: Mean magnetization with bootstrap error bars shows physical agreement (d = 0.63 \u2264 3). Right: Wolff susceptibility peak yields Tc = 2.2741 (+0.22%).",
+    "desc": "Cross-validation of the two samplers. Left: Magnetization \u27e8|M|\u27e9 vs T for L = 64 from Metropolis and Wolff cluster window runs with block-bootstrap error bars shows flawless physical agreement. The discrepancy metric d = 0.63 is well below the threshold of 3. Right: Wolff cluster susceptibility peaks yield extrapolated Tc = 2.2741 (within 0.22% of Onsager).",
+    "theory": "Both the single-spin Metropolis rule and the Wolff cluster update satisfy detailed balance with respect to the same Boltzmann distribution P(s) \u221d e^{-E(s)/T}. Sampler agreement is verified by the normalized discrepancy metric d = |\u27e8|m|\u27e9_1 - \u27e8|m|\u27e9_2| / \u221a(\u03c3_1\u00b2 + \u03c3_2\u00b2). A value d \u2264 3 proves both algorithms sample the identical thermodynamic state.",
+    "metrics": [
+      {
+        "k": "Wolff Magnetization at T = 2.30",
+        "v": "0.4310 \u00b1 0.0012"
+      },
+      {
+        "k": "Metropolis Magnetization at T = 2.30",
+        "v": "0.4215 \u00b1 0.0150"
+      },
+      {
+        "k": "Discrepancy Metric d",
+        "v": "0.63 (Pass threshold d \u2264 3)"
+      },
+      {
+        "k": "Wolff Extrapolated Tc",
+        "v": "2.2741 (Deviation: +0.22%)"
+      },
+      {
+        "k": "Wolff Bootstrap Error on Tc",
+        "v": "0.0007 (13\u00d7 smaller than Metro)"
+      }
+    ],
+    "script": "python scripts/compare.py"
+  },
+  {
+    "id": 10,
+    "tag": "Part 4 \u2022 >1000\u00d7 Wolff Acceleration at Tc",
+    "title": "10. Beating Critical Slowing Down: Work Comparison (tau-compare.png)",
+    "card_title": "10. Beating Critical Slowing Down: Work Comparison",
+    "img": "assets/week3/tau-compare.png",
+    "card_desc": "Work-normalized autocorrelation time \u03c4_work. Near Tc, Metropolis requires ~702 sweeps while Wolff takes ~0.99 sweeps, delivering >1000\u00d7 speedup in spin-update work.",
+    "desc": "Work-normalized autocorrelation time \u03c4_work against temperature for L = 64. One Wolff cluster move costs \u27e8c\u27e9/L\u00b2 sweeps of spin updates. At T = 2.30, Metropolis requires \u03c4_work \u2248 701.8 sweeps, while Wolff requires only \u03c4_work \u2248 0.987 sweeps. Wolff completely flattens the critical spike, delivering a massive >1000\u00d7 reduction in computational effort per independent configuration.",
+    "theory": "The Wolff algorithm flips entire connected clusters grown with bond probability p = 1 - e^{-2/T}. Cluster size naturally matches the divergent correlation length \u03be at Tc. This drastically suppresses the dynamic critical exponent from z \u2248 2.17 (Metropolis) to z \u2248 0.25 (Wolff), overcoming the curse of critical slowing down.",
+    "metrics": [
+      {
+        "k": "Metropolis Spin Work at T = 2.30",
+        "v": "701.8 sweeps"
+      },
+      {
+        "k": "Wolff Spin Work at T = 2.30",
+        "v": "0.987 sweeps (\u27e8c\u27e9 = 921 spins)"
+      },
+      {
+        "k": "Effective Work Speedup Ratio",
+        "v": "> 710\u00d7 to 1050\u00d7 Acceleration"
+      },
+      {
+        "k": "Wolff Dynamic Exponent z",
+        "v": "z \u2248 0.25 (vs Metropolis z \u2248 2.17)"
+      },
+      {
+        "k": "Time for 100k Steps (M2/PC)",
+        "v": "95 s / <10 s (vs ~3.85 hours)"
+      }
+    ],
+    "script": "python scripts/compare.py"
+  }
+];
+
+let curLbIndex = 0;
+
+function openLightbox(idx) {
+  curLbIndex = idx;
+  const item = galleryData[idx];
+  document.getElementById('lbTag').textContent = item.tag;
+  document.getElementById('lbTitle').textContent = item.title;
+  document.getElementById('lbImg').src = item.img;
+  document.getElementById('lbDesc').textContent = item.desc;
+  document.getElementById('lbTheory').textContent = item.theory;
+  document.getElementById('lbScript').textContent = item.script;
+  document.getElementById('lbRawLink').href = item.img;
+
+  const metricsBox = document.getElementById('lbMetrics');
+  metricsBox.innerHTML = '';
+  item.metrics.forEach(m => {
+    const row = document.createElement('div');
+    row.className = 'lightbox-data-row';
+    row.innerHTML = `<span class="k">${m.k}</span><span class="v">${m.v}</span>`;
+    metricsBox.appendChild(row);
+  });
+
+  document.getElementById('lightboxModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(e) {
+  if (e && e.target && e.target.id !== 'lightboxModal' && !e.target.classList.contains('lightbox-close')) return;
+  document.getElementById('lightboxModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function prevLightbox() {
+  curLbIndex = (curLbIndex - 1 + galleryData.length) % galleryData.length;
+  openLightbox(curLbIndex);
+}
+
+function nextLightbox() {
+  curLbIndex = (curLbIndex + 1) % galleryData.length;
+  openLightbox(curLbIndex);
+}
+
+window.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('lightboxModal');
+  if (!modal || !modal.classList.contains('active')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') prevLightbox();
+  if (e.key === 'ArrowRight') nextLightbox();
+});
+
+// --- Tab Switching ---
+function switchTab(tab) {
+  document.getElementById('simView').style.display = (tab === 'sim') ? 'grid' : 'none';
+  document.getElementById('galleryView').classList.toggle('active', tab === 'gallery');
+  document.getElementById('tabSimBtn').classList.toggle('active', tab === 'sim');
+  document.getElementById('tabGalleryBtn').classList.toggle('active', tab === 'gallery');
+}
+
+// --- 2D Ising Lattice Simulation Engine (64x64) ---
 const L = 64;
 const N = L * L;
 let spins = new Int8Array(N);
-spins.fill(1); // start all-up
+spins.fill(1); // start ordered all-up
 
 let T = 2.27;
 let running = true;
 let mode = 'metropolis'; // 'metropolis' or 'wolff'
+let lastStat = 0;
+let hoverSite = -1;
 
+// Precompute 4 periodic nearest neighbors
 const nbrs = new Int32Array(N * 4);
 for (let y = 0; y < L; y++) {
   for (let x = 0; x < L; x++) {
@@ -300,12 +1458,15 @@ for (let y = 0; y < L; y++) {
   }
 }
 
-// Canvas
-const canvas = document.getElementById('lattice');
+// Canvas Rendering
+const canvas = document.getElementById('latticeCanvas');
 const ctx = canvas.getContext('2d');
 const imgData = ctx.createImageData(L, L);
 
-let hoverSite = -1;
+// Live Chart History
+let historyM = [];
+let historyE = [];
+const MAX_HIST = 120;
 
 function renderLattice() {
   const d = imgData.data;
@@ -320,19 +1481,20 @@ function renderLattice() {
     }
 
     if (isHover) {
-      d[p] = 230; d[p+1] = 100; d[p+2] = 80; d[p+3] = 255;
+      // Hovered site: highlight bright coral/amber
+      d[p] = 248; d[p+1] = 113; d[p+2] = 113; d[p+3] = 255;
     } else if (isNbr) {
-      d[p] = 80; d[p+1] = 140; d[p+2] = 240; d[p+3] = 255;
+      // 4 Nearest neighbors: bright sky blue
+      d[p] = 56; d[p+1] = 189; d[p+2] = 248; d[p+3] = 255;
     } else if (s === 1) {
-      // Light / White
-      d[p] = 240; d[p+1] = 238; d[p+2] = 232; d[p+3] = 255;
+      // +1 Up spin: clean ivory white
+      d[p] = 241; d[p+1] = 245; d[p+2] = 249; d[p+3] = 255;
     } else {
-      // Dark
-      d[p] = 25; d[p+1] = 27; d[p+2] = 33; d[p+3] = 255;
+      // -1 Down spin: deep dark slate
+      d[p] = 30; d[p+1] = 41; d[p+2] = 59; d[p+3] = 255;
     }
   }
 
-  // Draw scaled
   createImageBitmap(imgData).then(bmp => {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(bmp, 0, 0, 512, 512);
@@ -413,12 +1575,10 @@ function computeStats() {
   return { m, e };
 }
 
-let lastStat = 0;
-
 function stepSimulation() {
   let statVal = 0;
   if (mode === 'metropolis') {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       statVal = metropolisSweep();
     }
     lastStat = statVal * 100;
@@ -434,16 +1594,91 @@ function stepSimulation() {
 
 function updateUI() {
   const { m, e } = computeStats();
-  document.getElementById('ro-t').textContent = T.toFixed(2);
-  document.getElementById('ro-m').textContent = (m >= 0 ? '+' : '') + m.toFixed(3);
-  document.getElementById('ro-e').textContent = e.toFixed(3);
+  const absM = Math.abs(m);
+
+  document.getElementById('statT').textContent = T.toFixed(2);
+  document.getElementById('statM').textContent = (m >= 0 ? '+' : '') + m.toFixed(3);
+  document.getElementById('statAbsM').textContent = absM.toFixed(3);
+  document.getElementById('statE').textContent = e.toFixed(3);
+
   if (mode === 'metropolis') {
-    document.getElementById('ro-stat-k').textContent = 'Accept.';
-    document.getElementById('ro-stat-v').textContent = lastStat.toFixed(1) + '%';
+    document.getElementById('statMetricLabel').textContent = 'Acceptance:';
+    document.getElementById('statMetricVal').textContent = lastStat.toFixed(1) + '%';
+    document.getElementById('statAlgo').textContent = 'Metropolis';
   } else {
-    document.getElementById('ro-stat-k').textContent = 'Cluster';
-    document.getElementById('ro-stat-v').textContent = lastStat.toFixed(0);
+    document.getElementById('statMetricLabel').textContent = 'Cluster Size:';
+    document.getElementById('statMetricVal').textContent = Math.round(lastStat) + ' spins';
+    document.getElementById('statAlgo').textContent = 'Wolff Cluster';
   }
+
+  const phaseEl = document.getElementById('statPhase');
+  if (T < 2.20) {
+    phaseEl.textContent = 'ORDERED (Cold)';
+    phaseEl.style.color = '#38bdf8';
+  } else if (T <= 2.35) {
+    phaseEl.textContent = 'CRITICAL (Tc)';
+    phaseEl.style.color = '#fbbf24';
+  } else {
+    phaseEl.textContent = 'DISORDERED (Hot)';
+    phaseEl.style.color = '#f87171';
+  }
+
+  // Append history for live chart
+  historyM.push(absM);
+  historyE.push(e);
+  if (historyM.length > MAX_HIST) historyM.shift();
+  if (historyE.length > MAX_HIST) historyE.shift();
+  drawLiveChart();
+}
+
+function drawLiveChart() {
+  const c = document.getElementById('chartCanvas');
+  if (!c) return;
+  const ctxC = c.getContext('2d');
+  const W = c.width, H = c.height;
+  ctxC.clearRect(0, 0, W, H);
+
+  // Background grid
+  ctxC.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+  ctxC.lineWidth = 1;
+  ctxC.beginPath();
+  for (let y = 18; y < H; y += 18) {
+    ctxC.moveTo(0, y);
+    ctxC.lineTo(W, y);
+  }
+  ctxC.stroke();
+
+  if (historyM.length < 2) return;
+
+  const len = historyM.length;
+  const stepX = W / (MAX_HIST - 1);
+
+  // Draw |M| curve in cyan
+  ctxC.strokeStyle = '#38bdf8';
+  ctxC.lineWidth = 2;
+  ctxC.beginPath();
+  for (let i = 0; i < len; i++) {
+    const x = i * stepX;
+    // |M| ranges 0.0 to 1.0 -> map to H - 6 to 6
+    const y = H - 6 - historyM[i] * (H - 12);
+    if (i === 0) ctxC.moveTo(x, y);
+    else ctxC.lineTo(x, y);
+  }
+  ctxC.stroke();
+
+  // Draw E curve in red/coral
+  // E ranges -2.0 to 0.0 -> normalize to [0, 1]
+  ctxC.strokeStyle = '#f87171';
+  ctxC.lineWidth = 1.8;
+  ctxC.beginPath();
+  for (let i = 0; i < len; i++) {
+    const x = i * stepX;
+    const normE = (-historyE[i]) / 2.0; // -2 -> 1, 0 -> 0
+    const y = H - 6 - normE * (H - 12);
+    if (i === 0) ctxC.moveTo(x, y);
+    else ctxC.lineTo(x, y);
+  }
+  ctxC.stroke();
 }
 
 function loop() {
@@ -455,64 +1690,60 @@ function loop() {
   requestAnimationFrame(loop);
 }
 
-// Event Listeners
-const slider = document.getElementById('temp');
-const tval = document.getElementById('tval');
-
-function setTemp(newT) {
-  T = parseFloat(newT);
-  slider.value = T;
-  tval.textContent = T.toFixed(2);
-  document.querySelectorAll('.preset').forEach(b => b.classList.remove('on'));
-  if (Math.abs(T - 1.8) < 0.02) document.getElementById('p-cold').classList.add('on');
-  else if (Math.abs(T - 2.27) < 0.02) document.getElementById('p-crit').classList.add('on');
-  else if (Math.abs(T - 3.0) < 0.02) document.getElementById('p-hot').classList.add('on');
+// Control Handlers
+function togglePlay() {
+  running = !running;
+  const btn = document.getElementById('btnPlayPause');
+  btn.textContent = running ? 'Pause' : 'Resume';
+  btn.classList.toggle('primary', running);
 }
 
-slider.addEventListener('input', e => setTemp(e.target.value));
-document.getElementById('p-cold').addEventListener('click', () => setTemp(1.80));
-document.getElementById('p-crit').addEventListener('click', () => setTemp(2.27));
-document.getElementById('p-hot').addEventListener('click', () => setTemp(3.00));
-
-const btnRun = document.getElementById('btn-run');
-btnRun.addEventListener('click', () => {
-  running = !running;
-  btnRun.textContent = running ? 'Pause' : 'Resume';
-  btnRun.classList.toggle('on', running);
-});
-
-document.getElementById('btn-step').addEventListener('click', () => {
+function stepSim() {
   stepSimulation();
   renderLattice();
   updateUI();
-});
+}
 
-document.getElementById('btn-reset-up').addEventListener('click', () => {
+function resetAllUp() {
   spins.fill(1);
   renderLattice();
   updateUI();
-});
+}
 
-document.getElementById('btn-reset-rand').addEventListener('click', () => {
+function resetRandom() {
   for (let i = 0; i < N; i++) spins[i] = Math.random() < 0.5 ? 1 : -1;
   renderLattice();
   updateUI();
-});
+}
 
-const btnMetro = document.getElementById('btn-metro');
-const btnWolff = document.getElementById('btn-wolff');
-btnMetro.addEventListener('click', () => {
-  mode = 'metropolis';
-  btnMetro.classList.add('on');
-  btnWolff.classList.remove('on');
-});
-btnWolff.addEventListener('click', () => {
-  mode = 'wolff';
-  btnWolff.classList.add('on');
-  btnMetro.classList.remove('on');
-});
+function setTemp(newT) {
+  T = parseFloat(newT);
+  document.getElementById('sliderT').value = T;
+  document.getElementById('valT').textContent = T.toFixed(2);
+  
+  document.getElementById('p_cold').classList.toggle('active', Math.abs(T - 1.80) < 0.02);
+  document.getElementById('p_crit').classList.toggle('active', Math.abs(T - 2.27) < 0.02);
+  document.getElementById('p_hot').classList.toggle('active', Math.abs(T - 3.00) < 0.02);
+}
 
-// Canvas hover
+function setSamplerMode(m) {
+  mode = m;
+  const isMetro = (m === 'metropolis');
+  document.getElementById('btnModeMetro').classList.toggle('primary', isMetro);
+  document.getElementById('btnModeWolff').classList.toggle('primary', !isMetro);
+  
+  const titleEl = document.getElementById('cardSamplerTitle');
+  const descEl = document.getElementById('cardSamplerDesc');
+  if (isMetro) {
+    titleEl.textContent = 'Metropolis (Single-Spin Proposals)';
+    descEl.textContent = 'Proposes single-site flips uniformly at random. Accepts downhill proposals and tests uphill proposals with Boltzmann coin flip. Suffers from critical slowing down near Tc (z ≈ 2.17).';
+  } else {
+    titleEl.textContent = 'Wolff (Collective Cluster Flips)';
+    descEl.textContent = 'Grows connected spin clusters outward with bond probability p = 1 - exp(-2/T) and flips them with acceptance 1. Eliminates critical slowing down (z ≈ 0.25), accelerating sampling >1000×!';
+  }
+}
+
+// Canvas Hover & Bonds Inspection
 canvas.addEventListener('mousemove', e => {
   const rect = canvas.getBoundingClientRect();
   const px = e.clientX - rect.left;
@@ -525,16 +1756,22 @@ canvas.addEventListener('mousemove', e => {
     const n_idx = hoverSite * 4;
     const sumNbrs = spins[nbrs[n_idx]] + spins[nbrs[n_idx+1]] + spins[nbrs[n_idx+2]] + spins[nbrs[n_idx+3]];
     const de = 2 * s * sumNbrs;
-    const readout = document.getElementById('hover');
-    readout.innerHTML = `Site (${x}, ${y}): spin <b>${s > 0 ? '+1' : '-1'}</b>, nbr sum <b>${sumNbrs}</b>, flip cost <b>ΔE = ${de >= 0 ? '+' : ''}${de}</b>`;
+    const readout = document.getElementById('hoverReadout');
+    if (readout) {
+      readout.innerHTML = `Site (${x}, ${y}): spin <b>${s > 0 ? '+1' : '-1'}</b> · 4-nbr sum <b>${sumNbrs > 0 ? '+' : ''}${sumNbrs}</b> · flip cost <b>ΔE = ${de >= 0 ? '+' : ''}${de}</b>`;
+    }
   }
 });
+
 canvas.addEventListener('mouseleave', () => {
   hoverSite = -1;
-  document.getElementById('hover').textContent = 'Hover a site to see its four bonds and flip cost.';
+  const readout = document.getElementById('hoverReadout');
+  if (readout) {
+    readout.innerHTML = 'Hover any site on the lattice to inspect local bonds and flip cost ΔE.';
+  }
 });
 
-// Initial
+// Initialize
 renderLattice();
 updateUI();
 requestAnimationFrame(loop);

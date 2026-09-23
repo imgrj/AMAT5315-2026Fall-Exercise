@@ -1,0 +1,9 @@
+L = 32:
+  cold mean |M| = 0.9863
+  fitted peak T_peak = 2.3477
+L = 64:
+  cold mean |M| = 0.9864
+  fitted peak T_peak = 2.3100
+
+Extrapolated T_c = 2.2723 (Onsager exact = 2.26919, deviation = +0.14%)
+Pass condition (< 2%): True
