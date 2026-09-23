@@ -148,6 +148,49 @@
     background: #090d16;
     overflow-y: auto;
   }
+    .blowup-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 15, 29, 0.82);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 25;
+    padding: 20px;
+    animation: fadeIn 0.2s ease-out;
+  }
+  .blowup-card {
+    background: #151c2e;
+    border: 1px solid rgba(248, 113, 113, 0.45);
+    box-shadow: 0 16px 36px rgba(0,0,0,0.6), 0 0 25px rgba(239, 68, 68, 0.18);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    max-width: 380px;
+    text-align: center;
+  }
+  .blowup-header {
+    color: var(--danger);
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .blowup-text {
+    color: var(--ink);
+    font-size: 12.5px;
+    line-height: 1.55;
+    margin-bottom: 16px;
+  }
+  .blowup-btn-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
   .canvas-container {
     position: relative;
     background: #05070c;
@@ -753,14 +796,10 @@ function updateVelocity(w) {
       }
       const k2 = kx * kx + ky * ky;
       if (k2 > 0) {
-        const pr = wr[idx] / k2;
-        const pi = wi[idx] / k2;
-        psi_r[idx] = pr;
-        psi_i[idx] = pi;
-        ur_hat[idx] = -ky * pi;
-        ui_hat[idx] = ky * pr;
-        vr_hat[idx] = kx * pi;
-        vi_hat[idx] = -kx * pr;
+        const pr = wr[idx] / k2, pi = wi[idx] / k2;
+        psi_r[idx] = pr; psi_i[idx] = pi;
+        ur_hat[idx] = -ky * pi; ui_hat[idx] = ky * pr;
+        vr_hat[idx] = kx * pi; vi_hat[idx] = -kx * pr;
       }
     }
   }
@@ -776,7 +815,6 @@ function updateVelocity(w) {
   }
 }
 
-// Compute rate dw/dt = - (u*wx + v*wy) + nu*Laplacian(w)
 function computeRate(w, outRate) {
   const wr = new Float64Array(w);
   const wi = new Float64Array(N * N);
@@ -839,33 +877,50 @@ function computeRate(w, outRate) {
   for (let i = 0; i < N * N; i++) outRate[i] = rate_r[i];
 }
 
-function stepIntegrator() {
+function singleStep(h) {
   const k1 = new Float64Array(N * N);
   if (method === 'euler') {
     computeRate(omega, k1);
-    for (let i = 0; i < N * N; i++) omega[i] += dt * k1[i];
+    for (let i = 0; i < N * N; i++) omega[i] += h * k1[i];
   } else if (method === 'rk2') {
     computeRate(omega, k1);
     const u_mid = new Float64Array(N * N);
-    for (let i = 0; i < N * N; i++) u_mid[i] = omega[i] + 0.5 * dt * k1[i];
+    for (let i = 0; i < N * N; i++) u_mid[i] = omega[i] + 0.5 * h * k1[i];
     const k2 = new Float64Array(N * N);
     computeRate(u_mid, k2);
-    for (let i = 0; i < N * N; i++) omega[i] += dt * k2[i];
+    for (let i = 0; i < N * N; i++) omega[i] += h * k2[i];
   } else {
     computeRate(omega, k1);
     const u_tmp = new Float64Array(N * N);
-    for (let i = 0; i < N * N; i++) u_tmp[i] = omega[i] + 0.5 * dt * k1[i];
+    for (let i = 0; i < N * N; i++) u_tmp[i] = omega[i] + 0.5 * h * k1[i];
     const k2 = new Float64Array(N * N);
     computeRate(u_tmp, k2);
-    for (let i = 0; i < N * N; i++) u_tmp[i] = omega[i] + 0.5 * dt * k2[i];
+    for (let i = 0; i < N * N; i++) u_tmp[i] = omega[i] + 0.5 * h * k2[i];
     const k3 = new Float64Array(N * N);
     computeRate(u_tmp, k3);
-    for (let i = 0; i < N * N; i++) u_tmp[i] = omega[i] + dt * k3[i];
+    for (let i = 0; i < N * N; i++) u_tmp[i] = omega[i] + h * k3[i];
     const k4 = new Float64Array(N * N);
     computeRate(u_tmp, k4);
     for (let i = 0; i < N * N; i++) {
-      omega[i] += (dt / 6.0) * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]);
+      omega[i] += (h / 6.0) * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]);
     }
+  }
+}
+
+function stepIntegrator() {
+  const dx = 2.0 * Math.PI / N;
+  const d = computeDiagnostics();
+  const cfl = (d.Umax * dt) / dx;
+
+  // Adaptive substepping for RK4/Midpoint if local stirring spikes CFL
+  let substeps = 1;
+  if (method !== 'euler' && cfl > 0.65 && isFinite(cfl)) {
+    substeps = Math.min(4, Math.ceil(cfl / 0.5));
+  }
+  const subDt = dt / substeps;
+
+  for (let s = 0; s < substeps; s++) {
+    singleStep(subDt);
   }
 
   updateVelocity(omega);
@@ -898,6 +953,14 @@ function loadPreset(name) {
   simTime = 0.0;
   simStep = 0;
   historyE = []; historyZ = []; historyT = [];
+
+  // Reset UI status & overlay
+  document.getElementById('blowupOverlay').style.display = 'none';
+  const statStatus = document.getElementById('statStatus');
+  statStatus.textContent = 'STABLE';
+  statStatus.style.color = 'var(--good)';
+  isRunning = true;
+  document.getElementById('btnPlayPause').textContent = 'Pause';
 
   if (name === 'tg') {
     nu = 0.1; dt = 0.01;
@@ -969,8 +1032,33 @@ function loadPreset(name) {
     for (let i = 0; i < N * N; i++) omega[i] *= scale;
   }
 
+  projectZeroMean(omega);
   updateVelocity(omega);
   updateControlsUI();
+  redrawCanvas();
+}
+
+function projectZeroMean(w) {
+  let sum = 0;
+  for (let i = 0; i < N * N; i++) sum += w[i];
+  const avg = sum / (N * N);
+  for (let i = 0; i < N * N; i++) w[i] -= avg;
+}
+
+function dampenFluid() {
+  const d = computeDiagnostics();
+  if (d.E > 0.001) {
+    const factor = Math.sqrt(0.4 / d.E);
+    for (let i = 0; i < N * N; i++) omega[i] *= factor;
+  }
+  projectZeroMean(omega);
+  updateVelocity(omega);
+  document.getElementById('blowupOverlay').style.display = 'none';
+  const statStatus = document.getElementById('statStatus');
+  statStatus.textContent = 'STABLE';
+  statStatus.style.color = 'var(--good)';
+  isRunning = true;
+  document.getElementById('btnPlayPause').textContent = 'Pause';
   redrawCanvas();
 }
 
@@ -979,39 +1067,142 @@ function injectVortices() {
   const cx = Math.random() * 2 * Math.PI;
   const cy = Math.random() * 2 * Math.PI;
   const sgn = Math.random() > 0.5 ? 1 : -1;
+  const sigma = 0.26;
+  const twoSig2 = 2.0 * sigma * sigma;
   for (let l = 0; l < N; l++) {
     const y = l * dx;
+    let dy = y - cy;
+    while (dy > Math.PI) dy -= 2.0 * Math.PI;
+    while (dy < -Math.PI) dy += 2.0 * Math.PI;
     for (let j = 0; j < N; j++) {
       const x = j * dx;
-      const d2 = (x - cx)**2 + (y - cy)**2;
-      omega[l * N + j] += sgn * 10.0 * Math.exp(-d2 / 0.15);
+      let d_x = x - cx;
+      while (d_x > Math.PI) d_x -= 2.0 * Math.PI;
+      while (d_x < -Math.PI) d_x += 2.0 * Math.PI;
+      const r2 = d_x * d_x + dy * dy;
+      omega[l * N + j] += sgn * 6.0 * (1.0 - r2 / twoSig2) * Math.exp(-r2 / twoSig2);
     }
   }
+  projectZeroMean(omega);
   updateVelocity(omega);
   redrawCanvas();
 }
 
+// --- Interactive Drawing: Physical Vortex Dipole & Zero-Mean Impulse ---
 const canvas = document.getElementById('fluidCanvas');
 let isMouseDown = false;
-canvas.addEventListener('mousedown', (e) => { isMouseDown = true; handleMouse(e); });
-window.addEventListener('mouseup', () => { isMouseDown = false; });
-canvas.addEventListener('mousemove', (e) => { if (isMouseDown) handleMouse(e); });
+let lastMouseX = null, lastMouseY = null;
+let lastMoveTime = 0;
 
-function handleMouse(e) {
+function getMousePos(e) {
   const rect = canvas.getBoundingClientRect();
   const px = (e.clientX - rect.left) / rect.width;
   const py = 1.0 - (e.clientY - rect.top) / rect.height;
-  const mx = px * 2.0 * Math.PI;
-  const my = py * 2.0 * Math.PI;
-  const dx = 2.0 * Math.PI / N;
-  for (let l = 0; l < N; l++) {
-    const y = l * dx;
-    for (let j = 0; j < N; j++) {
-      const x = j * dx;
-      const d2 = (x - mx)**2 + (y - my)**2;
-      omega[l * N + j] += 6.0 * Math.exp(-d2 / 0.1);
+  return {
+    x: Math.max(0, Math.min(1, px)) * 2.0 * Math.PI,
+    y: Math.max(0, Math.min(1, py)) * 2.0 * Math.PI
+  };
+}
+
+canvas.addEventListener('mousedown', (e) => {
+  isMouseDown = true;
+  const pos = getMousePos(e);
+  lastMouseX = pos.x;
+  lastMouseY = pos.y;
+  lastMoveTime = performance.now();
+  injectClickVortex(pos.x, pos.y);
+});
+
+window.addEventListener('mouseup', () => {
+  isMouseDown = false;
+  lastMouseX = null;
+  lastMouseY = null;
+});
+
+canvas.addEventListener('mousemove', (e) => {
+  if (!isMouseDown) return;
+  const now = performance.now();
+  if (now - lastMoveTime < 16) return; // ~60fps throttle
+
+  const pos = getMousePos(e);
+  if (lastMouseX !== null && lastMouseY !== null) {
+    let vx = pos.x - lastMouseX;
+    let vy = pos.y - lastMouseY;
+    if (vx > Math.PI) vx -= 2 * Math.PI;
+    if (vx < -Math.PI) vx += 2 * Math.PI;
+    if (vy > Math.PI) vy -= 2 * Math.PI;
+    if (vy < -Math.PI) vy += 2 * Math.PI;
+
+    const speed = Math.sqrt(vx * vx + vy * vy);
+    if (speed > 0.01) {
+      injectDipoleVortex(pos.x, pos.y, vx, vy, speed);
     }
   }
+  lastMouseX = pos.x;
+  lastMouseY = pos.y;
+  lastMoveTime = now;
+});
+
+function injectDipoleVortex(cx, cy, vx, vy, speed) {
+  const dx = 2.0 * Math.PI / N;
+  const sigma = 0.28;
+  const twoSig2 = 2.0 * sigma * sigma;
+  const sig2 = sigma * sigma;
+
+  const effSpeed = Math.min(speed, 0.35);
+  const dirX = vx / speed;
+  const dirY = vy / speed;
+  const strength = 12.0 * effSpeed;
+
+  for (let l = 0; l < N; l++) {
+    const y = l * dx;
+    let dy = y - cy;
+    while (dy > Math.PI) dy -= 2.0 * Math.PI;
+    while (dy < -Math.PI) dy += 2.0 * Math.PI;
+
+    for (let j = 0; j < N; j++) {
+      const x = j * dx;
+      let d_x = x - cx;
+      while (d_x > Math.PI) d_x -= 2.0 * Math.PI;
+      while (d_x < -Math.PI) d_x += 2.0 * Math.PI;
+
+      const r2 = d_x * d_x + dy * dy;
+      if (r2 > 1.2) continue;
+
+      const G = Math.exp(-r2 / twoSig2);
+      omega[l * N + j] += strength * G * (dirY * d_x - dirX * dy) / sig2;
+    }
+  }
+  projectZeroMean(omega);
+  updateVelocity(omega);
+  redrawCanvas();
+}
+
+function injectClickVortex(cx, cy) {
+  const dx = 2.0 * Math.PI / N;
+  const sigma = 0.25;
+  const twoSig2 = 2.0 * sigma * sigma;
+  const strength = 4.0;
+
+  for (let l = 0; l < N; l++) {
+    const y = l * dx;
+    let dy = y - cy;
+    while (dy > Math.PI) dy -= 2.0 * Math.PI;
+    while (dy < -Math.PI) dy += 2.0 * Math.PI;
+
+    for (let j = 0; j < N; j++) {
+      const x = j * dx;
+      let d_x = x - cx;
+      while (d_x > Math.PI) d_x -= 2.0 * Math.PI;
+      while (d_x < -Math.PI) d_x += 2.0 * Math.PI;
+
+      const r2 = d_x * d_x + dy * dy;
+      if (r2 > 1.0) continue;
+
+      omega[l * N + j] += strength * (1.0 - r2 / twoSig2) * Math.exp(-r2 / twoSig2);
+    }
+  }
+  projectZeroMean(omega);
   updateVelocity(omega);
   redrawCanvas();
 }
@@ -1104,24 +1295,41 @@ function loop() {
   if (isRunning) {
     stepIntegrator();
     const d = computeDiagnostics();
-    const isStable = isFinite(d.E) && isFinite(d.Z) && d.E < 20.0;
+    const dx = 2.0 * Math.PI / N;
+    const cfl = (d.Umax * dt) / dx;
+    const isStable = isFinite(d.E) && isFinite(d.Z) && isFinite(d.Umax) && d.E < 25.0;
+
     document.getElementById('statT').textContent = simTime.toFixed(2);
     document.getElementById('statE').textContent = isFinite(d.E) ? d.E.toFixed(4) : 'NaN (BLOWUP)';
     document.getElementById('statZ').textContent = isFinite(d.Z) ? d.Z.toFixed(4) : 'NaN';
     document.getElementById('statU').textContent = isFinite(d.Umax) ? d.Umax.toFixed(2) : 'NaN';
 
+    const statCfl = document.getElementById('statCFL');
+    if (statCfl) {
+      statCfl.textContent = isFinite(cfl) ? cfl.toFixed(3) : '∞';
+      if (cfl > 1.0) statCfl.style.color = 'var(--danger)';
+      else if (cfl > 0.7) statCfl.style.color = 'var(--accent-amber)';
+      else statCfl.style.color = 'var(--good)';
+    }
+
     const statStatus = document.getElementById('statStatus');
     if (isStable) {
       statStatus.textContent = 'STABLE';
       statStatus.style.color = 'var(--good)';
+      document.getElementById('blowupOverlay').style.display = 'none';
     } else {
       statStatus.textContent = 'UNSTABLE BLOWUP!';
       statStatus.style.color = 'var(--danger)';
       isRunning = false;
       document.getElementById('btnPlayPause').textContent = 'Resume';
+      document.getElementById('blowupUVal').textContent = isFinite(d.Umax) ? d.Umax.toFixed(2) : 'NaN';
+      document.getElementById('blowupCflVal').textContent = isFinite(cfl) ? cfl.toFixed(2) : '∞';
+      document.getElementById('blowupOverlay').style.display = 'flex';
     }
 
-    historyE.push(d.E); historyZ.push(d.Z); historyT.push(simTime);
+    historyE.push(isFinite(d.E) ? d.E : 0);
+    historyZ.push(isFinite(d.Z) ? d.Z : 0);
+    historyT.push(simTime);
     if (historyE.length > MAX_HIST) {
       historyE.shift(); historyZ.shift(); historyT.shift();
     }
@@ -1132,8 +1340,14 @@ function loop() {
 }
 
 function togglePlay() {
+  const d = computeDiagnostics();
+  if (!isRunning && (!isFinite(d.E) || d.E >= 25.0)) {
+    dampenFluid();
+    return;
+  }
   isRunning = !isRunning;
   document.getElementById('btnPlayPause').textContent = isRunning ? 'Pause' : 'Resume';
+  if (isRunning) document.getElementById('blowupOverlay').style.display = 'none';
 }
 
 function stepSim() {
