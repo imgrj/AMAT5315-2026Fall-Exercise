@@ -715,11 +715,32 @@
         <div class="stat-row"><span>Energy E:</span><span class="stat-val" id="statE">0.5000</span></div>
         <div class="stat-row"><span>Enstrophy Z:</span><span class="stat-val" id="statZ">6.6347</span></div>
         <div class="stat-row"><span>Max Speed U:</span><span class="stat-val" id="statU">2.46</span></div>
+        <div class="stat-row"><span>CFL Number:</span><span class="stat-val" id="statCFL">0.392</span></div>
         <div class="stat-row"><span>Status:</span><span class="stat-val" id="statStatus" style="color:var(--good);">STABLE</span></div>
+      </div>
+
+      <!-- Blowup Overlay Modal -->
+      <div id="blowupOverlay" class="blowup-overlay" style="display: none;">
+        <div class="blowup-card">
+          <div class="blowup-header">⚠️ 数值发散（CFL Blow-up）</div>
+          <div class="blowup-text">
+            流体局部速度过大，击穿了显式积分器的 <strong>CFL 对流稳定性极限</strong>（高频短波模式出现伪谱吉布斯发散）。
+            <div style="margin: 9px 0; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--accent-amber); background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px;">
+              Umax = <span id="blowupUVal">--</span> · CFL = <span id="blowupCflVal">--</span> &gt; 1.0
+            </div>
+            <div style="font-size: 11px; color: var(--ink-muted); margin-top: 4px;">
+              💡 <em>这正是作业第 3 部分验证的显式积分数值发散机制！</em>
+            </div>
+          </div>
+          <div class="blowup-btn-group">
+            <button class="btn primary" onclick="resetSim()">↺ 一键重置 (Reset)</button>
+            <button class="btn" onclick="dampenFluid()">💨 能量平息续跑 (Dampen)</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Playback Control Bar -->
+    <!-- Playback Control Bar --><!-- Playback Control Bar -->
     <div class="playback-bar">
       <button class="btn primary" id="btnPlayPause" onclick="togglePlay()">Pause</button>
       <button class="btn" onclick="stepSim()">Single Step</button>
@@ -1127,7 +1148,7 @@ const galleryData = [
       { k: "失稳测试步长 (h_blow)", v: "0.056 s" },
       { k: "首要发散模式", v: "k = 32 (2Δx 空间锯齿)" }
     ],
-    script: "week4/scripts/p1_line_accuracy.py"
+    script: "week4/scripts/plot_line_stability.py"
   },
   {
     id: 2,
@@ -1142,7 +1163,7 @@ const galleryData = [
       { k: "Standard RK4 实测斜率", v: "4.00 (理论 4 阶)" },
       { k: "Equal-Weights RK4 实测斜率", v: "2.00 (退化为 2 阶)" }
     ],
-    script: "week4/scripts/p1_line_accuracy.py"
+    script: "week4/scripts/plot_line_stability.py"
   },
   {
     id: 3,
@@ -1157,7 +1178,7 @@ const galleryData = [
       { k: "速度场相对 L2 误差", v: "7.04 × 10⁻⁷" },
       { k: "作业要求容差上限", v: "< 1.0 × 10⁻⁵ (完美通过)" }
     ],
-    script: "week4/scripts/p2_taylor_green.py"
+    script: "week4/scripts/plot_taylor_green.py"
   },
   {
     id: 4,
@@ -1172,7 +1193,7 @@ const galleryData = [
       { k: "拟涡能耗散倍数", v: "7.19 倍强耗散" },
       { k: "动能耗散倍数", v: "1.70 倍缓衰减" }
     ],
-    script: "week4/scripts/p3_random_flow.py"
+    script: "week4/scripts/plot_random.py"
   },
   {
     id: 5,
@@ -1187,7 +1208,7 @@ const galleryData = [
       { k: "对流主导实测稳定步长 (Random)", v: "h = 0.035 (CFL ≈ 0.65)" },
       { k: "对流主导实测发散步长", v: "h = 0.038 (t ≈ 3.7 爆炸)" }
     ],
-    script: "week4/scripts/p3_stability_scan.py"
+    script: "week4/scripts/plot_blowup.py"
   },
   {
     id: 6,
@@ -1202,7 +1223,7 @@ const galleryData = [
       { k: "湍流扰动放大倍数", v: "> 115 倍指数放大 (混沌)" },
       { k: "Taylor–Green 微扰终态", v: "< 10⁻¹⁴ (层流指数衰减)" }
     ],
-    script: "week4/scripts/p3_sensitivity.py"
+    script: "week4/scripts/run_sensitivity.py"
   },
   {
     id: 7,
@@ -1217,7 +1238,7 @@ const galleryData = [
       { k: "双对数回归拟合斜率", v: "4.104" },
       { k: "时间精度验证结论", v: "严格符合 O(Δt⁴) 四阶收敛" }
     ],
-    script: "week4/scripts/p4_order_check.py"
+    script: "week4/scripts/run_order.py"
   },
   {
     id: 8,
@@ -1233,7 +1254,7 @@ const galleryData = [
       { k: "Richardson 外推挑选步长", v: "Δt = 0.0125" },
       { k: "预测误差 / 实际测量误差", v: "3.96 × 10⁻⁶ / 3.89 × 10⁻⁶" }
     ],
-    script: "week4/scripts/p4_convergence_study.py"
+    script: "week4/scripts/run_convergence.py"
   }
 ];
 
@@ -1296,6 +1317,17 @@ function switchTab(tab) {
 }
 
 // --- 2D Fluid Simulation Engine (64x64) ---
+
+// Safe DOM helpers to avoid any null-pointer exception
+function safeSetText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+function safeSetDisplay(id, display) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = display;
+}
+
 const N = 64;
 let dt = 0.010;
 let nu = 0.004;
@@ -1569,7 +1601,7 @@ function loadPreset(name) {
   historyE = []; historyZ = []; historyT = [];
 
   // Reset UI status & overlay
-  document.getElementById('blowupOverlay').style.display = 'none';
+  safeSetDisplay('blowupOverlay', 'none');
   const statStatus = document.getElementById('statStatus');
   statStatus.textContent = 'STABLE';
   statStatus.style.color = 'var(--good)';
@@ -1667,7 +1699,7 @@ function dampenFluid() {
   }
   projectZeroMean(omega);
   updateVelocity(omega);
-  document.getElementById('blowupOverlay').style.display = 'none';
+  safeSetDisplay('blowupOverlay', 'none');
   const statStatus = document.getElementById('statStatus');
   statStatus.textContent = 'STABLE';
   statStatus.style.color = 'var(--good)';
@@ -1873,6 +1905,10 @@ function redrawCanvas() {
 }
 
 function redrawChart() {
+  const chartCanvas = document.getElementById('chartCanvas');
+  if (!chartCanvas) return;
+  const chartCtx = chartCanvas.getContext('2d');
+  if (!chartCtx) return;
   const w = chartCanvas.width;
   const h = chartCanvas.height;
   chartCtx.clearRect(0, 0, w, h);
@@ -1930,15 +1966,15 @@ function loop() {
     if (isStable) {
       statStatus.textContent = 'STABLE';
       statStatus.style.color = 'var(--good)';
-      document.getElementById('blowupOverlay').style.display = 'none';
+      safeSetDisplay('blowupOverlay', 'none');
     } else {
       statStatus.textContent = 'UNSTABLE BLOWUP!';
       statStatus.style.color = 'var(--danger)';
       isRunning = false;
       document.getElementById('btnPlayPause').textContent = 'Resume';
-      document.getElementById('blowupUVal').textContent = isFinite(d.Umax) ? d.Umax.toFixed(2) : 'NaN';
-      document.getElementById('blowupCflVal').textContent = isFinite(cfl) ? cfl.toFixed(2) : '∞';
-      document.getElementById('blowupOverlay').style.display = 'flex';
+      safeSetText('blowupUVal', isFinite(d.Umax) ? d.Umax.toFixed(2) : 'NaN'); // = isFinite(d.Umax) ? d.Umax.toFixed(2) : 'NaN';
+      safeSetText('blowupCflVal', isFinite(cfl) ? cfl.toFixed(2) : '∞'); // = isFinite(cfl) ? cfl.toFixed(2) : '∞';
+      safeSetDisplay('blowupOverlay', 'flex');
     }
 
     historyE.push(isFinite(d.E) ? d.E : 0);
@@ -1961,7 +1997,7 @@ function togglePlay() {
   }
   isRunning = !isRunning;
   document.getElementById('btnPlayPause').textContent = isRunning ? 'Pause' : 'Resume';
-  if (isRunning) document.getElementById('blowupOverlay').style.display = 'none';
+  if (isRunning) safeSetDisplay('blowupOverlay', 'none');
 }
 
 function stepSim() {
