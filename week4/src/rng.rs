@@ -4,7 +4,7 @@
 
 impl Rng {
     pub fn seed_from_u64(mut seed: u64) -> Self {
-        let mut sm = |state: &mut u64| -> u64 {
+        let sm = |state: &mut u64| -> u64 {
             *state = state.wrapping_add(0x9e3779b97f4a7c15);
             let mut z = *state;
             z = (z ^ (z >> 30)).wrapping_mul(0xbf58476d1ce4e5b9);
