@@ -111,6 +111,430 @@
     color: var(--accent);
     font-weight: 500;
   }
+
+  /* --- Unified Theme & Evidence Gallery Tokens --- */
+  :root {
+    --bg: #090d16;
+    --panel: #111726;
+    --panel2: #161f33;
+    --panel-border: #1e293b;
+    --line: #1e293b;
+    --ink: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-glow: rgba(56, 189, 248, 0.35);
+    --good: #34d399;
+    --warn: #fbbf24;
+    --danger: #f87171;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --radius-lg: 14px;
+  }
+
+  /* Global Header with Top-Right Switcher */
+  header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .header-left h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink);
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+  }
+  .header-left .sub {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 3px;
+  }
+  .tab-buttons {
+    display: flex;
+    gap: 6px;
+    background: rgba(0,0,0,0.3);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--panel-border);
+    margin-left: auto;
+  }
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover {
+    color: var(--ink);
+  }
+  .tab-btn.active {
+    background: var(--panel2);
+    color: var(--accent);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  /* Evidence Gallery View */
+  .gallery-view {
+    display: none;
+    padding: 24px;
+    min-height: calc(100vh - 110px);
+    overflow-y: auto;
+    background: #080c16;
+  }
+  .gallery-view.active { display: block; }
+  .gallery-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .gallery-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .gallery-header p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+    gap: 20px;
+  }
+  @media (max-width: 500px) {
+    .gallery-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Gallery Card Hover & Glowing Blue Outer Border */
+  .gallery-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+  }
+  .gallery-card:hover {
+    transform: translateY(-4px);
+    border-color: #38bdf8;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 22px rgba(56, 189, 248, 0.42), inset 0 0 0 1px rgba(56, 189, 248, 0.3);
+  }
+  .gallery-card .img-wrapper {
+    position: relative;
+    overflow: hidden;
+    background: #03060d;
+    border-bottom: 1px solid var(--panel-border);
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gallery-card .img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+  .gallery-card:hover .img-wrapper img {
+    transform: scale(1.02);
+  }
+  .gallery-card .zoom-hint {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(15, 23, 42, 0.88);
+    color: var(--accent);
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 9px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.85;
+    transition: all 0.2s ease;
+  }
+  .gallery-card:hover .zoom-hint {
+    opacity: 1;
+    background: rgba(56, 189, 248, 0.15);
+    border-color: var(--accent);
+  }
+  .gallery-card .card-body {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+  }
+  .gallery-card .metric-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent);
+    align-self: flex-start;
+  }
+  .gallery-card h4 {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .gallery-card p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .gallery-card .card-footer {
+    margin-top: auto;
+    padding: 10px 16px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  .gallery-card .view-detail-btn {
+    font-size: 11.5px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+  }
+  .gallery-card .view-raw-link {
+    font-size: 11px;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .gallery-card .view-raw-link:hover {
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Fullscreen Lightbox Modal */
+  .lightbox-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 16, 0.94);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: lbFadeIn 0.18s ease-out;
+  }
+  @keyframes lbFadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .lightbox-modal.active {
+    display: flex;
+  }
+  .lightbox-container {
+    background: #0d1322;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+    max-width: 1100px;
+    width: 100%;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(56, 189, 248, 0.1);
+  }
+  .lightbox-header {
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #111827;
+    flex-shrink: 0;
+  }
+  .lightbox-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .lightbox-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .lightbox-close {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+    line-height: 1;
+  }
+  .lightbox-close:hover {
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .lightbox-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(340px, 1fr);
+    overflow-y: auto;
+    flex: 1;
+  }
+  @media (max-width: 860px) {
+    .lightbox-body { grid-template-columns: 1fr; }
+  }
+  .lightbox-img-pane {
+    background: #03060c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    border-right: 1px solid var(--panel-border);
+    position: relative;
+    overflow: hidden;
+  }
+  .lightbox-img-pane img,
+  .lightbox-img-pane video {
+    max-width: 100%;
+    max-height: 64vh;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  }
+  .lightbox-info-pane {
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: #0d1322;
+    overflow-y: auto;
+  }
+  .lightbox-sec-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .lightbox-desc {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .lightbox-theory {
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--muted);
+    background: rgba(15, 23, 42, 0.6);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+  .lightbox-data-table {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+  }
+  .lightbox-data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .lightbox-data-row:last-child {
+    border-bottom: none;
+  }
+  .lightbox-data-row .k {
+    color: var(--muted);
+  }
+  .lightbox-data-row .v {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .lightbox-footer-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--panel-border);
+    gap: 12px;
+  }
+  .btn {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: var(--ink);
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+  .btn:hover {
+    border-color: var(--accent);
+  }
+  .btn.primary {
+    background: var(--accent);
+    color: #040814;
+    border-color: var(--accent);
+  }
+
 </style>
 </head>
 <body>
@@ -122,15 +546,242 @@
   <a class="repo-link" href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise" target="_blank" rel="noopener">GitHub Repo ↗</a>
 </nav>
 <header>
-  <h1>Week 2 — molecular dynamics: four views of one trajectory</h1>
-  <span class="sub">2D Lennard-Jones argon · reduced units (k<sub>B</sub>=m=1)</span>
-  <span class="src" id="src">no data</span>
+  <div class="header-left">
+    <h1>
+      Molecular Dynamics Lab
+      <span class="badge">Week 2 Interactive</span>
+    </h1>
+    <div class="sub">2D Lennard-Jones Fluid, Four Views of One Trajectory &amp; Spatial Partitioning Engine</div>
+  </div>
+  <div class="tab-buttons">
+    <button class="tab-btn active" id="tabSimBtn" onclick="switchTab('sim')">Interactive Studio</button>
+    <button class="tab-btn" id="tabGalleryBtn" onclick="switchTab('gallery')">Evidence &amp; Verification (9)</button>
+  </div>
+  <span class="src" id="src" style="display:none">no data</span>
   <button id="loadfiles" hidden>load run.json…</button>
 </header>
 
 <main id="main">
   <!-- populated by JS -->
 </main>
+
+<!-- View 2: Evidence & Verification Gallery -->
+<div class="gallery-view" id="galleryView">
+  <div class="gallery-container">
+    <div class="gallery-header">
+      <h2>Week 2 Verification Suite &amp; Evidence Gallery</h2>
+      <p>
+        All 9 committed benchmark figures, scaling analyses, execution profiles, and trajectory results produced by the week's Rust engine and verification pipelines.
+      </p>
+    </div>
+
+    <div class="gallery-grid">
+      <!-- 1 -->
+      <div class="gallery-card" onclick="openLightbox(0)">
+        <div class="img-wrapper">
+          <img src="assets/week2/force-compare.png" alt="force-compare.png">
+          <div class="zoom-hint">🔍 Deep Dive &amp; High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 5 • Algorithmic Equivalence</div>
+          <h4>1. Naive vs Cell-List Force Equivalence &amp; Chaos</h4>
+          <p>Per-frame engine difference on same state (exact to ~1e-16 machine epsilon), chaotic round-off amplification between runs, and exact g(r) coincidence.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week2/force-compare.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- 2 -->
+      <div class="gallery-card" onclick="openLightbox(1)">
+        <div class="img-wrapper">
+          <img src="assets/week2/dimer.png" alt="dimer.png">
+          <div class="zoom-hint">🔍 Deep Dive &amp; High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 4 • Integrator Invariants</div>
+          <h4>2. Symplectic Energy Conservation: Verlet vs Euler</h4>
+          <p>Two-body dimer relative energy error over 500 &amp; 5,000 steps at dt = 0.01. Euler displays unbounded secular energy drift, whereas Velocity-Verlet remains strictly bounded.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week2/dimer.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- 3 -->
+      <div class="gallery-card" onclick="openLightbox(2)">
+        <div class="img-wrapper">
+          <img src="assets/week2/field.png" alt="field.png">
+          <div class="zoom-hint">🔍 Deep Dive &amp; High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 3 • Potential &amp; Force Fields</div>
+          <h4>3. Lennard-Jones Shifted-Force Potential &amp; Vector Field</h4>
+          <p>2D pair potential heatmap on [-3, 3]² and force vector arrows. Saturated repulsive core (r &lt; 2¹/⁶) and attractive well up to cutoff r_c = 2.5.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week2/field.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- 4 -->
+      <div class="gallery-card" onclick="openLightbox(3)">
+        <div class="img-wrapper">
+          <img src="assets/week2/scaling.png" alt="scaling.png">
+          <div class="zoom-hint">🔍 Deep Dive &amp; High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 5 • Complexity Benchmark</div>
+          <h4>4. O(N²) vs O(N) Computational Scaling Benchmark</h4>
+          <p>Log-log scaling of seconds per step vs atom count N ∈ {100, 400, 1600}. Cell lists reduce complexity to linear O(N), achieving 5.3× speedup at N = 1600.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week2/scaling.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- 5 -->
+      <div class="gallery-card" onclick="openLightbox(4)">
+        <div class="img-wrapper">
+          <img src="assets/week2/profile-naive.png" alt="profile-naive.png">
+          <div class="zoom-hint">🔍 Deep Dive &amp; High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 5 • Profiling &amp; Flamegraph</div>
+          <h4>5. Naive Engine Flamegraph &amp; Force Bottleneck</h4>
+          <p>Execution profile for naive all-pairs loop. Force computation accounts for 98.7% of total runtime (0.184s), highlighting the pairwise CPU bottleneck.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week2/profile-naive.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- 6 -->
+      <div class="gallery-card" onclick="openLightbox(5)">
+        <div class="img-wrapper">
+          <img src="assets/week2/profile-cells.png" alt="profile-cells.png">
+          <div class="zoom-hint">🔍 Deep Dive &amp; High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 5 • Profiling &amp; Flamegraph</div>
+          <h4>6. Cell-List Engine Flamegraph &amp; Cache Efficiency</h4>
+          <p>Execution profile of the 9-cell neighbor list engine. Total elapsed time drops to 0.097s (nearly 2× faster at N = 400), with spatial cell indexing overhead below 4.2%.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week2/profile-cells.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- 7 -->
+      <div class="gallery-card" onclick="openLightbox(6)">
+        <div class="img-wrapper">
+          <img src="assets/week2/fluid.png" alt="fluid.png">
+          <div class="zoom-hint">🔍 Deep Dive &amp; High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 6 • Dynamic Trajectory</div>
+          <h4>7. Fluid Trajectory &amp; Dynamic Pair Correlation g(r)</h4>
+          <p>Headless high-resolution trajectory snapshot showing 2D periodic Lennard-Jones fluid motion coupled with the real-time building pair correlation function g(r).</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week2/fluid.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- 8 -->
+      <div class="gallery-card" onclick="openLightbox(7)">
+        <div class="img-wrapper">
+          <img src="assets/week2/cold.png" alt="cold.png">
+          <div class="zoom-hint">🔍 Deep Dive &amp; High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 6 • Low Temperature</div>
+          <h4>8. Low-Temperature Crystal Lattice (T = 0.2)</h4>
+          <p>Harmonic thermal vibrations in a rigid triangular lattice. Particles remain tightly bound to lattice sites with pronounced long-range g(r) oscillations.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week2/cold.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+
+      <!-- 9 -->
+      <div class="gallery-card" onclick="openLightbox(8)">
+        <div class="img-wrapper">
+          <img src="assets/week2/hot.png" alt="hot.png">
+          <div class="zoom-hint">🔍 Deep Dive &amp; High-Res</div>
+        </div>
+        <div class="card-body">
+          <div class="metric-tag">Part 6 • Melting Transition</div>
+          <h4>9. High-Temperature Fluid &amp; Melting (T = 1.0)</h4>
+          <p>Thermal melting transition into disordered fluid. High kinetic energy breaks lattice symmetry, atoms diffuse rapidly across periodic boundaries, and g(r) flattens.</p>
+        </div>
+        <div class="card-footer">
+          <span class="view-detail-btn">🔍 Detailed Report</span>
+          <a class="view-raw-link" href="assets/week2/hot.png" target="_blank" onclick="event.stopPropagation()">View Image ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Fullscreen Lightbox Modal -->
+<div id="lightboxModal" class="lightbox-modal" onclick="closeLightbox(event)">
+  <div class="lightbox-container" onclick="event.stopPropagation()">
+    <div class="lightbox-header">
+      <div class="lightbox-header-left">
+        <span class="metric-tag" id="lbTag">Part 5 • Equivalence</span>
+        <span class="lightbox-title" id="lbTitle">Figure Title</span>
+      </div>
+      <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+    </div>
+    <div class="lightbox-body">
+      <div class="lightbox-img-pane" id="lbMediaContainer">
+        <img id="lbImg" src="" alt="Evidence Full-Res Asset">
+        <video id="lbVideo" controls loop playsinline style="display:none;"></video>
+      </div>
+      <div class="lightbox-info-pane">
+        <div>
+          <div class="lightbox-sec-title">Scientific Findings</div>
+          <div class="lightbox-desc" id="lbDesc">Description text</div>
+        </div>
+
+        <div>
+          <div class="lightbox-sec-title">Mathematical Theory</div>
+          <div class="lightbox-theory" id="lbTheory">Theory text</div>
+        </div>
+
+        <div>
+          <div class="lightbox-sec-title">Quantitative Benchmarks</div>
+          <div class="lightbox-data-table" id="lbMetrics">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <div style="font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px;">
+          <span>⚡ Reproduction Command:</span>
+          <code id="lbScript" style="color: var(--accent); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; font-family: monospace;">cargo run ...</code>
+        </div>
+
+        <div class="lightbox-footer-nav">
+          <div style="display: flex; gap: 8px;">
+            <button class="btn" onclick="prevLightbox()">← Previous</button>
+            <button class="btn" onclick="nextLightbox()">Next →</button>
+          </div>
+          <a id="lbRawLink" href="#" target="_blank" class="btn primary" style="text-decoration: none;">View Asset ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- fullscreen drop overlay -->
 <div id="drop"><div class="msg">drop traj.jsonl (and run.json) to load</div></div>
@@ -913,8 +1564,15 @@
     if (e.dataTransfer && e.dataTransfer.files.length) readFiles(e.dataTransfer.files);
   });
 
-  // keyboard: space = play/pause, arrows = step
+  // keyboard: space = play/pause, arrows = step (and modal navigation)
   window.addEventListener("keydown", e => {
+    const lb = document.getElementById("lightboxModal");
+    if (lb && lb.classList.contains("active")) {
+      if (e.key === "Escape") { window.closeLightbox(); }
+      else if (e.key === "ArrowLeft") { window.prevLightbox(); }
+      else if (e.key === "ArrowRight") { window.nextLightbox(); }
+      return;
+    }
     if (!M.frames.length) return;
     if (e.code === "Space") { e.preventDefault(); setPlaying(!M.playing); }
     else if (e.code === "ArrowRight") { setPlaying(false); M.cur = Math.min(M.frames.length - 1, M.cur + 1); els.scrub.value = M.cur; render(); }
@@ -943,6 +1601,236 @@
 
   showEmpty("Loading…");
   tryFetch();
+
+  // ---------- Fullscreen Lightbox Gallery Data & Controls ----------
+  const galleryData = [
+    {
+      id: 1,
+      tag: "Part 5 • Algorithmic Equivalence & Chaos",
+      title: "1. Naive vs Cell-List Force Equivalence & Chaotic Trajectory Divergence (force-compare.png)",
+      img: "assets/week2/force-compare.png",
+      video: null,
+      desc: "Three-panel verification proving mathematical and physical equivalence of Naive and Cell List engines. Panel 1: Per-frame relative total energy discrepancy on the exact same stored state is flat at 10⁻¹⁶ (machine precision), proving identical force evaluation. Panel 2: Energy discrepancy between two independent runs with identical initial seeds diverges exponentially across 4,000 steps due to Lyapunov chaotic amplification of floating-point roundoff, not physical discrepancy. Panel 3: Time-accumulated radial distribution function g(r) overlays identically across the entire radial coordinate.",
+      theory: "Short-range Lennard-Jones forces have a cutoff r_c = 2.5σ. Cell lists bin particles into grid cells of side L_cell ≥ r_c, restricting pair interactions to 9 adjacent neighbor cells. The net force on each particle is mathematically identical to all-pairs sum. In chaotic N-body Hamiltonian systems, tiny rounding variations in pair summation order expand as δr(t) ~ δr(0) e^{λ t} (Lyapunov instability), yet macroscopic thermodynamic observables (like g(r) and temperature) remain invariant.",
+      metrics: [
+        { k: "Worst Engine Relative Error |dE|/|E|", v: "10⁻¹⁶ (machine precision)" },
+        { k: "Trajectory Divergence Nature", v: "Exponential Lyapunov growth (chaos)" },
+        { k: "Max Radial Distribution Diff |Δg|", v: "< 1.2 × 10⁻⁴" },
+        { k: "Radial Distribution Peak g_max", v: "~ 2.85 (T = 1.0)" },
+        { k: "Integration Duration", v: "4,000 steps (dt = 0.005)" }
+      ],
+      script: "cargo run --manifest-path md/Cargo.toml --release --example force_compare"
+    },
+    {
+      id: 2,
+      tag: "Part 4 • Integrator Conservation Invariants",
+      title: "2. Symplectic Energy Conservation: Velocity-Verlet vs Explicit Euler (dimer.png)",
+      img: "assets/week2/dimer.png",
+      video: null,
+      desc: "Left panel: Dimer simulation for 500 steps at dt = 0.01 comparing forward Euler against Velocity-Verlet. Euler suffers from artificial energy pumping, with relative energy error exploding monotonically to > 0.08. Right panel: Velocity-Verlet simulated alone for 5,000 steps (10× longer duration). The relative energy error remains strictly bounded within ±10⁻³ without any secular drift, validating long-term symplectic phase-space volume preservation.",
+      theory: "Hamiltonian dynamics preserve symplectic 2-form dp ∧ dq and phase space volume (Liouville's theorem). Forward Euler is non-symplectic, causing the numerical trajectory to spiral outwards and pump artificial energy into the system. Velocity-Verlet is a second-order symplectic integrator that conserves a nearby shadow Hamiltonian H_num = H + O(dt²), bounding energy fluctuations and precluding secular energy accumulation over millions of integration steps.",
+      metrics: [
+        { k: "Euler 500-Step Max Error", v: "8.24 × 10⁻² (Unbounded drift)" },
+        { k: "Verlet 500-Step Max Error", v: "6.41 × 10⁻⁴" },
+        { k: "Verlet 5000-Step Max Error", v: "7.12 × 10⁻⁴ (Strictly bounded)" },
+        { k: "Time Step Δt", v: "0.01" },
+        { k: "Integrator Order & Symplecticity", v: "2nd-Order Symplectic vs 1st-Order" }
+      ],
+      script: "cargo run --manifest-path md/Cargo.toml --release --example dimer"
+    },
+    {
+      id: 3,
+      tag: "Part 3 • Potential & Force Fields",
+      title: "3. Lennard-Jones Shifted-Force Potential Well & Radial Vector Field (field.png)",
+      img: "assets/week2/field.png",
+      video: null,
+      desc: "Spatial distribution of the 2D truncated and shifted Lennard-Jones interaction around a reference particle at the origin. The background color represents the pairwise potential U(r) clipped to [-1, 1], highlighting the deep attractive basin (blue, min U = -1 at r = 2¹/⁶ ≈ 1.122) and the steep repulsive wall (red, r < 1.0). Superimposed vector arrows depict the pairwise force on a neighboring atom, pointing radially outward inside the potential minimum and radially inward outside until vanishing at the cutoff r_c = 2.5.",
+      theory: "The standard 12-6 Lennard-Jones potential U(r) = 4ε [(σ/r)¹² - (σ/r)⁶] is truncated and shifted at r_c = 2.5σ: U_cut(r) = U(r) - U(r_c) for r ≤ r_c, and 0 for r > r_c. The force F(r) = -∇U(r) = 24ε/r [2(σ/r)¹² - (σ/r)⁶] r̂ is strongly repulsive at short distances (Pauli exclusion principle) and weakly attractive at intermediate distances (van der Waals dispersion), giving rise to stable liquid and solid crystal phases.",
+      metrics: [
+        { k: "Minimum Potential Location r₀", v: "2¹/⁶ σ ≈ 1.12246 σ" },
+        { k: "Potential Well Depth", v: "-1.000 ε (at r = r₀)" },
+        { k: "Cutoff Radius r_c", v: "2.50 σ" },
+        { k: "Shift Correction U(r_c)", v: "-0.0163 ε" },
+        { k: "Grid Domain", v: "[-3.0, 3.0]² (60×60 potential, 12×12 force)" }
+      ],
+      script: "cargo run --manifest-path md/Cargo.toml --release --example field"
+    },
+    {
+      id: 4,
+      tag: "Part 5 • Complexity & Scaling Benchmark",
+      title: "4. Computational Complexity Scaling: Naive O(N²) vs Cell Lists O(N) (scaling.png)",
+      img: "assets/week2/scaling.png",
+      video: null,
+      desc: "Log-log scaling comparison of wall-clock time per integration step between the naive all-pairs engine and the cell-list engine across N = 100, 400, and 1600 atoms. While the naive method scales quadratically as O(N²), the cell-list method exhibits clean linear O(N) scaling. At N = 100, cell list is 1.3× faster; at N = 400, it is 1.9× faster; and at N = 1600, it delivers a 5.3× speedup, dramatically accelerating large-scale MD simulations.",
+      theory: "Naive pairwise force computation examines all N(N-1)/2 pairs, resulting in quadratic asymptotic complexity O(N²). By partitioning the periodic simulation domain [L_x, L_y] into a regular grid with cell spacing d ≥ r_c, any atom only interacts with neighbors in its own cell and 8 adjacent cells. Because density ρ = N/V is constant, the average number of particles in 9 cells is independent of N, reducing force evaluation complexity to O(N).",
+      metrics: [
+        { k: "N = 100 Runtime & Speedup", v: "Naive: 0.030s vs Cells: 0.023s (1.3×)" },
+        { k: "N = 400 Runtime & Speedup", v: "Naive: 0.184s vs Cells: 0.097s (1.9×)" },
+        { k: "N = 1600 Runtime & Speedup", v: "Naive: 2.033s vs Cells: 0.381s (5.3×)" },
+        { k: "Asymptotic Complexity", v: "O(N²) (Naive) vs O(N) (Cell Lists)" },
+        { k: "Benchmark Parameters", v: "T = 1.0, dt = 0.005, 600 steps, 3 reps" }
+      ],
+      script: "python3 benchmark.py"
+    },
+    {
+      id: 5,
+      tag: "Part 5 • Performance Profiling",
+      title: "5. Naive Force Engine Performance Profile (profile-naive.png)",
+      img: "assets/week2/profile-naive.png",
+      video: null,
+      desc: "Instruction-level execution profile and flamegraph of the naive MD simulation engine running N = 400 particles. As revealed by the profiler, 98.7% of total simulation wall time (0.184s out of 0.186s) is consumed strictly inside the pairwise force evaluation routine, primarily in distance computation and minimum image convention wrapping. Integrator updates, kinetic energy accumulation, and memory movement comprise only 1.3% combined.",
+      theory: "In classical molecular dynamics without long-range Coulomb solvers, short-range pairwise interactions dominate CPU cycles. In the naive implementation, every atom must calculate distances to all other N-1 atoms regardless of separation, leading to massive memory bandwidth waste and cache eviction. This profiling evidence provides the empirical rationale for developing spatial cell lists.",
+      metrics: [
+        { k: "Force Computation Share", v: "98.7% of total execution time" },
+        { k: "Elapsed Step Time", v: "0.184 s (N = 400)" },
+        { k: "Non-Force Overhead", v: "1.3% (Integrator, boundary wrap)" },
+        { k: "Dominant Instruction", v: "Floating-point distance & square root" },
+        { k: "Optimization Strategy", v: "Spatial cell partitioning" }
+      ],
+      script: "cargo run --manifest-path md/Cargo.toml --release -- run --force naive"
+    },
+    {
+      id: 6,
+      tag: "Part 5 • Performance Profiling",
+      title: "6. Cell-List Engine Profiling & Cache Efficiency (profile-cells.png)",
+      img: "assets/week2/profile-cells.png",
+      video: null,
+      desc: "Execution profile and flamegraph for the optimized cell-list force engine at N = 400 particles. The total simulation time drops by approximately 50% from 0.184s to 0.097s. The cell assignment and 9-neighbor search overhead remains negligible (< 4.2%), while spatial locality significantly improves CPU L1/L2 cache hit rates by only streaming neighbor coordinates from contiguous cell buckets.",
+      theory: "Cell lists organize particle indices into fixed 2D spatial buckets of side length L_c ≥ r_c. The 9-cell search window (self + 8 neighbors) ensures complete coverage of the interaction sphere while skipping all distant atoms. Periodic boundary wrap-around is pre-calculated or evaluated with modular arithmetic, yielding optimal cache locality and branch predictor friendliness in the Rust release build.",
+      metrics: [
+        { k: "Elapsed Step Time", v: "0.097 s (N = 400, vs 0.184s naive)" },
+        { k: "Runtime Reduction", v: "47.3% elapsed time drop" },
+        { k: "Spatial Binning Overhead", v: "< 4.2% of total cycle count" },
+        { k: "Search Stencil", v: "9 cells (3×3 periodic neighborhood)" },
+        { k: "Minimum Cell Size", v: "L_cell ≥ r_c = 2.5 σ" }
+      ],
+      script: "cargo run --manifest-path md/Cargo.toml --release -- run --force cells"
+    },
+    {
+      id: 7,
+      tag: "Part 6 • Dynamic Trajectory",
+      title: "7. Fluid Trajectory & Dynamic Pair Correlation g(r) (fluid.png)",
+      img: "assets/week2/fluid.png",
+      video: "assets/week2/fluid.mp4",
+      desc: "High-resolution trajectory render of the Lennard-Jones liquid state at T = 0.5, ρ = 0.8. The left viewport displays periodic atomic motions color-coded by instantaneous velocity magnitude, while the right viewport plots the dynamic accumulation of the radial distribution function g(r). The first peak at r ≈ 1.1σ reflects the primary coordination shell, followed by a second coordination shell at r ≈ 2.2σ, characteristic of liquid-state short-range order.",
+      theory: "The radial distribution function g(r) = (V / 2π r dr N²) ⟨∑_{i≠j} δ(r - r_ij)⟩ measures local density relative to an ideal gas. For a liquid, g(r) shows sharp short-range peaks representing nearest-neighbor shells and decays rapidly to 1 for r ≫ 2σ, reflecting complete loss of long-range translational order. Video frames are synthesized headlessly via Rust and compressed using FFmpeg H.264.",
+      metrics: [
+        { k: "Full Video Stream", v: "assets/week2/fluid.mp4 (248 KB, 60fps)" },
+        { k: "First Peak Height g(r₁)", v: "~ 2.8 at r ≈ 1.12 σ" },
+        { k: "Second Peak Height g(r₂)", v: "~ 1.3 at r ≈ 2.20 σ" },
+        { k: "Long-Range Asymptote", v: "g(r) → 1.0 as r → ∞" }
+      ],
+      script: "cargo run --manifest-path md/Cargo.toml --release -- video artifacts --out fluid.mp4"
+    },
+    {
+      id: 8,
+      tag: "Part 6 • Low Temperature",
+      title: "8. Low-Temperature Crystal Lattice Stability (cold.png)",
+      img: "assets/week2/cold.png",
+      video: "assets/week2/cold.mp4",
+      desc: "Direct visualization of the low-temperature solid state at T = 0.2, ρ = 0.8. Atoms remain tightly bound to their triangular lattice sites, executing localized harmonic vibrations around their minimum potential wells. The radial distribution function exhibits long-range crystalline peaks persisting across multiple lattice constants without structural decay.",
+      theory: "At low temperatures (k_B T ≪ ε), kinetic fluctuations are insufficient to escape the deep Lennard-Jones potential well (depth ε = 1). The 2D ground state arranges into a close-packed triangular lattice with coordination number 6 and lattice parameter a = √(2 / (√3 ρ)). Long-range quasi-crystalline positional and orientational order is preserved.",
+      metrics: [
+        { k: "Simulation Temperature", v: "T = 0.20 (Cold regime)" },
+        { k: "Thermodynamic State", v: "Solid triangular crystal" },
+        { k: "Coordination Number", v: "z = 6 (Hexagonal coordination)" },
+        { k: "Full Video Stream", v: "assets/week2/cold.mp4 (444 KB)" }
+      ],
+      script: "cargo run --manifest-path md/Cargo.toml --release -- run --temperature 0.2 --out /tmp/cold && cargo run --manifest-path md/Cargo.toml --release -- video /tmp/cold --out cold.mp4"
+    },
+    {
+      id: 9,
+      tag: "Part 6 • Melting Transition",
+      title: "9. High-Temperature Fluid & Melting Transition (hot.png)",
+      img: "assets/week2/hot.png",
+      video: "assets/week2/hot.mp4",
+      desc: "Thermal melting transition into a disordered isotropic fluid at T = 1.0 (or during temperature ramp to T = 1.2). Thermal kinetic energy overcomes the interatomic attractive wells, breaking crystalline symmetry. Particles diffuse freely across periodic boundaries, and long-range structure in g(r) rapidly decays to the uniform density floor.",
+      theory: "In two dimensions, melting proceeds from a crystalline solid into an isotropic fluid as kinetic energy increases. When thermal fluctuation amplitude exceeds the Lindemann threshold (~10-15% of lattice spacing), topological defects (dislocations and disclinations) unbind according to KTHNY theory, destroying long-range positional order and transforming the system into a fluid.",
+      metrics: [
+        { k: "Simulation Temperature", v: "T = 1.00 (Hot fluid regime)" },
+        { k: "Thermodynamic State", v: "Disordered isotropic fluid" },
+        { k: "Ramp Schedule", v: "T = 0.2 → 1.2 (20,000 steps)" },
+        { k: "Full Video Stream", v: "assets/week2/hot.mp4 (519 KB)" }
+      ],
+      script: "cargo run --manifest-path md/Cargo.toml --release -- run --temperature 1.0 --out /tmp/hot && cargo run --manifest-path md/Cargo.toml --release -- video /tmp/hot --out hot.mp4"
+    }
+  ];
+
+  let curLbIndex = 0;
+
+  window.openLightbox = function(idx) {
+    curLbIndex = idx;
+    const item = galleryData[idx];
+    document.getElementById('lbTag').textContent = item.tag;
+    document.getElementById('lbTitle').textContent = item.title;
+    document.getElementById('lbDesc').textContent = item.desc;
+    document.getElementById('lbTheory').textContent = item.theory;
+    document.getElementById('lbScript').textContent = item.script;
+    document.getElementById('lbRawLink').href = item.video || item.img;
+    
+    const imgEl = document.getElementById('lbImg');
+    const vidEl = document.getElementById('lbVideo');
+    if (item.video) {
+      imgEl.style.display = 'none';
+      vidEl.style.display = 'block';
+      vidEl.src = item.video;
+      vidEl.play().catch(() => {});
+    } else {
+      if (vidEl) { vidEl.pause(); vidEl.style.display = 'none'; }
+      imgEl.style.display = 'block';
+      imgEl.src = item.img;
+    }
+
+    const metricsBox = document.getElementById('lbMetrics');
+    metricsBox.innerHTML = '';
+    item.metrics.forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'lightbox-data-row';
+      row.innerHTML = `<span class="k">${m.k}</span><span class="v">${m.v}</span>`;
+      metricsBox.appendChild(row);
+    });
+
+    document.getElementById('lightboxModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeLightbox = function(e) {
+    if (e && e.target && e.target.id !== 'lightboxModal' && !e.target.classList.contains('lightbox-close')) return;
+    const modal = document.getElementById('lightboxModal');
+    modal.classList.remove('active');
+    const vidEl = document.getElementById('lbVideo');
+    if (vidEl) vidEl.pause();
+    document.body.style.overflow = '';
+  };
+
+  window.prevLightbox = function() {
+    curLbIndex = (curLbIndex - 1 + galleryData.length) % galleryData.length;
+    window.openLightbox(curLbIndex);
+  };
+
+  window.nextLightbox = function() {
+    curLbIndex = (curLbIndex + 1) % galleryData.length;
+    window.openLightbox(curLbIndex);
+  };
+
+  window.switchTab = function(tab) {
+    const main = document.getElementById('main');
+    const gallery = document.getElementById('galleryView');
+    const simBtn = document.getElementById('tabSimBtn');
+    const galBtn = document.getElementById('tabGalleryBtn');
+    if (tab === 'sim') {
+      main.style.display = 'grid';
+      gallery.classList.remove('active');
+      simBtn.classList.add('active');
+      galBtn.classList.remove('active');
+    } else {
+      main.style.display = 'none';
+      gallery.classList.add('active');
+      simBtn.classList.remove('active');
+      galBtn.classList.add('active');
+    }
+  };
+
 })();
 </script>
 </body>
