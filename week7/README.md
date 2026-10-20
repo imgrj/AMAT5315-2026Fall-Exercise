@@ -341,7 +341,7 @@ pixelwise variance across completions.
 ![Error and variation](evidence/part4-variation.png)
 
 *Produced by `scripts/part4_inpaint.py`.* Hidden-pixel MSE against the withheld
-truth averages **0.226** over the 16 completions (reference 0.24), ranging from
+truth averages **0.221** over the 16 completions (reference 0.24), ranging from
 0.109 to 0.611. The largest change of any observed pixel is **0.0** (requirement
 < 1e-5), and the completions are identical outside the hole (largest
 disagreement 0.0) because the last merge overwrites every observed entry with
