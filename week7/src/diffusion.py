@@ -1,4 +1,4 @@
-﻿"""Forward noising, DDPM and DDIM reverse updates (learning sheet equations 4-12)."""
+"""Forward noising, DDPM and DDIM reverse updates (learning sheet equations 4-12)."""
 
 from __future__ import annotations
 
@@ -77,11 +77,10 @@ def tweedie_denoise(eps_fn, x, sched, t: int):
 def ddim_step(eps_fn, x, sched, t: int, t_next: int, key=None):
     """Deterministic DDIM update ``t -> t_next`` (equation 11); ``key`` is unused."""
     abar_t = float(sched.abars[t])
-    # SABOTAGE (negative control): keep the source level's coefficients instead
-    # of the destination level's, which is not DDIM.
+    abar_next = float(sched.abars[t_next])
     eps = eps_fn(x, t)
     x0_hat = (x - math.sqrt(1.0 - abar_t) * eps) / math.sqrt(abar_t)
-    return math.sqrt(abar_t) * x0_hat + math.sqrt(1.0 - abar_t) * eps
+    return math.sqrt(abar_next) * x0_hat + math.sqrt(1.0 - abar_next) * eps
 
 
 def even_levels(steps: int, T: int = 1000) -> list[int]:
@@ -166,4 +165,3 @@ def forward_movie_states(x0, sched, levels, key):
         current = level
         states.append(x)
     return states
-
