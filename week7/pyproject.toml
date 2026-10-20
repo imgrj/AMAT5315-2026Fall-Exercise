@@ -1,0 +1,17 @@
+[project]
+name = "week7"
+version = "0.1.0"
+description = "Week 7: Diffusion models and flow matching (DDPM, DDIM, pretrained CIFAR-10 U-Net, RePaint)"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "jax[cpu]>=0.11.2",
+    "matplotlib>=3.10.0",
+    "numpy>=2.0.0",
+    "pillow>=12.0.0",
+    "scipy>=1.15.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

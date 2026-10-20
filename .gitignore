@@ -1,3 +1,6 @@
-__pycache__/
+﻿__pycache__/
 *.pyc
 .pytest_cache/
+.uv-cache/
+.hf-home/
+
