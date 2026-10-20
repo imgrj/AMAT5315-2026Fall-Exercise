@@ -1,4 +1,4 @@
-# Week 7: Diffusion and Flow Matching
+﻿# Week 7: Diffusion and Flow Matching
 
 Generation by transforming fresh Gaussian noise: a denoising diffusion
 probabilistic model (DDPM) on a four-cluster Gaussian mixture, deterministic

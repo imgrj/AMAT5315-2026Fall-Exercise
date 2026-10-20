@@ -1,4 +1,4 @@
-# AMAT5315: Scientific Computing for Physicists - Weekly Exercises
+﻿# AMAT5315: Scientific Computing for Physicists - Weekly Exercises
 
 This repository stores weekly exercises for AMAT5315 (*Scientific Computing for Physicists*). Each week contains complete source code, verification test suites, evidence figures, and interactive web laboratories.
 
@@ -48,7 +48,7 @@ Generation by transporting fresh Gaussian noise: DDPM and DDIM on a four-cluster
 
 #### 4. RePaint inpainting
 - **Observed pixels**: hidden square rows/columns 6:26, 99 network evaluations per completion; the largest change of an observed pixel is **0.0** (requirement < 1e-5).
-- **Hidden content**: mean hidden-pixel MSE **0.226** over 16 completions (reference 0.24), differing between seeds inside the hole; the variance map shows where the observation leaves the content undetermined.
+- **Hidden content**: mean hidden-pixel MSE **0.221** over 16 completions (reference 0.24), differing between seeds inside the hole; the variance map shows where the observation leaves the content undetermined.
 
 | Trained DDPM recovers the four clusters | Flow matching and DDIM in tens of steps |
 | :---: | :---: |
