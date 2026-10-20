@@ -1,0 +1,49 @@
+{
+  "seed": 20260709,
+  "revision": "267b167dc01f0e4e61923ea244e8b988f84deb80",
+  "model_dir": "inputs/cifar-model",
+  "download_command": "uv run --with huggingface-hub==1.33.0 hf download google/ddpm-cifar10-32 config.json diffusion_pytorch_model.safetensors --revision 267b167dc01f0e4e61923ea244e8b988f84deb80 --local-dir inputs/cifar-model",
+  "param_count": 35746307,
+  "images": 4,
+  "levels": 1000,
+  "model_index_rule": "pass level t as model index t-1",
+  "pixel_stats": [
+    [
+      -0.11191331595182419,
+      -0.8658875823020935,
+      0.4879675507545471,
+      0.29333290457725525
+    ],
+    [
+      -0.19312091171741486,
+      -1.0044277906417847,
+      0.8344337344169617,
+      0.29649680852890015
+    ],
+    [
+      -0.3735494613647461,
+      -1.0223937034606934,
+      0.9607313871383667,
+      0.38596513867378235
+    ],
+    [
+      -0.30011364817619324,
+      -0.9890205264091492,
+      0.8500288128852844,
+      0.30040526390075684
+    ]
+  ],
+  "reference_max_abs_diff": 7.152557373046875e-06,
+  "seconds": 793.0163898468018,
+  "ms_per_batch_evaluation": 782.9435274600983,
+  "show_levels": [
+    1000,
+    800,
+    500,
+    200,
+    100,
+    50,
+    20,
+    0
+  ]
+}
