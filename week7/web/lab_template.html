@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 7 — Diffusion and Flow Matching Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-page: #080c16;
+    --bg-panel: #0f172a;
+    --bg-panel-alt: #162036;
+    --panel-border: #1e2d4d;
+    --ink-main: #f1f5f9;
+    --ink-muted: #94a3b8;
+    --accent: #38bdf8;
+    --good: #4ade80;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg-page);
+    color: var(--ink-main);
+    font: 14px/1.6 'Inter', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+    min-height: 100vh;
+  }
+  .week-nav {
+    display: flex; align-items: center; gap: 8px; padding: 10px 24px;
+    background: #0b1120; border-bottom: 1px solid var(--panel-border);
+    overflow-x: auto; font-size: 13px;
+  }
+  .week-nav a {
+    color: var(--ink-muted); text-decoration: none; padding: 6px 14px;
+    border-radius: var(--radius-sm); font-weight: 500; white-space: nowrap;
+  }
+  .week-nav a:hover { color: var(--ink-main); background: rgba(255,255,255,0.05); }
+  .week-nav a.active { color: var(--accent); background: rgba(56,189,248,0.12); border: 1px solid rgba(56,189,248,0.3); }
+  header {
+    padding: 22px 28px; background: var(--bg-panel); border-bottom: 1px solid var(--panel-border);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+  }
+  header h1 { font-size: 1.4rem; color: #fff; letter-spacing: -0.02em; }
+  header p { color: var(--ink-muted); font-size: 13px; margin-top: 4px; }
+  .badge {
+    font-size: 12px; color: var(--accent); border: 1px solid rgba(56,189,248,0.35);
+    background: rgba(56,189,248,0.08); padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+  }
+  main { max-width: 1180px; margin: 0 auto; padding: 26px 22px 60px; display: flex; flex-direction: column; gap: 26px; }
+  section { display: flex; flex-direction: column; gap: 14px; }
+  h2 { font-size: 1.05rem; font-weight: 600; color: #fff; }
+  h2 span { color: var(--ink-muted); font-weight: 400; font-size: 0.85rem; margin-left: 8px; }
+  .card {
+    background: var(--bg-panel); border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg); padding: 18px; display: flex; gap: 18px; flex-wrap: wrap;
+  }
+  .card.stack { flex-direction: column; }
+  .controls { display: flex; flex-direction: column; gap: 14px; min-width: 250px; flex: 1; }
+  .control { display: flex; flex-direction: column; gap: 6px; }
+  .control label { font-size: 12px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .control .value { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  select, input[type="range"] { width: 100%; }
+  select {
+    background: var(--bg-panel-alt); color: var(--ink-main); border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm); padding: 7px 9px; font: inherit;
+  }
+  input[type="range"] { accent-color: #38bdf8; }
+  .buttons { display: flex; gap: 10px; margin-top: 4px; }
+  button {
+    flex: 1; padding: 9px 14px; border-radius: var(--radius-sm); border: 1px solid var(--panel-border);
+    background: var(--bg-panel-alt); color: var(--ink-main); font: inherit; font-weight: 500; cursor: pointer;
+  }
+  button.primary { background: rgba(56,189,248,0.16); border-color: rgba(56,189,248,0.45); color: #7dd3fc; }
+  button:hover { border-color: var(--accent); }
+  canvas { background: #070b13; border: 1px solid var(--panel-border); border-radius: var(--radius-md); max-width: 100%; }
+  .stats {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-muted);
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 6px 18px;
+    margin-top: 10px; width: 100%;
+  }
+  .stats b { color: var(--ink-main); font-weight: 600; }
+  .stats .ok { color: var(--good); }
+  .note { color: var(--ink-muted); font-size: 12.5px; }
+  .gallery { display: grid; gap: 10px; }
+  .gallery.cifar { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .tile { display: flex; flex-direction: column; gap: 6px; }
+  .tile img { width: 100%; image-rendering: pixelated; border-radius: var(--radius-sm); border: 1px solid var(--panel-border); background: #000; }
+  .tile .caption { font-size: 11.5px; color: var(--ink-muted); font-family: 'JetBrains Mono', monospace; }
+  .inpaint-grid { display: grid; gap: 14px; }
+  .inpaint-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .inpaint-row .tile img { aspect-ratio: 1 / 1; object-fit: cover; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #7dd3fc; }
+  footer { border-top: 1px solid var(--panel-border); padding: 18px 28px; color: var(--ink-muted); font-size: 12px; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink-muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; }
+</style>
+</head>
+<body>
+<nav class="week-nav">
+  <a href="week1-pi-lab.html">Week 1: AI Agents &amp; Pi</a>
+  <a href="index.html">Week 2: Molecular Dynamics</a>
+  <a href="week3-ising-lab.html">Week 3: Ising Lattice Lab</a>
+  <a href="week4-fluid-lab.html">Week 4: Fluid Dynamics Lab</a>
+  <a href="week5-seismic-lab.html">Week 5: Seismic &amp; AD Lab</a>
+  <a href="week6-energy-lab.html">Week 6: Energy-Based Models</a>
+  <a href="week7-diffusion-lab.html" class="active">Week 7: Diffusion &amp; Flow Matching</a>
+</nav>
+
+<header>
+  <div>
+    <h1>Week 7: Diffusion and Flow Matching</h1>
+    <p>Denoising diffusion, deterministic DDIM and flow matching on four clusters, then a downloaded CIFAR-10 predictor and RePaint inpainting</p>
+  </div>
+  <span class="badge">Week 7 Interactive Lab</span>
+</header>
+
+<main>
+  <section>
+    <h2>1. Live DDPM / DDIM on the four-cluster mixture <span>runs the trained 37,762-parameter network in your browser</span></h2>
+    <div class="card">
+      <canvas id="cloud" width="560" height="560"></canvas>
+      <div class="controls">
+        <div class="control">
+          <label>Sampler</label>
+          <select id="sampler">
+            <option value="ddim">DDIM (deterministic)</option>
+            <option value="ddpm">DDPM (stochastic)</option>
+          </select>
+        </div>
+        <div class="control">
+          <label>Network evaluations (steps): <span class="value" id="steps-value">20</span></label>
+          <input type="range" id="steps" min="1" max="8" step="1" value="3">
+        </div>
+        <div class="control">
+          <label>Noise prediction</label>
+          <select id="model">
+            <option value="learned">learned network</option>
+            <option value="exact">exact E[&epsilon; | x<sub>t</sub>]</option>
+          </select>
+        </div>
+        <div class="control">
+          <label>Particles</label>
+          <select id="particles">
+            <option value="120">120</option>
+            <option value="200" selected>200</option>
+            <option value="320">320</option>
+          </select>
+        </div>
+        <div class="buttons">
+          <button class="primary" id="run">Run</button>
+          <button id="reset">Reset</button>
+        </div>
+        <p class="note">One network evaluation per step. Fewer steps mean larger reverse jumps; DDIM reuses the predicted noise with the destination level's coefficients, DDPM adds fresh noise of variance 1&nbsp;&minus;&nbsp;a.</p>
+      </div>
+      <div class="stats" id="cloud-stats"></div>
+    </div>
+    <div class="legend">
+      <span><i style="background:#38bdf8"></i>particles</span>
+      <span><i style="background:#475569"></i>target 2&sigma; circles</span>
+      <span><i style="background:#4ade80"></i>exact target draws</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. How many steps does each sampler need? <span>4000 samples per run, energy distance to 4000 exact draws</span></h2>
+    <div class="card stack">
+      <canvas id="chart" width="1080" height="380"></canvas>
+      <p class="note">Shaded band: 95% quantile of the energy distance between two independent exact sample sets (the null scale, <b id="null-value"></b>). Dashed curves use exact conditional quantities and isolate discretisation error from predictor error. Hover-free summary: flow matching reaches the null scale around 10&ndash;20 steps, DDIM around 20&ndash;50, DDPM around 50.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>3. The downloaded predictor on photographs <span>weights learned elsewhere, reverse updates computed here</span></h2>
+    <div class="card stack">
+      <div class="controls" style="max-width:420px">
+        <div class="control">
+          <label>Reverse process, level <span class="value" id="level-value">t = 1000</span></label>
+          <input type="range" id="level" min="0" max="7" step="1" value="0">
+        </div>
+      </div>
+      <div class="card" style="border:none;padding:0;background:transparent">
+        <div class="tile" style="flex:1;min-width:220px">
+          <img id="stage-image" alt="reverse process stage">
+          <div class="caption" id="stage-caption">t = 1000</div>
+        </div>
+        <div class="gallery cifar" style="flex:2" id="cifar-gallery"></div>
+      </div>
+      <p class="note" id="cifar-note"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2>4. RePaint inpainting: the hidden square is not determined <span>rows/columns 6:26, four seeds, 99 evaluations per completion</span></h2>
+    <div class="card stack">
+      <div class="controls" style="max-width:420px">
+        <div class="control">
+          <label>Seed <span class="value" id="seed-value">7201</span></label>
+          <input type="range" id="seed" min="0" max="3" step="1" value="0">
+        </div>
+      </div>
+      <div class="inpaint-grid" id="inpaint-grid"></div>
+      <p class="note" id="inpaint-note"></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Evidence and commands: <code>week7/README.md</code>. All figures and metrics in this page were produced by
+  <code>scripts/part1_diffusion.py</code>, <code>scripts/part2_fewer_steps.py</code>, <code>scripts/part3_cifar.py</code> and
+  <code>scripts/part4_inpaint.py</code>; the page itself is generated by <code>scripts/build_web_lab.py</code>.
+</footer>
+
+<script>
+const DATA = __DATA__;
+
+/* ---------------------------------------------------------------- decoding */
+function decodeF32(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Float32Array(bytes.buffer);
+}
+const SHAPES = DATA.weights.shapes;
+const W = DATA.weights.w.map(decodeF32);
+const BIASES = DATA.weights.b.map(decodeF32);
+
+/* ---------------------------------------------------------------- schedule */
+const T = 1000;
+const BETA_START = 1e-4, BETA_END = 0.02;
+const betas = new Float64Array(T);
+const abars = new Float64Array(T + 1);
+abars[0] = 1;
+for (let i = 0; i < T; i++) {
+  betas[i] = BETA_START + (BETA_END - BETA_START) * i / (T - 1);
+  abars[i + 1] = abars[i] * (1 - betas[i]);
+}
+const LEVEL_OPTIONS = [1, 2, 5, 10, 20, 50, 100, 1000];
+
+function evenLevels(steps) {
+  const levels = [];
+  for (let i = 0; i <= steps; i++) levels.push(Math.round(T * (steps - i) / steps));
+  levels[0] = T; levels[levels.length - 1] = 0;
+  return levels;
+}
+
+/* ------------------------------------------------------------------ network */
+function mlpForward(x, n, uValue) {
+  const d = 34;
+  let h = new Float32Array(n * d);
+  for (let i = 0; i < n; i++) {
+    h[i * d] = x[2 * i];
+    h[i * d + 1] = x[2 * i + 1];
+    const t = uValue / T;
+    for (let k = 0; k < 16; k++) {
+      const a = t * (2 * Math.PI * Math.pow(2, k));
+      h[i * d + 2 + k] = Math.sin(a);
+      h[i * d + 18 + k] = Math.cos(a);
+    }
+  }
+  for (let layer = 0; layer < 3; layer++) {
+    const ni = SHAPES[0][layer][0], no = SHAPES[0][layer][1];
+    const w = W[layer], b = BIASES[layer];
+    const out = new Float32Array(n * no);
+    for (let i = 0; i < n; i++) {
+      const off = i * ni, oo = i * no;
+      for (let j = 0; j < no; j++) {
+        let s = b[j];
+        for (let k = 0; k < ni; k++) s += h[off + k] * w[k * no + j];
+        out[oo + j] = s / (1 + Math.exp(-s));
+      }
+    }
+    h = out;
+  }
+  const w = W[3], b = BIASES[3];
+  const out = new Float32Array(n * 2);
+  for (let i = 0; i < n; i++) {
+    const off = i * 128;
+    for (let j = 0; j < 2; j++) {
+      let s = b[j];
+      for (let k = 0; k < 128; k++) s += h[off + k] * w[k * 2 + j];
+      out[2 * i + j] = s;
+    }
+  }
+  return out;
+}
+
+const CENTERS = [[3, 0], [0, 3], [-3, 0], [0, -3]];
+const VAR = 0.09;
+
+function exactNoise(x, n, abar) {
+  const a = Math.sqrt(abar), v = VAR * abar + (1 - abar), b = Math.sqrt(1 - abar);
+  const out = new Float32Array(2 * n);
+  for (let i = 0; i < n; i++) {
+    const x1 = x[2 * i], x2 = x[2 * i + 1];
+    let maxLogit = -Infinity;
+    const logits = [0, 0, 0, 0];
+    for (let k = 0; k < 4; k++) {
+      const d1 = x1 - a * CENTERS[k][0], d2 = x2 - a * CENTERS[k][1];
+      logits[k] = -(d1 * d1 + d2 * d2) / (2 * v);
+      if (logits[k] > maxLogit) maxLogit = logits[k];
+    }
+    let sum = 0;
+    for (let k = 0; k < 4; k++) { logits[k] = Math.exp(logits[k] - maxLogit); sum += logits[k]; }
+    let e1 = 0, e2 = 0;
+    for (let k = 0; k < 4; k++) {
+      const wgt = logits[k] / sum;
+      const m1 = CENTERS[k][0] + (VAR * a / v) * (x1 - a * CENTERS[k][0]);
+      const m2 = CENTERS[k][1] + (VAR * a / v) * (x2 - a * CENTERS[k][1]);
+      e1 += wgt * m1; e2 += wgt * m2;
+    }
+    out[2 * i] = (x1 - a * e1) / b;
+    out[2 * i + 1] = (x2 - a * e2) / b;
+  }
+  return out;
+}
+
+/* ----------------------------------------------------------------- sampler */
+function gaussian() {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+const state = { x: new Float32Array(0), n: 200, levels: [], index: 0, running: false, sampler: "ddim", model: "learned" };
+
+function initialise() {
+  const n = state.n;
+  const x = new Float32Array(2 * n);
+  for (let i = 0; i < 2 * n; i++) x[i] = gaussian();
+  state.x = x;
+  state.levels = evenLevels(LEVEL_OPTIONS[+document.getElementById("steps").value]);
+  state.index = 0;
+  state.running = false;
+  draw();
+  updateStats("not started");
+}
+
+function stepOnce() {
+  const n = state.n, levels = state.levels, i = state.index;
+  const t = levels[i], tNext = levels[i + 1];
+  const abarT = abars[t], abarNext = abars[tNext];
+  const a = abarT / abarNext;
+  const x = state.x;
+  const eps = state.model === "learned" ? mlpForward(x, n, t) : exactNoise(x, n, abarT);
+  const next = new Float32Array(2 * n);
+  if (state.sampler === "ddim") {
+    const s1 = Math.sqrt(abarT), s2 = Math.sqrt(abarNext), s3 = Math.sqrt(1 - abarT), s4 = Math.sqrt(1 - abarNext);
+    for (let j = 0; j < n; j++) {
+      const x0a = (x[2 * j] - s3 * eps[2 * j]) / s1;
+      const x0b = (x[2 * j + 1] - s3 * eps[2 * j + 1]) / s1;
+      next[2 * j] = s2 * x0a + s4 * eps[2 * j];
+      next[2 * j + 1] = s2 * x0b + s4 * eps[2 * j + 1];
+    }
+  } else {
+    const scale = Math.sqrt(a), corr = (1 - a) / Math.sqrt(1 - abarT), sd = Math.sqrt(1 - a);
+    for (let j = 0; j < n; j++) {
+      next[2 * j] = (x[2 * j] - corr * eps[2 * j]) / scale + (tNext > 0 ? sd * gaussian() : 0);
+      next[2 * j + 1] = (x[2 * j + 1] - corr * eps[2 * j + 1]) / scale + (tNext > 0 ? sd * gaussian() : 0);
+    }
+  }
+  state.x = next;
+  state.index++;
+}
+
+/* ------------------------------------------------------------------ drawing */
+const cloud = document.getElementById("cloud");
+const cctx = cloud.getContext("2d");
+const LIMIT = 8;
+
+function toPixel(value, size) {
+  return (value + LIMIT) / (2 * LIMIT) * size;
+}
+
+function draw() {
+  const size = cloud.width;
+  cctx.fillStyle = "#070b13";
+  cctx.fillRect(0, 0, size, size);
+  cctx.strokeStyle = "#152238";
+  cctx.lineWidth = 1;
+  for (let g = -6; g <= 6; g += 2) {
+    const p = toPixel(g, size);
+    cctx.beginPath(); cctx.moveTo(p, 0); cctx.lineTo(p, size); cctx.stroke();
+    cctx.beginPath(); cctx.moveTo(0, p); cctx.lineTo(size, p); cctx.stroke();
+  }
+  cctx.strokeStyle = "#475569";
+  for (const center of CENTERS) {
+    cctx.beginPath();
+    cctx.arc(toPixel(center[0], size), toPixel(center[1], size), 0.6 / (2 * LIMIT) * size, 0, 2 * Math.PI);
+    cctx.stroke();
+  }
+  cctx.fillStyle = "rgba(56,189,248,0.75)";
+  for (let i = 0; i < state.n; i++) {
+    const x = state.x[2 * i], y = state.x[2 * i + 1];
+    if (!Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > LIMIT * 4 || Math.abs(y) > LIMIT * 4) continue;
+    cctx.fillRect(toPixel(x, size) - 1.2, toPixel(y, size) - 1.2, 2.4, 2.4);
+  }
+  cctx.fillStyle = "#94a3b8";
+  cctx.font = "12px 'JetBrains Mono', monospace";
+  cctx.fillText(`step ${state.index}/${state.levels.length - 1}`, 12, 20);
+}
+
+function clusterStats() {
+  const n = state.n;
+  const counts = [0, 0, 0, 0];
+  const sums = [[0, 0], [0, 0], [0, 0], [0, 0]];
+  const sumsq = [[0, 0], [0, 0], [0, 0], [0, 0]];
+  for (let i = 0; i < n; i++) {
+    const x = state.x[2 * i], y = state.x[2 * i + 1];
+    let best = 0, bestD = Infinity;
+    for (let k = 0; k < 4; k++) {
+      const dx = x - CENTERS[k][0], dy = y - CENTERS[k][1];
+      const d = dx * dx + dy * dy;
+      if (d < bestD) { bestD = d; best = k; }
+    }
+    counts[best]++;
+    sums[best][0] += x; sums[best][1] += y;
+    sumsq[best][0] += x * x; sumsq[best][1] += y * y;
+  }
+  const pops = [], widths = [];
+  for (let k = 0; k < 4; k++) {
+    const c = counts[k];
+    pops.push(c / n);
+    if (c < 2) { widths.push(NaN); continue; }
+    const m = [sums[k][0] / c, sums[k][1] / c];
+    widths.push(Math.sqrt(Math.max(0, sumsq[k][0] / c - m[0] * m[0])) , Math.sqrt(Math.max(0, sumsq[k][1] / c - m[1] * m[1])));
+  }
+  return { pops, widths, counts };
+}
+
+function updateStats(prefix) {
+  const { pops, widths } = clusterStats();
+  const popText = pops.map(p => p.toFixed(3)).join(", ");
+  const widthFlat = widths;
+  const validWidths = widthFlat.filter(Number.isFinite);
+  const widthText = validWidths.length ? `${Math.min(...validWidths).toFixed(3)}–${Math.max(...validWidths).toFixed(3)}` : "–";
+  const popDev = Math.max(...pops.map(p => Math.abs(p - 0.25)));
+  const widthDev = validWidths.length ? Math.max(...validWidths.map(w => Math.abs(w - 0.3))) : NaN;
+  const okClass = (dev, limit) => (dev < limit ? "ok" : "");
+  document.getElementById("cloud-stats").innerHTML = `
+    <div>${prefix}<br>populations: <b>${popText}</b></div>
+    <div>max |population − 0.25|: <b class="${okClass(popDev, 0.04)}">${popDev.toFixed(3)}</b></div>
+    <div>per-coordinate widths: <b>${widthText}</b></div>
+    <div>max |width − 0.30|: <b class="${okClass(widthDev, 0.03)}">${widthDev.toFixed(3)}</b></div>`;
+}
+
+function tick() {
+  if (!state.running) return;
+  const start = performance.now();
+  while (state.index < state.levels.length - 1 && performance.now() - start < 13) stepOnce();
+  draw();
+  if (state.index >= state.levels.length - 1) {
+    state.running = false;
+    updateStats(`finished: ${state.levels.length - 1} ${state.sampler.toUpperCase()} evaluations`);
+    return;
+  }
+  updateStats(`running ${state.sampler.toUpperCase()}, ${state.levels.length - 1} evaluations total`);
+  requestAnimationFrame(tick);
+}
+
+document.getElementById("steps").addEventListener("input", () => {
+  document.getElementById("steps-value").textContent = LEVEL_OPTIONS[+document.getElementById("steps").value];
+  initialise();
+});
+document.getElementById("sampler").addEventListener("change", (event) => { state.sampler = event.target.value; initialise(); });
+document.getElementById("model").addEventListener("change", (event) => { state.model = event.target.value; initialise(); });
+document.getElementById("particles").addEventListener("change", (event) => { state.n = +event.target.value; initialise(); });
+document.getElementById("run").addEventListener("click", () => {
+  if (state.index >= state.levels.length - 1) initialise();
+  if (state.running) return;
+  state.running = true;
+  requestAnimationFrame(tick);
+});
+document.getElementById("reset").addEventListener("click", initialise);
+
+/* ------------------------------------------------------------------- chart */
+function drawChart() {
+  const canvas = document.getElementById("chart");
+  const ctx = canvas.getContext("2d");
+  const Wc = canvas.width, Hc = canvas.height;
+  const margin = { left: 60, right: 300, top: 20, bottom: 42 };
+  ctx.fillStyle = "#070b13"; ctx.fillRect(0, 0, Wc, Hc);
+  const steps = DATA.sweep.steps;
+  const xmin = Math.log10(1), xmax = Math.log10(100);
+  const ymin = Math.log10(5e-4), ymax = Math.log10(2);
+  const px = (value) => margin.left + (Math.log10(value) - xmin) / (xmax - xmin) * (Wc - margin.left - margin.right);
+  const py = (value) => Hc - margin.bottom - (Math.log10(value) - ymin) / (ymax - ymin) * (Hc - margin.top - margin.bottom);
+  ctx.strokeStyle = "#152238";
+  for (const tickValue of [1e-3, 1e-2, 1e-1, 1]) {
+    ctx.beginPath(); ctx.moveTo(margin.left, py(tickValue)); ctx.lineTo(Wc - margin.right, py(tickValue)); ctx.stroke();
+  }
+  for (const tickValue of steps) {
+    ctx.beginPath(); ctx.moveTo(px(tickValue), margin.top); ctx.lineTo(px(tickValue), Hc - margin.bottom); ctx.stroke();
+  }
+  ctx.fillStyle = "rgba(148,163,184,0.18)";
+  ctx.fillRect(margin.left, py(DATA.sweep.null), Wc - margin.left - margin.right, py(1e-4) - py(DATA.sweep.null));
+  ctx.strokeStyle = "#64748b"; ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(margin.left, py(DATA.sweep.null)); ctx.lineTo(Wc - margin.right, py(DATA.sweep.null)); ctx.stroke();
+  ctx.setLineDash([]);
+  const series = [
+    ["ddpm", "#a78bfa", "DDPM"],
+    ["ddim", "#f87171", "DDIM"],
+    ["flow", "#4ade80", "flow matching"],
+    ["ddpm_exact", "#a78bfa", "DDPM exact"],
+    ["ddim_exact", "#f87171", "DDIM exact"],
+    ["flow_exact", "#4ade80", "flow exact"],
+  ];
+  for (const [key, color, label] of series) {
+    const dashed = key.endsWith("exact");
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = dashed ? 1 : 1.8;
+    ctx.setLineDash(dashed ? [5, 4] : []);
+    ctx.beginPath();
+    DATA.sweep.series[key].energy.forEach((value, i) => {
+      const x = px(steps[i]), y = py(Math.max(value, 5e-4));
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+    DATA.sweep.series[key].energy.forEach((value, i) => {
+      ctx.beginPath(); ctx.arc(px(steps[i]), py(Math.max(value, 5e-4)), dashed ? 2 : 3, 0, 2 * Math.PI); ctx.fill();
+    });
+  }
+  ctx.fillStyle = "#94a3b8"; ctx.font = "12px 'JetBrains Mono', monospace";
+  ctx.fillText("energy distance", 8, margin.top + 4);
+  ctx.fillText("evaluations", Wc - margin.right - 78, Hc - 12);
+  ctx.fillStyle = "#f1f5f9";
+  let y = margin.top + 8;
+  ctx.fillText("4000 samples per run", Wc - margin.right + 14, y); y += 20;
+  ctx.fillStyle = "#94a3b8";
+  ctx.fillText(`null 95% = ${DATA.sweep.null.toFixed(4)}`, Wc - margin.right + 14, y); y += 26;
+  for (const [key, color, label] of series) {
+    ctx.fillStyle = color;
+    ctx.fillRect(Wc - margin.right + 14, y - 8, 10, 3);
+    ctx.fillStyle = "#cbd5e1";
+    ctx.fillText(label, Wc - margin.right + 32, y);
+    y += 18;
+  }
+  ctx.fillStyle = "#64748b";
+  ctx.fillText(`DDIM two-run max |Δ| = ${DATA.sweep.determinism.ddim_max_abs_diff}`, Wc - margin.right + 14, y + 8);
+  ctx.fillText(`DDPM same-cluster rate = ${DATA.sweep.determinism.ddpm_same_cluster_fraction.toFixed(3)}`, Wc - margin.right + 14, y + 26);
+  ctx.fillText(`velocity rel. RMS (taken at the samples):`, Wc - margin.right + 14, y + 48);
+  DATA.sweep.velocity.relative_rms.forEach((value, i) => {
+    ctx.fillText(`  s=${DATA.sweep.velocity.s[i]}  ${value.toFixed(3)}`, Wc - margin.right + 14, y + 66 + i * 18);
+  });
+}
+
+/* --------------------------------------------------------------- galleries */
+const stageImage = document.getElementById("stage-image");
+const stageCaption = document.getElementById("stage-caption");
+const levelSlider = document.getElementById("level");
+function updateStage() {
+  const index = +levelSlider.value;
+  stageImage.src = DATA.cifar.stages[index];
+  const level = DATA.cifar.levels[index];
+  document.getElementById("level-value").textContent = `t = ${level}`;
+  stageCaption.textContent = `t = ${level}`;
+}
+levelSlider.addEventListener("input", updateStage);
+
+const gallery = document.getElementById("cifar-gallery");
+DATA.cifar.generated.forEach((src, i) => {
+  const tile = document.createElement("div");
+  tile.className = "tile";
+  tile.innerHTML = `<img src="${src}" alt="generated sample ${i + 1}"><div class="caption">generated ${i + 1}</div>`;
+  gallery.appendChild(tile);
+});
+DATA.cifar.real.forEach((src, i) => {
+  const tile = document.createElement("div");
+  tile.className = "tile";
+  tile.innerHTML = `<img src="${src}" alt="real CIFAR-10 image ${i + 1}"><div class="caption">real CIFAR-10 ${i + 1}</div>`;
+  gallery.appendChild(tile);
+});
+document.getElementById("cifar-note").textContent =
+  `JAX port of diffusers v0.40.0: ${DATA.part3.param_count.toLocaleString()} parameters, max |difference| against the reference predictions ` +
+  `${DATA.part3.reference_max_abs_diff.toExponential(2)}. Weights fixed; the sampler performs 1000 reverse updates with level t passed as model index t − 1.`;
+
+const inpaintGrid = document.getElementById("inpaint-grid");
+function buildInpaint() {
+  inpaintGrid.innerHTML = "";
+  DATA.inpaint.images.forEach((row, i) => {
+    const rowEl = document.createElement("div");
+    rowEl.className = "inpaint-row";
+    const seedIndex = +document.getElementById("seed").value;
+    const mse = DATA.inpaint.hidden_mse[i][seedIndex];
+    rowEl.innerHTML = `
+      <div class="tile"><img src="${row.truth}" alt="truth"><div class="caption">truth ${i + 1}</div></div>
+      <div class="tile"><img src="${row.observation}" alt="observation"><div class="caption">observation</div></div>
+      <div class="tile"><img src="${row.completions[seedIndex]}" alt="completion"><div class="caption">seed ${DATA.inpaint.seeds[seedIndex]} · MSE ${mse.toFixed(2)}</div></div>
+      <div class="tile"><img src="${row.variance}" alt="variance"><div class="caption">variance over seeds</div></div>`;
+    inpaintGrid.appendChild(rowEl);
+  });
+  document.getElementById("seed-value").textContent = DATA.inpaint.seeds[+document.getElementById("seed").value];
+}
+document.getElementById("seed").addEventListener("input", buildInpaint);
+document.getElementById("null-value").textContent = DATA.sweep.null.toFixed(4);
+document.getElementById("inpaint-note").textContent =
+  `${DATA.inpaint.jumps} jumps (1000, 980, …, 20, 0), two attempts each except the last, ${DATA.inpaint.evaluations} network evaluations per completion. ` +
+  `Observed pixels change by at most ${DATA.inpaint.observed_max_change} (last merge overwrites them with the clean observation); ` +
+  `inside the hole different seeds are different plausible completions.`;
+
+/* ------------------------------------------------------------------- start */
+initialise();
+updateStage();
+buildInpaint();
+drawChart();
+</script>
+</body>
+</html>

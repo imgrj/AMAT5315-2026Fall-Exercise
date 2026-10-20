@@ -9,6 +9,10 @@ filling in a hidden square.
 All models are JAX, CPU first, and every number below is produced by the
 commands shown next to it.
 
+**Interactive lab**: [docs/week7-diffusion-lab.html](../docs/week7-diffusion-lab.html) re-implements the trained 37,762-parameter predictor in JavaScript and runs DDPM and DDIM live in the browser (checked against JAX to about 2e-4), next to the step-count comparison, a scrubber over the CIFAR reverse process and the inpainting seed slider. Rebuild it with python scripts/build_web_lab.py after new runs.
+
+---
+
 ---
 
 ## Contents
