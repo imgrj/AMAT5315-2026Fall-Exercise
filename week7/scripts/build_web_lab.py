@@ -1,7 +1,7 @@
 """Build the Week 7 interactive lab (docs/week7-diffusion-lab.html).
 
-Embeds the trained noise predictor, the step-count sweep and small PNG tiles for
-the photograph gallery and the inpainting comparison, so the page is a single
+Embeds the trained noise predictor and small PNG tiles for the photograph
+gallery and the inpainting comparison, so the page is a single
 self-contained file with no external requests.
 """
 
@@ -73,40 +73,20 @@ def main() -> int:
         "b": [float32_b64(np.asarray(b)) for b in params["biases"]],
     }
 
-    sweep_payload = json.loads((ROOT / "evidence" / "part2_metrics.json").read_text(encoding="utf-8"))
-    sweep = {
-        "steps": sweep_payload["sweep"]["steps"],
-        "null": sweep_payload["sweep"]["null_quantile_95"],
-        "series": {
-            name: {
-                "energy": sweep_payload["sweep"][name]["energy"][: len(sweep_payload["sweep"]["steps"])],
-                "fraction": sweep_payload["sweep"][name]["fraction_error"][: len(sweep_payload["sweep"]["steps"])],
-                "width": sweep_payload["sweep"][name]["width_error"][: len(sweep_payload["sweep"]["steps"])],
-            }
-            for name in ("ddpm", "ddim", "flow", "ddpm_exact", "ddim_exact", "flow_exact")
-        },
-        "determinism": sweep_payload["determinism"],
-        "velocity": {
-            "s": sweep_payload["velocity"]["s"],
-            "relative_rms": sweep_payload["velocity"]["relative_rms"],
-            "relative_rms_grid": sweep_payload["velocity"]["relative_rms_grid"],
-        },
-    }
-
-    # Part 3: reverse-process stages of the first image, four final images, real CIFAR
-    part3 = np.load(ROOT / "artifacts" / "part3" / "samples.npz")
-    stage_tiles = [photo_b64(to_display(part3[f"level_{level}"][0]), size=256) for level in SHOW_LEVELS]
-    generated = [photo_b64(to_display(part3["samples"][i]), size=256) for i in range(4)]
-    from part3_cifar import load_real_cifar
+    # Part 4: reverse-process stages of the first image, four final images, real CIFAR
+    part4 = np.load(ROOT / "artifacts" / "part4" / "samples.npz")
+    stage_tiles = [photo_b64(to_display(part4[f"level_{level}"][0]), size=256) for level in SHOW_LEVELS]
+    generated = [photo_b64(to_display(part4["samples"][i]), size=256) for i in range(4)]
+    from part4_cifar import load_real_cifar
 
     real = [photo_b64(to_display(image), size=256) for image in load_real_cifar(4)]
 
-    # Part 4: truth, observation, four completions per image, variance map
-    part4 = np.load(ROOT / "artifacts" / "part4" / "completions.npz")
-    completions = part4["completions"]
-    truth = part4["truth"]
-    mask = part4["mask"]
-    seeds = part4["seeds"]
+    # Part 5: truth, observation, four completions per image, variance map
+    part5 = np.load(ROOT / "artifacts" / "part5" / "completions.npz")
+    completions = part5["completions"]
+    truth = part5["truth"]
+    mask = part5["mask"]
+    seeds = part5["seeds"]
     hidden = mask == 0
     inpaint_images = []
     for i in range(4):
@@ -121,11 +101,11 @@ def main() -> int:
         for j in range(4):
             row["completions"].append(photo_b64(to_display(completions[i * 4 + j]), size=192))
         inpaint_images.append(row)
-    metrics = json.loads((ROOT / "evidence" / "part4_metrics.json").read_text(encoding="utf-8"))
+    metrics = json.loads((ROOT / "evidence" / "part5_metrics.json").read_text(encoding="utf-8"))
 
+    part4_metrics = json.loads((ROOT / "evidence" / "part4_metrics.json").read_text(encoding="utf-8"))
     payload = {
         "weights": weights,
-        "sweep": sweep,
         "cifar": {"stages": stage_tiles, "levels": SHOW_LEVELS, "generated": generated, "real": real},
         "inpaint": {
             "images": inpaint_images,
@@ -136,12 +116,11 @@ def main() -> int:
             "evaluations": metrics["network_evaluations"],
         },
         "part1": {
-            "count": int(json.loads((ROOT / "evidence" / "part1_metrics.json").read_text())["training"]["parameter_count"]),
-            "loss": float(json.loads((ROOT / "evidence" / "part1_metrics.json").read_text())["training"]["final_loss"]),
+            "loss": json.loads((ROOT / "evidence" / "part1_metrics.json").read_text())["training"]["final_loss"],
         },
-        "part3": {
-            "reference_max_abs_diff": json.loads((ROOT / "evidence" / "part3_metrics.json").read_text())["reference_max_abs_diff"],
-            "param_count": json.loads((ROOT / "evidence" / "part3_metrics.json").read_text())["param_count"],
+        "part4": {
+            "reference_max_abs_diff": part4_metrics["reference_max_abs_diff"],
+            "param_count": part4_metrics["param_count"],
         },
     }
 
@@ -154,6 +133,9 @@ def main() -> int:
         target = asset_dir / name
         if not target.exists() or target.read_bytes() != data:
             target.write_bytes(data)
+    for stale in asset_dir.iterdir():
+        if stale.is_file() and stale.name not in gallery_files:
+            stale.unlink()
     print(f"copied {len(gallery_files)} evidence figures to {asset_dir}")
 
     template = TEMPLATE.read_text(encoding="utf-8")

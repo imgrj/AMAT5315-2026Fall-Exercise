@@ -1,4 +1,4 @@
-"""Part 3: the downloaded CIFAR-10 noise predictor on photographs.
+"""Part 4: the downloaded CIFAR-10 noise predictor on photographs.
 
 Loads the pinned ``google/ddpm-cifar10-32`` weights as a fixed JAX noise
 predictor, verifies the port against the diffusers v0.40.0 reference outputs,
@@ -63,7 +63,7 @@ def to_display(x: np.ndarray) -> np.ndarray:
 def main() -> int:
     setup_matplotlib()
     _common.ensure_dirs()
-    (ARTIFACTS / "part3").mkdir(parents=True, exist_ok=True)
+    (ARTIFACTS / "part4").mkdir(parents=True, exist_ok=True)
     if not (MODEL_DIR / "diffusion_pytorch_model.safetensors").exists():
         raise SystemExit(
             "missing inputs/cifar-model; download it with\n"
@@ -71,7 +71,7 @@ def main() -> int:
             "    config.json diffusion_pytorch_model.safetensors --revision " + REVISION + " \\\n"
             "    --local-dir inputs/cifar-model"
         )
-    print("=== Part 3: the pretrained CIFAR-10 noise predictor ===")
+    print("=== Part 4: the pretrained CIFAR-10 noise predictor ===")
     started = time.time()
     loaded = unet.load_unet(MODEL_DIR)
     params = loaded["params"]
@@ -79,7 +79,7 @@ def main() -> int:
     print(f"loaded {count:,} parameters from the pinned revision {REVISION}")
 
     # ------------------------------------------------ reference verification
-    ref_path = ARTIFACTS / "part3" / "reference_unet.npz"
+    ref_path = ARTIFACTS / "part4" / "reference_unet.npz"
     reference_diff = None
     if ref_path.exists():
         data = np.load(ref_path)
@@ -133,7 +133,7 @@ def main() -> int:
             if row == 0:
                 ax.set_title(f"$t={level}$", fontsize=9)
     fig.suptitle("Downloaded weights plus Part 1's DDPM update: structure appears between $t=200$ and $t=50$", y=0.99)
-    save_figure(fig, "part3-cifar-generation.png")
+    save_figure(fig, "part4-cifar-generation.png")
 
     real = load_real_cifar(4)
     fig, axes = plt.subplots(2, 5, figsize=(13.5, 5.6))
@@ -158,7 +158,7 @@ def main() -> int:
                     "Computed now:\nDDPM reverse updates,\n1000 network evaluations",
                     fontsize=7.5, va="center")
     fig.suptitle("Generated photographs from Gaussian noise, compared with real CIFAR-10 images", y=1.0)
-    save_figure(fig, "part3-cifar-samples.png")
+    save_figure(fig, "part4-cifar-samples.png")
 
     # ------------------------------------------------------------- metrics
     pixel_stats = []
@@ -183,9 +183,9 @@ def main() -> int:
         "ms_per_batch_evaluation": float(np.mean(step_times) * 1000),
         "show_levels": SHOW_LEVELS,
     }
-    dump_json("part3_metrics.json", payload)
+    dump_json("part4_metrics.json", payload)
     np.savez_compressed(
-        ARTIFACTS / "part3" / "samples.npz",
+        ARTIFACTS / "part4" / "samples.npz",
         samples=samples,
         **{f"level_{level}": snapshots[level] for level in SHOW_LEVELS},
     )

@@ -1,4 +1,4 @@
-﻿"""Training loops: noise prediction (Part 1) and velocity prediction (Part 2)."""
+"""Training loops: Algorithm 1 (noise predictor) and Algorithm 4 (velocity network)."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from . import mixture, model, schedule
 DEFAULT_UPDATES = 25000
 DEFAULT_BATCH = 512
 DEFAULT_LR = 1e-3
-DEFAULT_STAGES = (0, 100, 300, 1000, 3000, 6000, 10000, 15000, 20000, 25000)
+DEFAULT_STAGES = (0, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 25000)
 
 
 def _zeros_like(tree):
@@ -47,7 +47,7 @@ def _noise_batch(key, abars, T: int, batch: int):
 
 def noise_loss(params, key, abars, T: int, batch: int):
     x_t, t, eps = _noise_batch(key, abars, T, batch)
-    pred = model.apply(params, x_t, t.astype(jnp.float32) / float(T))
+    pred = model.apply(params, x_t, t.astype(jnp.float32) - 1.0)
     return 0.5 * jnp.mean(jnp.sum((pred - eps) ** 2, axis=-1))
 
 
@@ -62,8 +62,8 @@ def _velocity_batch(key, batch: int):
 
 def velocity_loss(params, key, batch: int):
     x_s, s, target = _velocity_batch(key, batch)
-    pred = model.apply(params, x_s, s)
-    return jnp.mean(jnp.sum((pred - target) ** 2, axis=-1))
+    pred = model.apply(params, x_s, model.FLOW_TIME_SCALE * s)
+    return 0.5 * jnp.mean(jnp.sum((pred - target) ** 2, axis=-1))
 
 
 def train_noise_predictor(

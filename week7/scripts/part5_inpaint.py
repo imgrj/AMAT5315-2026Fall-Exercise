@@ -1,4 +1,4 @@
-﻿"""Part 4: RePaint inpainting with the downloaded CIFAR-10 predictor.
+﻿"""Part 5: RePaint inpainting with the downloaded CIFAR-10 predictor.
 
 Hides rows and columns 6:26 in all three channels of the four prepared test
 images, completes each with seeds 7201-7204, and checks that every observed
@@ -40,11 +40,11 @@ def to_display(x: np.ndarray) -> np.ndarray:
 def main() -> int:
     setup_matplotlib()
     _common.ensure_dirs()
-    (ARTIFACTS / "part4").mkdir(parents=True, exist_ok=True)
+    (ARTIFACTS / "part5").mkdir(parents=True, exist_ok=True)
     if not IMAGES.exists():
         raise SystemExit(f"missing {IMAGES}; download it with\n"
                          "  curl -fL https://giggleliu.github.io/AMAT5315-2026Fall/downloads/week7-images.npz -o inputs/images.npz")
-    print("=== Part 4: filling in missing pixels with RePaint ===")
+    print("=== Part 5: filling in missing pixels with RePaint ===")
     data = np.load(IMAGES)
     truth = np.asarray(data["test"], dtype=np.float32).transpose(0, 2, 3, 1)  # (4, 32, 32, 3)
     n_images = truth.shape[0]
@@ -124,7 +124,7 @@ def main() -> int:
             if i == 0:
                 ax.set_title(title, fontsize=8)
     fig.suptitle("RePaint completions keep every observed pixel and disagree inside the hidden square", y=0.995)
-    save_figure(fig, "part4-inpainting.png")
+    save_figure(fig, "part5-inpainting.png")
 
     fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.0))
     width = 0.2
@@ -141,7 +141,7 @@ def main() -> int:
     axes[1].set_ylabel("mean variance over 4 completions")
     axes[1].set_title("variation across seeds inside the hole")
     fig.suptitle("Error against the particular truth versus variation between plausible completions", y=1.02)
-    save_figure(fig, "part4-variation.png")
+    save_figure(fig, "part5-variation.png")
 
     payload = {
         "seeds": SEEDS,
@@ -157,9 +157,9 @@ def main() -> int:
         "seconds": elapsed,
         "levels": levels,
     }
-    dump_json("part4_metrics.json", payload)
+    dump_json("part5_metrics.json", payload)
     np.savez_compressed(
-        ARTIFACTS / "part4" / "completions.npz",
+        ARTIFACTS / "part5" / "completions.npz",
         completions=completions,
         truth=truth,
         mask=mask,

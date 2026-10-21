@@ -27,11 +27,11 @@ from _common import COLORS, ARTIFACTS, EVIDENCE, dump_json, save_figure, save_gi
 sys.path.insert(0, str(_common.ROOT))
 from src import diffusion, metrics, mixture, model, schedule, train
 
-SEED = 20260707
+SEED = 2026
 UPDATES = 25000
 BATCH = 512
 LR = 1e-3
-STAGES = (0, 100, 300, 1000, 3000, 6000, 10000, 15000, 20000, 25000)
+STAGES = (0, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 25000)
 N_FORWARD = 2000
 N_GENERATE = 2000
 N_DENOISE = 1000
@@ -150,7 +150,7 @@ def main() -> int:
 
     fig = plt.figure(figsize=(16.5, 3.9))
     gs = fig.add_gridspec(1, 5, wspace=0.32, width_ratios=[1, 1, 1.25, 1, 0.9])
-    show = [0, 1000, 6000, 25000]
+    show = [0, 500, 5000, 25000]
     for i, update in enumerate(show):
         ax = fig.add_subplot(gs[0, i])
         for center in mixture.CENTERS:
