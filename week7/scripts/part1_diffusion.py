@@ -122,21 +122,31 @@ def main() -> int:
         ends = np.asarray(stage_paths[update][0])
         print(f"  stage {update:6d}: loss {loss_at[update]:.4f}  max|endpoint| {np.abs(ends).max():8.2f}")
 
-    gif_stages = STAGES
     frames = []
-    for update in gif_stages:
-        fig, ax = plt.subplots(figsize=(4.8, 4.8))
+    for update in STAGES:
+        fig = plt.figure(figsize=(8.6, 4.4))
+        grid = fig.add_gridspec(1, 2, width_ratios=[1, 1.15], wspace=0.26)
+        ax = fig.add_subplot(grid[0, 0])
         for center in mixture.CENTERS:
             ax.add_patch(plt.Circle(center, 2 * mixture.STD, fill=False, ls=":", lw=0.8, color=COLORS["noise"]))
         for j in range(n_paths):
-            path = np.stack([stage_paths[update][lvl][j] for lvl in (1000, 500, 100, 0)])
-            ax.plot(path[:, 0], path[:, 1], color=COLORS["learned"], lw=0.6, alpha=0.7)
+            path = np.stack([stage_paths[update][lvl][j] for lvl in (1000, 700, 400, 200, 100, 50, 20, 0)])
+            ax.plot(path[:, 0], path[:, 1], color=COLORS["learned"], lw=0.6, alpha=0.75)
             ax.scatter(path[0, 0], path[0, 1], s=14, facecolors="none", edgecolors=COLORS["noise"])
             ax.scatter(path[-1, 0], path[-1, 1], s=18, color=COLORS["learned"])
         style_axes(ax, (-8, 8), (-8, 8))
-        ax.set_title(f"update {update}  loss {loss_at[update]:.4f}")
+        ax.set_title(f"update {update}: 10 DDPM paths, loss {loss_at[update]:.4f}")
+        ax2 = fig.add_subplot(grid[0, 1])
+        ax2.plot(history["updates"], history["loss"], color=COLORS["data"], lw=0.9)
+        ax2.scatter([update], [loss_at[update]], color=COLORS["learned"], s=22, zorder=4)
+        ax2.axvline(update, color=COLORS["learned"], ls=":", lw=0.8)
+        ax2.set_xlim(0, UPDATES)
+        ax2.set_ylim(0.2, 1.3)
+        ax2.set_xlabel("update")
+        ax2.set_ylabel("noise-prediction loss")
+        ax2.set_title(f"training loss so far ({update} of {UPDATES} updates)")
         frames.append(fig)
-    save_gif(frames, "part1-training.gif", fps=1.4)
+    save_gif(frames, "part1-training.gif", fps=1.1)
 
     fig = plt.figure(figsize=(16.5, 3.9))
     gs = fig.add_gridspec(1, 5, wspace=0.32, width_ratios=[1, 1, 1.25, 1, 0.9])

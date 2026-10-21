@@ -139,6 +139,8 @@
     overflow: hidden; aspect-ratio: 16 / 10; display: flex; align-items: center; justify-content: center;
   }
   .img-wrapper img { width: 100%; height: 100%; object-fit: contain; }
+  .img-wrapper.animated { aspect-ratio: 1 / 1; }
+  .img-wrapper.animated img { object-fit: contain; }
   .zoom-hint {
     position: absolute; bottom: 8px; right: 8px; background: rgba(10,15,29,0.85);
     border: 1px solid rgba(56,189,248,0.3); color: var(--accent); font-size: 11px;
@@ -354,6 +356,7 @@
 <script>
 const DATA = __DATA__;
 const PREFIX = "assets/week7/";
+const ASSET_VERSION = "?v=3";
 
 /* ---------------------------------------------------------------- decoding */
 function decodeF32(b64) {
@@ -682,6 +685,7 @@ const GALLERY_ITEMS = [
     badge: "Part 1 • Movie",
     title: "2. Forward-diffusion movie",
     img: "part1-forward.gif",
+    animated: true,
     desc: "Animated version of item 1: the modes broaden and merge into a Gaussian cloud.",
     theory: "Following identical samples isolates the effect of the noising rule from sampling noise.",
     metrics: [["samples", "2000"], ["levels shown", "0 … 1000"]],
@@ -700,6 +704,7 @@ const GALLERY_ITEMS = [
     badge: "Part 1 • Movie",
     title: "4. Training-stage movie over all ten saved models",
     img: "part1-training.gif",
+    animated: true,
     desc: "Animated version of item 3, one frame per saved stage.",
     theory: "At initialization the paths leave the plotted square; after the first hundred updates they already land on the clusters.",
     metrics: [["stages", "10"], ["paths", "10"]],
@@ -718,6 +723,7 @@ const GALLERY_ITEMS = [
     badge: "Part 1 • Movie",
     title: "6. Reverse-process movie",
     img: "part1-reverse.gif",
+    animated: true,
     desc: "The 2000 generation paths played from t = 1000 back to t = 0.",
     theory: "Early reverse steps choose the cluster, later steps position the point inside it.",
     metrics: [["samples", "2000"], ["steps", "1000"]],
@@ -803,9 +809,9 @@ GALLERY_ITEMS.forEach((item, index) => {
   card.className = "gallery-card";
   card.onclick = () => openLightbox(index);
   card.innerHTML = `
-    <div class="img-wrapper">
-      <img src="${PREFIX}${item.img}" alt="${item.title}" loading="lazy">
-      <span class="zoom-hint">View details</span>
+    <div class="img-wrapper${item.animated ? " animated" : ""}">
+      <img src="${PREFIX}${item.img}${ASSET_VERSION}" alt="${item.title}" loading="lazy">
+      <span class="zoom-hint">${item.animated ? "Animated · details" : "View details"}</span>
     </div>
     <div class="card-body">
       <span class="metric-tag">${item.badge}</span>
@@ -826,7 +832,7 @@ function openLightbox(index) {
   document.getElementById("modalTitle").textContent = item.title;
   document.getElementById("modalDesc").textContent = item.desc;
   document.getElementById("modalTheory").textContent = item.theory;
-  document.getElementById("modalImg").src = PREFIX + item.img;
+  document.getElementById("modalImg").src = PREFIX + item.img + ASSET_VERSION;
   document.getElementById("modalCmd").textContent = item.cmd;
   document.getElementById("modalTable").innerHTML =
     "<tr><th>Quantity</th><th>Value</th></tr>" +
