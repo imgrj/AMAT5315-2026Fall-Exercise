@@ -34,18 +34,31 @@ def float32_b64(array: np.ndarray) -> str:
     return base64.b64encode(np.ascontiguousarray(array, dtype="<f4").tobytes()).decode("ascii")
 
 
-def png_b64(array: np.ndarray, scale: int = 4) -> str:
-    """Encode an RGB or grayscale image as a PNG data URL (scaled with nearest)."""
+def photo_b64(array: np.ndarray, size: int = 256) -> str:
+    """Encode a small image as a smooth (Lanczos) JPEG data URL for display.
+
+    CIFAR-10 samples are natively 32 x 32.  Blowing them up with nearest-neighbour
+    interpolation is what makes a photograph look like coloured blocks, so the lab
+    resamples smoothly once here and lets the browser scale the result.
+    """
     array = np.asarray(array)
     if array.dtype != np.uint8:
-        array = np.clip(array, 0.0, 1.0)
-        array = (array * 255.0 + 0.5).astype(np.uint8)
-    image = Image.fromarray(array)
-    if scale != 1:
-        image = image.resize((image.width * scale, image.height * scale), Image.NEAREST)
+        array = (np.clip(array, 0.0, 1.0) * 255.0 + 0.5).astype(np.uint8)
+    if array.ndim == 2:
+        array = np.stack([array, array, array], axis=-1)
+    image = Image.fromarray(array).resize((size, size), Image.LANCZOS)
     buffer = io.BytesIO()
-    image.save(buffer, format="PNG", optimize=True)
-    return "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode("ascii")
+    image.save(buffer, format="JPEG", quality=92, optimize=True)
+    return "data:image/jpeg;base64," + base64.b64encode(buffer.getvalue()).decode("ascii")
+
+
+def heat_b64(values: np.ndarray, size: int = 256) -> str:
+    """Encode a scalar map with the magma colour map (smooth JPEG)."""
+    import matplotlib.cm as cm
+
+    values = np.clip(np.asarray(values, dtype=np.float64) / max(0.2, float(np.max(values)) + 1e-12), 0.0, 1.0)
+    rgb = (cm.magma(values)[..., :3] * 255.0).astype(np.uint8)
+    return photo_b64(rgb, size=size)
 
 
 def to_display(x: np.ndarray) -> np.ndarray:
@@ -82,11 +95,11 @@ def main() -> int:
 
     # Part 3: reverse-process stages of the first image, four final images, real CIFAR
     part3 = np.load(ROOT / "artifacts" / "part3" / "samples.npz")
-    stage_tiles = [png_b64(to_display(part3[f"level_{level}"][0])) for level in SHOW_LEVELS]
-    generated = [png_b64(to_display(part3["samples"][i])) for i in range(4)]
+    stage_tiles = [photo_b64(to_display(part3[f"level_{level}"][0]), size=256) for level in SHOW_LEVELS]
+    generated = [photo_b64(to_display(part3["samples"][i]), size=256) for i in range(4)]
     from part3_cifar import load_real_cifar
 
-    real = [png_b64(to_display(image)) for image in load_real_cifar(4)]
+    real = [photo_b64(to_display(image), size=256) for image in load_real_cifar(4)]
 
     # Part 4: truth, observation, four completions per image, variance map
     part4 = np.load(ROOT / "artifacts" / "part4" / "completions.npz")
@@ -100,15 +113,13 @@ def main() -> int:
         obs = to_display(truth[i]).copy()
         obs[6:26, 6:26] = 0.5
         row = {
-            "truth": png_b64(to_display(truth[i])),
-            "observation": png_b64(obs),
+            "truth": photo_b64(to_display(truth[i]), size=192),
+            "observation": photo_b64(obs, size=192),
             "completions": [],
-            "variance": png_b64(
-                np.clip(completions[i * 4:(i + 1) * 4].var(axis=0).mean(axis=-1) / 0.2, 0.0, 1.0), scale=4
-            ),
+            "variance": heat_b64(completions[i * 4:(i + 1) * 4].var(axis=0).mean(axis=-1), size=192),
         }
         for j in range(4):
-            row["completions"].append(png_b64(to_display(completions[i * 4 + j])))
+            row["completions"].append(photo_b64(to_display(completions[i * 4 + j]), size=192))
         inpaint_images.append(row)
     metrics = json.loads((ROOT / "evidence" / "part4_metrics.json").read_text(encoding="utf-8"))
 
