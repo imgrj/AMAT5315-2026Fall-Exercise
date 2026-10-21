@@ -134,6 +134,17 @@ def main() -> int:
         },
     }
 
+    # evidence figures are served with the site: the GitHub Pages root is docs/
+    asset_dir = DOCS / "assets" / "week7"
+    asset_dir.mkdir(parents=True, exist_ok=True)
+    gallery_files = sorted(p.name for p in (ROOT / "evidence").iterdir() if p.suffix in {".png", ".gif"})
+    for name in gallery_files:
+        data = (ROOT / "evidence" / name).read_bytes()
+        target = asset_dir / name
+        if not target.exists() or target.read_bytes() != data:
+            target.write_bytes(data)
+    print(f"copied {len(gallery_files)} evidence figures to {asset_dir}")
+
     template = TEMPLATE.read_text(encoding="utf-8")
     html = template.replace("__DATA__", json.dumps(payload, separators=(",", ":")))
     OUT.parent.mkdir(parents=True, exist_ok=True)

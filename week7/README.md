@@ -1,4 +1,4 @@
-﻿# Week 7: Diffusion and Flow Matching
+# Week 7: Diffusion and Flow Matching
 
 Generation by transforming fresh Gaussian noise: a denoising diffusion
 probabilistic model (DDPM) on a four-cluster Gaussian mixture, deterministic
@@ -9,7 +9,7 @@ filling in a hidden square.
 All models are JAX, CPU first, and every number below is produced by the
 commands shown next to it.
 
-**Interactive lab**: [docs/week7-diffusion-lab.html](../docs/week7-diffusion-lab.html) re-implements the trained 37,762-parameter predictor in JavaScript and runs DDPM and DDIM live in the browser (checked against JAX to about 2e-4), next to the step-count comparison, a scrubber over the CIFAR reverse process and the inpainting seed slider. Rebuild it with python scripts/build_web_lab.py after new runs.
+**Interactive lab**: [docs/week7-diffusion-lab.html](../docs/week7-diffusion-lab.html) follows the other weeks' two-tab layout. **Interactive Studio** re-implements the trained 37,762-parameter predictor in JavaScript and runs DDPM and DDIM live in the browser (checked against JAX to about 2e-4), with a slider over the pretrained CIFAR-10 reverse process and the RePaint seed comparison. **Evidence & Verification (14)** collects the eleven committed figures plus the three movies, each opening a detail panel with its measured numbers and producing command. Rebuild it with `python scripts/build_web_lab.py` after new runs.
 
 ---
 
