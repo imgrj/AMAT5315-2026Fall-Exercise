@@ -1,17 +1,22 @@
 # Week 7: Diffusion and Flow Matching
 
-Generation by transforming fresh Gaussian noise: a denoising diffusion
-probabilistic model (DDPM) on a four-cluster Gaussian mixture, deterministic
-few-step sampling with DDIM, flow matching on straight paths, then the same
-machinery with a downloaded CIFAR-10 noise predictor for photographs and for
-filling in a hidden square.
+Generation by transforming fresh Gaussian noise. Part 1 trains a noise
+predictor on four clusters and samples with DDPM (Algorithm 1 and Algorithm 2 of
+the learning sheet). Part 2 makes the reverse path deterministic with DDIM.
+Part 3 trains a velocity network by flow matching and compares how many steps
+each sampler needs. Parts 4 and 5 use a downloaded CIFAR-10 noise predictor to
+generate photographs and to fill in a hidden square.
 
-All models are JAX, CPU first, and every number below is produced by the
-commands shown next to it.
+All models are JAX, CPU first, and every number below is produced by the command
+shown next to it.
 
-**Interactive lab**: [docs/week7-diffusion-lab.html](../docs/week7-diffusion-lab.html) follows the other weeks' two-tab layout. **Interactive Studio** re-implements the trained 37,762-parameter predictor in JavaScript and runs DDPM and DDIM live in the browser (checked against JAX to about 2e-4), with a slider over the pretrained CIFAR-10 reverse process and the RePaint seed comparison. **Evidence & Verification (14)** collects the eleven committed figures plus the three movies, each opening a detail panel with its measured numbers and producing command. Rebuild it with `python scripts/build_web_lab.py` after new runs.
-
----
+**Interactive lab**: [docs/week7-diffusion-lab.html](../docs/week7-diffusion-lab.html)
+follows the two-tab layout of the other weeks. **Interactive Studio** runs the
+trained 37,762-parameter predictor in JavaScript (DDPM and DDIM, checked against
+JAX to about 2e-4) with a slider over the pretrained CIFAR-10 reverse process
+and the RePaint seed comparison. **Evidence & Verification (14)** collects the
+eleven committed figures plus the three movies, each with its measured numbers
+and producing command. Rebuild it with `python scripts/build_web_lab.py`.
 
 ---
 
@@ -19,32 +24,37 @@ commands shown next to it.
 
 | Part | What is built | Evidence |
 | :--- | :--- | :--- |
-| 1 | Forward diffusion, time-conditioned noise predictor, DDPM sampler | `part1-*.png`, `part1-*.gif`, `part1_metrics.json` |
-| 2 | DDIM, exact conditional-mean noise, flow-matching velocity network | `part2-*.png`, `part2_metrics.json` |
-| 3 | JAX port of the pretrained CIFAR-10 U-Net, 1000-step DDPM | `part3-cifar-*.png`, `part3_metrics.json` |
-| 4 | RePaint inpainting of rows and columns 6:26 | `part4-*.png`, `part4_metrics.json` |
+| 1 | Target and forward diffusion; Algorithm 1 training; Algorithm 2 DDPM sampling | `part1-*.png`, `part1-*.gif`, `part1_metrics.json` |
+| 2 | Algorithm 3 (deterministic DDIM) and the exact conditional-mean control | `part2-determinism.png`, `part2_metrics.json` |
+| 3 | Algorithm 4 (flow matching) and Algorithm 5 (Euler), with the step sweep | `part3-velocity.png`, `part3-steps.png`, `part3_metrics.json` |
+| 4 | JAX port of the pretrained CIFAR-10 U-Net + 1000-step DDPM | `part4-cifar-*.png`, `part4_metrics.json` |
+| 5 | Algorithm 6 (RePaint inpainting) | `part5-*.png`, `part5_metrics.json` |
 
 ```
 week7/
+├── diffusion.toml               # Part 1 network, optimizer, seed, checkpoints
+├── flow.toml                    # Part 3 network, optimizer, seed
 ├── SPEC.md                      # the sheet restated as pass/fail criteria
-├── pyproject.toml
 ├── src/
 │   ├── schedule.py              # beta schedule, alpha_t, abar_t
 │   ├── mixture.py               # target, exact conditional noise / posterior mean / velocity
-│   ├── model.py                 # time-conditioned MLP (noise and velocity predictors)
-│   ├── diffusion.py             # Eq. 4-12: forward, DDPM, DDPM-skipped, DDIM, trajectories
-│   ├── flow.py                  # Eq. 13-17: straight paths, marginal velocity, Euler sampling
-│   ├── metrics.py               # cluster statistics, energy distance, null scale, KS distance
-│   ├── train.py                 # Adam + cosine decay; 25000-update training loops
+│   ├── model.py                 # Eq. 8-11 time features and the MLP
+│   ├── diffusion.py             # Eq. 6-7, Algorithm 2, Eq. 17, Algorithm 3
+│   ├── flow.py                  # Algorithm 4-5 and the exact marginal velocity
+│   ├── metrics.py               # cluster statistics, energy distance, null scale
+│   ├── train.py                 # Algorithm 1 and Algorithm 4 training loops
 │   ├── unet.py                  # JAX UNet2DModel for google/ddpm-cifar10-32
-│   └── repaint.py               # RePaint sampler (Eq. 19-22)
+│   └── repaint.py               # Algorithm 6
 ├── scripts/
-│   ├── part1_diffusion.py       # Part 1 pipeline
-│   ├── part2_fewer_steps.py     # Part 2 pipeline
-│   ├── part3_cifar.py           # Part 3 pipeline
-│   ├── part4_inpaint.py         # Part 4 pipeline
-│   └── export_reference_unet.py # diffusers v0.40.0 reference outputs (torch env)
-├── tests/test_week7.py          # 30 verification tests derived from SPEC.md
+│   ├── part1_forward.py         # Part 1, first task: target + forward only
+│   ├── part1_diffusion.py       # Part 1: training, DDPM, figures
+│   ├── part2_ddim.py            # Part 2
+│   ├── part3_flow.py            # Part 3
+│   ├── part4_cifar.py           # Part 4
+│   ├── part5_inpaint.py         # Part 5
+│   ├── export_reference_unet.py # diffusers v0.40.0 reference outputs (torch env)
+│   └── build_web_lab.py         # builds docs/week7-diffusion-lab.html
+├── tests/test_week7.py          # 35 verification tests
 ├── evidence/                    # committed figures and metric summaries
 ├── artifacts/                   # raw runs: weights, samples, trajectories (git-ignored)
 └── inputs/                      # downloads (git-ignored)
@@ -53,8 +63,6 @@ week7/
 ---
 
 ## Environment
-
-Recorded from `setup.txt` and this machine:
 
 | Component | Version |
 | :--- | :--- |
@@ -68,287 +76,223 @@ Recorded from `setup.txt` and this machine:
 | Reference check | torch 2.14.1+cpu, diffusers 0.40.0 (uv, Python 3.12) |
 
 ```powershell
-# local test environment that reuses the CPU JAX install
 uv venv week7/.venv --python 3.14 --system-site-packages
 uv pip install --python week7/.venv/Scripts/python.exe pytest
-
-# verification
 week7\.venv\Scripts\python.exe -m pytest week7\tests -q
 ```
-
----
 
 ## Downloads (not committed)
 
 ```powershell
-# pretrained CIFAR-10 noise predictor, pinned revision
 uv run --with huggingface-hub==1.33.0 hf download google/ddpm-cifar10-32 `
   config.json diffusion_pytorch_model.safetensors `
   --revision 267b167dc01f0e4e61923ea244e8b988f84deb80 `
   --local-dir inputs/cifar-model
 
-# four test images and four validation images, clean values in [-1, 1]
 curl -fL https://giggleliu.github.io/AMAT5315-2026Fall/downloads/week7-images.npz `
   -o inputs/images.npz
 ```
 
-The CIFAR-10 comparison gallery in Part 3 reuses Week 6's archive
-(`week6/inputs/cifar10/cifar-10-binary.tar.gz`) and falls back to downloading it
-if absent. `inputs/` and `artifacts/` are git-ignored, as required.
+The CIFAR-10 comparison gallery in Part 4 reuses Week 6's archive
+(`week6/inputs/cifar10/cifar-10-binary.tar.gz`) and falls back to downloading it.
 
 ---
 
-## Part 1: DDPM on the four-cluster mixture
+## Part 1: diffusion on the four-cluster mixture
 
-### What is implemented
+### The two tasks
 
-* Target `p_data(x) = 1/4 Σ_k N(x; μ_k, 0.09 I)` with
-  `μ_k = (3,0), (0,3), (-3,0), (0,-3)`; exact samples are the reference.
-* Schedule `β_t` linear in `t` from `1e-4` to `0.02`, `T = 1000`,
-  `ᾱ_t = Π_{s≤t}(1-β_s)`, so `ᾱ_1000 = 4.04e-5` (sheet: ≈ 4e-5).
-* Forward rule (Eq. 4) and the closed-form jump (Eq. 5).
-* Time-conditioned noise predictor: 2 coordinates + 32 sinusoidal time features
-  → three hidden layers of 128 units with SiLU → 2 outputs (37,762 parameters).
-* Loss (Eq. 6), noise levels drawn uniformly, batch of 512 freshly drawn
-  mixture points per update, Adam, cosine decay of the learning rate to zero,
-  **25000 updates**, models kept at updates
-  `0, 100, 300, 1000, 3000, 6000, 10000, 15000, 20000, 25000`.
-* DDPM sampler (Eq. 8-9): variance `β_t`, no clipping, no noise in the final
-  step (`σ_1 = 0`).
+The sheet asks for two separate pieces of work. `scripts/part1_forward.py`
+implements only the target (Eq. 2) and the forward rule (Eq. 6–7): it follows 2000
+samples through all 1000 levels and checks the closed-form jump against the
+iterated process. `scripts/part1_diffusion.py` then trains the predictor
+(Algorithm 1) and samples with DDPM (Algorithm 2).
 
 ```powershell
-week7\.venv\Scripts\python.exe week7\scripts\part1_diffusion.py
-# regenerate the figures from the saved stages without retraining:
-week7\.venv\Scripts\python.exe week7\scripts\part1_diffusion.py --reuse-stages
+python scripts/part1_forward.py       # target + forward diffusion only
+python scripts/part1_diffusion.py     # training + DDPM + all figures
+python scripts/part1_diffusion.py --reuse-stages   # redraw figures from saved checkpoints
 ```
 
-### (1) Forward diffusion merges the modes
+`diffusion.toml` fixes everything the sheet pins: three hidden layers of 128
+SiLU units, 32 time features `sin/cos((t-1)·10000^(-j/16))`, normal weights with
+standard deviation `1/√n` and zero biases, Adam `(0.9, 0.999, 1e-8)`, learning
+rate `1e-3` with a cosine decay to zero, batch 512, 25,000 updates, float32,
+seed 2026, and checkpoints
+`[0, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 25000]`.
+
+### Algorithm 1 in the code
+
+`src/train.py::train_noise_predictor` is a line-by-line transcription:
+
+| Sheet line | Code |
+| :--- | :--- |
+| 2–4 fix `α_t`, `ᾱ_0 = 1`, `ᾱ_t = Π α_k` | `src/schedule.py::linear_schedule` |
+| 6–15 one batch: draw `x0`, `ε`, `t`, form `x_t`, accumulate the loss | `train.py::_noise_batch`, `noise_loss` |
+| 13 `ℓ = (1/d)‖ε_θ(x_t,t) - ε‖²` | `0.5 * mean(Σ_i (ε̂-ε)²)` (d = 2, so 1/2 = 1/d) |
+| 16–17 `(θ,q) ← U(θ,q,g,η_j)` | `train.py::_adam_update` with the cosine learning rate |
+| 19 return predictor and coefficients | saved stages `artifacts/part1/stage_*.npz` |
+
+The measured loss history ends at **0.2316**. A positive plateau is expected:
+Eq. (14) splits the squared error into irreducible uncertainty about the noise
+and a term that training can remove; at the origin all four clusters remain
+plausible, so the optimal predictor returns their average, not a particular
+noise draw.
+
+### Algorithm 2 in the code
+
+`src/diffusion.py::ddpm_step`, applied from `t = T` down to `1`:
+`ε̂ = ε_θ(x,t)`, then `μ = (x - β_t ε̂/√(1-ᾱ_t))/√α_t`, then
+`x ← μ + √β_t z` with `z ~ N(0,I)` **except at the last step**, where `z = 0`.
+This is exactly Algorithm 2; there is no clipping.
+
+### Evidence
 
 ![Forward diffusion](evidence/part1-forward.png)
 
 *Produced by `scripts/part1_diffusion.py` (movie: `evidence/part1-forward.gif`).*
-The same 2000 points are followed on one fixed scale. At `t = 1000` the
-per-coordinate mean is `(-0.007, -0.003)` and the variance is
-`(1.046, 0.990)`: both within 0.1 of the standard-Gaussian values, as required.
-
-### (2) Training moves the endpoints onto the clusters
+At `t = 1000` the per-coordinate mean is `(-0.0064, 0.0070)` and the variance
+`(0.977, 1.021)`, both within 0.1 of the standard Gaussian.
 
 ![Training stages](evidence/part1-training-stages.png)
 
-*Produced by `scripts/part1_diffusion.py` (movie over all ten stages:
-`evidence/part1-training.gif`).* Ten DDPM paths share their starting noise and
-their reverse-step noise across every stage, so only the weights change. At
-initialization the paths leave the plotted square (endpoints up to `|x| ≈ 8.9e3`
-on this draw; the sheet quotes about 1500); after 100 updates they already sit
-on the clusters, and the loss plateaus near **0.274**, not zero. That remainder
-is the conditional uncertainty of Eq. 7, not a defective fit.
-
-### (3) Generated samples recover populations, centres and widths
+*Produced by `scripts/part1_diffusion.py` (movie over all ten checkpoints:
+`evidence/part1-training.gif`).* The ten DDPM paths share their starting noise
+and reverse-step noise, so only the weights change. Initialization sends paths
+far outside the square; by update 500 they already sit on the clusters.
 
 ![Generated samples](evidence/part1-generation.png)
 
 *Produced by `scripts/part1_diffusion.py`; reverse-process movie
-`evidence/part1-reverse.gif`.* 2000 DDPM samples with 1000 steps:
+`evidence/part1-reverse.gif`.* 2000 samples with 1000 DDPM steps:
 
 | Quantity | Requirement | Measured |
 | :--- | :--- | :--- |
-| populations | within 0.04 of 0.25 | 0.2405, 0.2590, 0.2420, 0.2585 |
-| spreads | within 0.03 of 0.30 | 0.285 – 0.310 (all 8 coordinates) |
-| centres | within 0.05 of the targets | max error 0.019 |
-| energy distance to 2000 exact draws | (reported) | 1.3e-3 |
+| populations | within 0.04 of 0.25 | 0.2555, 0.2675, 0.2295, 0.2475 |
+| spreads | within 0.03 of 0.30 | 0.281 – 0.321 |
+| centres | within 0.05 of the targets | largest error 0.040 |
+| energy distance to 2000 exact draws | (reported) | 3.9e-3 |
 
-### Optional: checking the denoiser
+### Additional check: the denoiser (not required by the sheet)
 
 ![Denoiser check](evidence/part1-denoiser.png)
 
-*Produced by `scripts/part1_diffusion.py`.* The Tweedie denoiser
-`x̂_0 = (x_t - √(1-ᾱ_t) ε_θ)/√(ᾱ_t)` against the exact posterior mean
-`E[x_0|x_t]`, as RMS error divided by the exact posterior standard deviation:
-**0.056 (t=100), 0.052 (t=300), 0.046 (t=600), 0.377 (t=900)**. Up to `t=600`
-the two marker sets coincide; at `t=900` Tweedie's formula divides by
-`√ᾱ_t ≈ 0.006`, so a small predictor error becomes a large denoising error —
-the amplification described in the sheet.
-
-Raw arrays: `artifacts/part1/stage_*.npz`, `history.json`, `generated.npz`.
+The Tweedie denoiser `x̂0 = (x_t - √(1-ᾱ_t) ε_θ)/√ᾱ_t` against the exact
+posterior mean, as RMS error divided by the exact posterior standard deviation:
+**0.042 (t=100), 0.034 (t=300), 0.022 (t=600), 0.243 (t=900)**. At `t = 900`
+Tweedie's formula divides by `√ᾱ_t ≈ 0.006`, so a small predictor error becomes
+a large denoising error.
 
 ---
 
-## Part 2: fewer-step sampling with DDIM and flow matching
-
-### What is implemented
-
-* **DDIM** (Eq. 10-11): Tweedie estimate of the clean point, then the
-  destination-level coefficients, no fresh noise. Accepts any descending list of
-  levels; `even_levels(K)` gives `K` evenly spaced levels down to zero.
-* **DDPM with skipped levels** (Eq. 12): `a = ᾱ_t/ᾱ_{t'}`, noise variance
-  `1 - a`, none at `t' = 0`.
-* **Exact option**: the mixture's conditional-mean noise `E[ε|x_t]` replaces the
-  network, which isolates discretization error from predictor error.
-* **Flow matching** (Eq. 13-17): `x_s = (1-s)x_0 + s z`, target `z - x_0`,
-  `s ~ U[0,1]`, the same architecture trained from scratch (25000 updates,
-  batch 512, cosine decay to zero, final loss 5.44), Euler steps from `s=1` to
-  `s=0`.
-* Exact marginal velocity (Eq. 15) for comparison.
-* 4000 samples per run at 1, 2, 5, 10, 20, 50, 100 steps, plus 1000 levels for
-  DDPM and DDIM; energy distance (Eq. 18) and a 95% null quantile from 20 pairs
-  of independent exact 4000-point sets.
+## Part 2: deterministic DDIM
 
 ```powershell
-week7\.venv\Scripts\python.exe week7\scripts\part2_fewer_steps.py
-# reuse the saved velocity network (skips the 4-minute training):
-week7\.venv\Scripts\python.exe week7\scripts\part2_fewer_steps.py --reuse-velocity
+python scripts/part2_ddim.py
 ```
-
-### (1) DDIM is deterministic; DDPM is not
 
 ![Determinism](evidence/part2-determinism.png)
 
-*Produced by `scripts/part2_fewer_steps.py`.* Two DDIM runs over 1000 levels
-from the same noise differ by **exactly 0.0**. Two DDPM runs from the same
-start agree on the final cluster for **27.3%** of the points, the chance rate
-for four clusters. Both reproduce the target: DDIM populations lie within 0.015
-of 0.25.
+*Produced by `scripts/part2_ddim.py` (Algorithm 3).* Two DDIM runs over 1000
+levels from the same noise differ by **exactly 0.0**; two DDPM runs from the
+same start agree on the final cluster for **23.5%** of the points, the chance
+rate for four clusters. DDIM populations are 0.2450–0.2615 (within 0.015 of
+0.25). Widths: learned 0.311 (largest), the same starts with the exact
+conditional-mean noise 0.310, an exact 2000-point target draw 0.307 — the band
+`[0.29, 0.32]` holds for all three, and the learned-vs-exact gap is 0.001.
 
-The width criterion needs care. The reference run's widths stayed inside
-`[0.29, 0.32]`; that band is only about two finite-sample standard deviations at
-2000 samples, and the sheet's own Part 1 allowance for the same quantity is
-0.03 (three fluctuations). On this draw one coordinate reaches **0.3286**. The
-controls in `part2_metrics.json` show where that comes from: propagating the
-*same* starting noise with the **exact** conditional-mean noise gives 0.3215,
-an exact 2000-point target draw gives 0.3110, and the learned-vs-exact gap is
-only **0.0089**. The excess is finite-sample variation and discretization, not
-predictor error, so the acceptance test applies the sheet's 0.03 allowance.
+---
 
-### (2) The learned velocity matches the exact marginal velocity
+## Part 3: flow matching and the cost of fewer steps
 
-![Velocity fields](evidence/part2-velocity.png)
+```powershell
+python scripts/part3_flow.py
+python scripts/part3_flow.py --reuse-velocity   # skip the four-minute training
+```
 
-*Produced by `scripts/part2_fewer_steps.py`.* Relative RMS error (RMS of the
-difference divided by RMS of the exact velocity) over 4000 exact path samples:
-**0.022 (s=0.1), 0.053 (s=0.5), 0.063 (s=0.9)** — below 0.1 at every `s`, as
-required. Arrows show `dx_s/ds`, so generation runs against them; near `s=1`
-the field approaches `v(x,1) = x` because the mixture's mean is zero.
+Algorithm 4 trains on `x_s = (1-s)x_0 + s z` with target `z - x_0` and
+`s ~ U[0,1]`; Algorithm 5 integrates `dx/ds = v_θ` backwards from `s = 1` with
+Euler steps. `flow.toml` uses the same network with `1000 s` in place of `t-1`
+and seed 2029; the training loss ends at **2.47**.
 
-On a 17×17 grid that covers the sample support the same errors are 0.174, 0.083
-and 0.052; on a fixed `[-6,6]` grid they are 0.51, 0.57 and 0.33. Grid points far
-from the path distribution are extrapolation — the network never saw them in
-training — which is why the pass condition is evaluated where the field has to
-transport probability, and both grid values are recorded for transparency.
+![Velocity fields](evidence/part3-velocity.png)
 
-### (3) Flow and DDIM need tens of steps; DDPM needs more
+*Produced by `scripts/part3_flow.py`.* Relative RMS error over 4000 exact path
+samples: **0.020 (s=0.1), 0.026 (s=0.5), 0.066 (s=0.9)**, below the required 0.1.
+On a grid over the sample support the same errors are 0.19, 0.06 and 0.05;
+farther out on `[-6,6]` they reach 0.71, 0.44 and 0.12 because those points are
+outside the training support — extrapolation, reported separately.
 
-![Step comparison](evidence/part2-steps.png)
+![Step comparison](evidence/part3-steps.png)
 
-*Produced by `scripts/part2_fewer_steps.py`.* Energy distance against 4000 exact
-samples (null 95% quantile **0.00213**, shaded); points at 1000 are the
-full-resolution runs.
+*Produced by `scripts/part3_flow.py`.* Energy distance against 4000 exact samples
+(null 95% quantile **0.0038**, shaded); points at 1000 are the full-resolution
+DDPM/DDIM runs.
 
 | Steps | flow matching | DDIM | DDPM |
 | :---: | :---: | :---: | :---: |
-| 1 | 1.084 | 0.748 | 0.761 |
-| 2 | 0.0989 | 0.486 | 0.344 |
-| 5 | 0.0161 | 0.0279 | 0.0350 |
-| 10 | 0.0060 | 0.0118 | 0.0081 |
-| 20 | **0.0026** | 0.0043 | 0.0095 |
-| 50 | **0.0026** | 0.0034 | **0.0017** |
-| 100 | 0.0036 | 0.0065 | 0.0020 |
+| 1 | 2.190 | 0.247 | 0.243 |
+| 2 | 0.192 | 0.402 | 0.601 |
+| 5 | 0.0228 | 0.0197 | 0.0259 |
+| 10 | 0.0090 | 0.0067 | 0.0043 |
+| 20 | **0.0023** | 0.0027 | 0.0011 |
+| 50 | 0.0013 | 0.0011 | 0.0004 |
+| 100 | 0.0018 | 0.0029 | 0.0011 |
 
-At 20 steps flow matching is below the required 0.005 with widths within 0.03 of
-0.30 (largest width error 0.029); DDIM is close behind; DDPM only reaches the
-null scale at about fifty levels. One and two steps collapse toward the mean for
-every sampler, even with the exact noise or velocity — the discretization
-error, not the learned model, is what fails there.
-
----
-
-## Part 3: the same predictor on photographs
-
-### What is implemented
-
-* Downloaded `google/ddpm-cifar10-32` at revision
-  `267b167dc01f0e4e61923ea244e8b988f84deb80` (config + safetensors), weights
-  fixed.
-* `src/unet.py`: `UNet2DModel` re-implemented in JAX following the pinned
-  configuration — side lengths 32→16→8→4→8→16→32, channels 128/256/256/256, two
-  residual blocks per down stage and three per up stage, attention at side
-  length 16 on both paths and in the 4×4 middle (one head of 256 channels, as
-  the configuration's `attention_head_dim: null` implies), 128 sinusoidal time
-  features → 512-wide embedding supplied to every residual block, SiLU, group
-  norm with 32 groups and `eps = 1e-6`. Parameters: **35,746,307** (sheet:
-  about 35.7 million).
-* Timestep rule: the sampler's level `t` is passed as model index `t - 1`; the
-  sampling states stay unclipped and only the display map `(x+1)/2` clips.
-* Part 1's DDPM update is reused unchanged for 1000 evaluations.
-
-### Port verification against diffusers v0.40.0
-
-```powershell
-# reference outputs from the pinned reference implementation (torch/uv)
-uv run --python 3.12 --with torch --with diffusers==0.40.0 `
-  python week7/scripts/export_reference_unet.py
-```
-
-`scripts/part3_cifar.py` then compares its own JAX prediction with those six
-fixed inputs: maximum absolute difference **7.15e-6** on noise predictions whose
-RMS is about 1.0-1.7 — float32 round-off, not a structural mismatch.
-
-### (1) Recognizable photographs without further training
-
-![Reverse process](evidence/part3-cifar-generation.png)
-
-*Produced by `scripts/part3_cifar.py`.* Each row is one sample; structure appears
-late — at `t = 200` the images are still mostly noise, objects become
-recognizable between `t = 200` and `t = 50`.
-
-![Samples versus real images](evidence/part3-cifar-samples.png)
-
-*Produced by `scripts/part3_cifar.py`.* Generated images above, real CIFAR-10
-images below; pixel statistics of the unclipped sampling states are printed in
-the panel. The **weights** were learned before the download; the sampler
-computes the 1000 reverse updates now. Sampling cost: 783 ms per four-image
-network evaluation, 793 s for the run.
+At 20 steps flow matching is below 0.005 with width error 0.019 (< 0.03); DDIM is
+close behind; DDPM is accurate from about twenty levels here and was the slowest
+in the reference. One or two steps collapse toward the mean for every sampler,
+even with exact noise or velocity: at that resolution the clean estimate
+averages over all clusters compatible with the starting noise.
 
 ---
 
-## Part 4: filling in missing pixels
-
-### What is implemented
-
-* Mask: rows and columns `6:26` in all three channels (400 hidden pixels ×
-  3 channels = 1200 hidden values).
-* Levels `1000, 980, …, 20, 0`: 50 jumps; two attempts per jump except the final
-  jump to zero → **99 network evaluations** per completion.
-* Each proposal uses the clipped Tweedie estimate with the conditional mean
-  (Eq. 21) and conditional variance (Eq. 22); the observations are forward-noised
-  at the destination level (Eq. 19) and merged after every proposal (Eq. 20), so
-  the final merge restores the clean observation. Between attempts the state is
-  forward-noised back to the source level with fresh noise.
-* Four test images × seeds 7201-7204 = 16 completions, batched into one
-  network call.
+## Part 4: the downloaded predictor on photographs
 
 ```powershell
-week7\.venv\Scripts\python.exe week7\scripts\part4_inpaint.py
+# reference outputs from the pinned diffusers version (torch/uv)
+uv run --python 3.12 --with torch --with diffusers==0.40.0 python scripts/export_reference_unet.py
+python scripts/part4_cifar.py
 ```
 
-### (1) Observed pixels are kept; the hole disagrees
+`src/unet.py` re-implements `UNet2DModel` from the pinned configuration:
+32→16→8→4→8→16→32 side lengths, channels 128/256/256/256, two residual blocks
+per down stage and three per up stage, attention at side length 16 and in the
+4×4 middle (one head of 256 channels), a 128→512 time embedding supplied to
+every residual block, SiLU, group norm with `eps = 1e-6`. Parameters:
+**35,746,307** (the sheet's about 35.7M). The JAX predictions match the
+diffusers v0.40.0 reference to **7.15e-6** on six fixed inputs.
 
-![Inpainting](evidence/part4-inpainting.png)
+![Reverse process](evidence/part4-cifar-generation.png)
 
-*Produced by `scripts/part4_inpaint.py`.* Rows are the four test images:
-truth, observation, the four completions with their hidden-pixel MSE, and the
-pixelwise variance across completions.
+![Samples versus real](evidence/part4-cifar-samples.png)
 
-![Error and variation](evidence/part4-variation.png)
+*Produced by `scripts/part4_cifar.py`.* Four images from Gaussian noise with
+Algorithm 2 unchanged (1000 steps, unclipped states, display `(x+1)/2`), beside
+real CIFAR-10 images. Structure appears between `t = 200` and `t = 50`. The
+weights were learned before the download; the reverse updates are computed here.
 
-*Produced by `scripts/part4_inpaint.py`.* Hidden-pixel MSE against the withheld
-truth averages **0.221** over the 16 completions (reference 0.24), ranging from
-0.109 to 0.611. The largest change of any observed pixel is **0.0** (requirement
-< 1e-5), and the completions are identical outside the hole (largest
-disagreement 0.0) because the last merge overwrites every observed entry with
-the clean observation. Inside the hole the mean variance across seeds is
-0.035/0.145/0.046/0.060 — the mask leaves those pixels undetermined, so a
-completion can look plausible and still be wrong: the true content is one of
-several images consistent with the visible border.
+---
+
+## Part 5: filling in missing pixels with RePaint
+
+```powershell
+python scripts/part5_inpaint.py
+```
+
+![Inpainting](evidence/part5-inpainting.png)
+
+![Error and variation](evidence/part5-variation.png)
+
+*Produced by `scripts/part5_inpaint.py` (Algorithm 6).* Rows/columns 6:26 are
+hidden in all three channels (1200 hidden values); 50 jumps of 20 levels, two
+attempts each except the final one, 99 network evaluations per completion, 16
+completions. The largest change of an observed pixel is **0.0** (< 1e-5) and the
+completions are identical outside the hole (0.0). The hidden-pixel MSE averages
+**0.221** over the 16 completions (range 0.109–0.611; reference 0.24). The mean
+variance across seeds is 0.035 / 0.145 / 0.046 / 0.060 per image: inside the hole
+the observation does not determine the content, so a plausible completion can
+still differ from the withheld truth.
 
 ---
 
@@ -356,32 +300,29 @@ several images consistent with the visible border.
 
 ```powershell
 week7\.venv\Scripts\python.exe -m pytest week7\tests -q
-# 30 passed
+# 35 passed
 ```
 
-* **Mathematical contracts** (independent of the implementation): schedule
-  values and products; exact mixture moments; the posterior-mean limits at low
-  and high noise; the identity linking `E[ε|x_t]` and `E[x_0|x_t]`; the exact
-  noise beating the zero predictor; closed-form noising moments; DDPM's Eq. 8-9
-  arithmetic including the noiseless last step; Eq. 12 and its adjacent-level
-  reduction plus the `1-a` noise variance; DDIM determinism and its one-step
-  Tweedie limit; evenly spaced levels; `v(x,1)=x`; Euler determinism and its
-  exact solution; energy-distance and null-scale behaviour; cluster statistics
-  recovering exact draws.
-* **Acceptance tests** read the committed `evidence/*_metrics.json` and enforce
-  the sheet's tolerances (populations, centres, spreads, forward end state,
-  ten stages and loss, denoiser, determinism, velocity, step counts, parameter
-  count, observed-pixel preservation).
+* **Configuration tests**: `diffusion.toml` and `flow.toml` carry the sheet's
+  widths, activations, time-feature parameters, optimizer values, seeds and
+  checkpoint list; the time features satisfy Eq. (8–9); the noise predictor sees
+  `t-1` and the velocity network sees `1000 s`; initialization has standard
+  deviation `1/√(input width)` and zero biases.
+* **Mathematical contracts**: schedule values and products; exact mixture
+  moments; the posterior-mean limits; the identity linking `E[ε|x_t]` and
+  `E[x_0|x_t]`; closed-form noising moments; Algorithm 2's arithmetic including
+  the noiseless last step; Eq. (17) and its adjacent-level limit; DDIM
+  determinism and its one-step Tweedie limit; evenly spaced levels; Euler
+  determinism and its exact solution; energy distance and the null scale.
+* **Acceptance tests** read `evidence/*_metrics.json` and enforce the sheet's
+  tolerances for Parts 1–5.
 
-### Negative control (sabotage) commit
+### Negative control
 
-The commit `Sabotage (negative control): ...` deliberately uses the source
-level's coefficients in the DDIM update instead of the destination level's.
-`tests/test_week7.py::test_ddim_is_deterministic_and_matches_tweedie_with_one_step`
-fails on that commit (a one-step DDIM no longer returns the Tweedie estimate),
-and the following `Fix ...` commit restores Eq. 11 and the suite passes again —
-confirming that the tests detect a real defect rather than merely the current
-output.
+The commit `Sabotage (negative control): ...` deliberately keeps the source
+level's coefficients in the DDIM update. `test_ddim_is_deterministic_and_matches_tweedie_with_one_step`
+fails on that commit and the following `Fix ...` commit restores Eq. (11) — the
+suite detects a real defect rather than merely the current output.
 
 ---
 
@@ -389,87 +330,106 @@ output.
 
 ```powershell
 cd week7
-# Part 1 (about 4 minutes of CPU training)
-..\week7\.venv\Scripts\python.exe scripts\part1_diffusion.py
-# Part 2 (about 4 minutes of training plus the sweep)
-..\week7\.venv\Scripts\python.exe scripts\part2_fewer_steps.py
-# Part 3: reference outputs, then 1000-step DDPM on four images (~13 minutes)
+python scripts/part1_forward.py        # first task: target + forward only
+python scripts/part1_diffusion.py      # Algorithm 1 + 2 (~4 min training)
+python scripts/part2_ddim.py           # Algorithm 3 (~1 min)
+python scripts/part3_flow.py           # Algorithm 4 + 5 and the sweep (~6 min)
 uv run --python 3.12 --with torch --with diffusers==0.40.0 python scripts/export_reference_unet.py
-..\week7\.venv\Scripts\python.exe scripts\part3_cifar.py
-# Part 4: 16 RePaint completions (~4.5 minutes)
-..\week7\.venv\Scripts\python.exe scripts\part4_inpaint.py
-# Verification
-..\week7\.venv\Scripts\python.exe -m pytest tests -q
+python scripts/part4_cifar.py          # pretrained DDPM, four images (~13 min)
+python scripts/part5_inpaint.py        # Algorithm 6 (~4.5 min)
+python -m pytest tests -q
 ```
+
+(Windows: prefix the Python calls with `..\week7\.venv\Scripts\python.exe`.)
 
 ---
 
-## Final review
+## Algorithms 1 and 2, and the dynamics they integrate
 
-**How the trained noise predictor recovers the mixture's clusters,
-populations, widths and centres.** The predictor learns `E[ε|x_t]` (the
-squared-error identity of Eq. 7 makes this the only optimal target). The DDPM
-update inverts one forward step with that estimate, so the reverse trajectory
-ends where the data lie; 1000 small steps let each mode keep its own population
-and width instead of collapsing to the mean, which is what one-step generation
-does. The measurements confirm all three properties separately: equal
-populations cannot reveal a shifted or broadened cluster, and a low loss cannot
-reveal a wrong distribution.
+### Algorithm 1 is force-field fitting
 
-**How DDIM uses the predicted noise.** DDIM solves Eq. 5 for the clean point
-(Tweedie, Eq. 10) and then recombines that estimate with the same predicted
-noise at the destination level's coefficients (Eq. 11). Nothing random is added,
-so the map is deterministic; deleting DDPM's noise term alone would not give
-DDIM, because the coefficients also change. Skipping levels is legitimate
-because the coefficients depend only on `ᾱ`, at the price of discretization
-error that the step sweep measures.
+The forward process is a **Brownian dynamics** with time-dependent damping:
 
-**Steps needed by DDPM, DDIM and flow matching.** At 4000 samples the energy
-distance reaches the null scale at about 50 DDPM levels, about 20 DDIM levels
-and about 10–20 flow-matching Euler steps. Flow matching is the cheapest per
-step of the three for this mixture, DDIM is close, and DDPM's extra randomness
-buys accuracy only when the steps are small. All three fail at one or two steps
-by collapsing toward the mean, even with exact conditional quantities.
+```
+x_t = √(1-β_t) x_{t-1} + √β_t z
+```
 
-**Why the averaged path velocity preserves the distribution.** Each constructed
-straight segment carries probability with velocity `z - x_0`, so the flux at
-`(x,s)` is the density times the conditional average velocity there. That
-average satisfies the continuity equation (Eq. 16) for the density along the
-paths; following it transports the distribution even though an individual
-trajectory need not follow any single training segment. The network can only
-learn that average, because the endpoints are not in its input.
+i.e. an overdamped particle in a harmonic trap whose stiffness grows with `t`,
+at a temperature set by `β_t`. The stationary distribution is `N(0, I)`; the
+particle forgets where it started. Algorithm 1 learns the **mean noise**, which
+is (up to a sign and scale) the force that the data distribution exerts on the
+diffusing particle:
 
-**Learned before the download versus computed now.** The 35.7 million weights —
-the U-Net that maps a noisy image and a level to a noise estimate — were learned
-on CIFAR-10 by someone else and are kept fixed. Our sampler supplies the
-schedule coefficients, the 1000 reverse updates, the noise draws, the
-`t - 1` model index and the display mapping. In Part 4 the same weights propose
-hidden pixels, while the mask, the forward-noised observations, the merge and
-the jump schedule are computed here.
+```
+∇_x log q_t(x) = -E[ε | x_t = x] / √(1-ᾱ_t)
+```
 
-**Why RePaint keeps the observed pixels yet differs from the truth and from
-itself.** Every merge substitutes the forward-noised observations at the same
-level, and the last merge at `t' = 0` substitutes the clean observations, so the
-observed entries are reproduced exactly. The hidden entries are never observed,
-so different seeds — different forward-noise draws between attempts — produce
-different plausible contents, as the variance map shows. The withheld truth is
-one sample from the posterior over completions; the hidden-pixel MSE is nonzero
-because the observation leaves many images plausible.
+Because squared error is minimized by the conditional mean (Eq. 14), regression
+on the known noise learns exactly that force. Each update draws a fresh batch of
+`(x0, ε, t)`, computes `x_t` from Eq. (7), forms `ℓ = (1/d)‖ε_θ(x_t,t)-ε‖²`, and
+takes one Adam step with a cosine-decaying learning rate. Nothing about the
+target data is stored; only the force field is compressed into 37,762 weights.
+
+### Algorithm 2 is a reverse-time Langevin integrator
+
+Sampling integrates the reverse dynamics from `t = T` to `t = 0`:
+
+```
+x_{t-1} = (1/√α_t) (x_t - β_t/√(1-ᾱ_t) ε̂) + √β_t z,      z = 0 at t = 1
+```
+
+Read as a Langevin step, the first term is a **drift** (the deterministic force
+pushing toward higher data density) and `√β_t z` is **thermal noise** that keeps
+the spread of the visited states correct. The drift is the exact posterior mean
+`E[x_{t-1}|x_t]` under the Gaussian approximation of the reverse step, which is
+why the algorithm needs no likelihood and no normalizer.
+
+The last step sets `z = 0`: after the final quench the sampler returns the mean,
+a single data-like sample rather than a thermal one. Clipping is omitted because
+`[-1, 1]` would cut off this mixture's centres at `|x| = 3`.
+
+### Connecting the two
+
+* Learning fits the **force**; sampling follows the **force** while adding the
+  right amount of noise. Both use the same fixed schedule.
+* The reverse step's variance `β_t` is the leading term of the exact conditional
+  covariance `Cov(x_{t-1}|x_t) = (β_t/α_t)(I + β_t H_t)`, which is `β_t I + O(β_t²)`
+  for small steps — the Gaussian approximation used by DDPM.
+* Part 2 removes the noise term and jumps between selected levels (Algorithm 3);
+  Part 3 replaces the force by a velocity field (Algorithms 4–5). The comparison
+  in Part 3 measures what each approximation costs in the number of steps.
+
+---
+
+## Explaining the results, as the sheet asks
+
+* **Transport comparison.** DDPM's stochastic reverse steps reproduce the target
+  with about fifty network evaluations; DDIM's deterministic update reaches it
+  in roughly twenty; Euler flow matching needs about twenty as well and has the
+  smallest energy distance at that budget. One or two steps fail for all three
+  because a single jump returns an average over the clusters compatible with
+  the starting noise.
+* **Generated photographs.** The U-Net weights were learned on CIFAR-10 before
+  the download and are fixed; the sampler supplies the schedule, the 1000
+  reverse updates, the noise draws and the `t-1` model index. Softness is the
+  32×32 native resolution of the checkpoint, not a porting error (the JAX port
+  matches the reference implementation to 7.15e-6).
+* **Inpainting.** RePaint keeps the observed pixels exactly because every merge
+  overwrites them with the forward-noised observation and the final merge uses
+  the clean one. Inside the hole the observation leaves many images plausible,
+  so different seeds produce different completions with nonzero error against
+  the withheld truth.
 
 ---
 
 ## Notes and limitations
 
-* The supplied learning sheet was named `week4-learning-sheet.pdf` although it
-  is the Week 7 sheet; it is stored here as `week7-learning-sheet.pdf`.
-* One DDIM width coordinate (0.3286) is outside the reference's observed band
-  `[0.29, 0.32]`; the exact-noise and exact-sample controls in
-  `part2_metrics.json` show it is finite-sample variation (gap to the
-  exact-noise run: 0.0089), and the sheet's Part 1 allowance is 0.03.
+* One DDIM width coordinate lies close to the top of the reference band
+  (`0.311` learned, `0.310` with exact noise, `0.307` for exact draws), so the
+  width is a property of this 2000-point draw, not of the predictor.
 * Relative velocity error is evaluated where the field transports probability;
   grid points far outside the training support are extrapolation and are
-  reported separately (0.17-0.57 on wide grids).
-* At 4000 samples, energy distances below about 0.002 are not distinguishable
-  from exact-vs-exact noise, so the ordering of DDPM at 50 versus 100 levels is
-  within the null scale.
+  reported separately.
+* At 4000 samples, energy distances below about 0.004 are not distinguishable
+  from exact-vs-exact noise.
 * `inputs/` and `artifacts/` are not committed; every script recreates them.

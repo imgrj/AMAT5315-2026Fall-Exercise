@@ -24,49 +24,54 @@ This repository stores weekly exercises for AMAT5315 (*Scientific Computing for 
 
 ## Week 7: Diffusion and Flow Matching (Latest Exercise)
 
-Generation by transporting fresh Gaussian noise: DDPM and DDIM on a four-cluster mixture, flow matching on straight paths, a JAX port of a pretrained CIFAR-10 noise predictor, and RePaint inpainting.
+Generation by transporting fresh Gaussian noise, following the revised learning sheet's Algorithms 1-6: DDPM on a four-cluster mixture (Parts 1), deterministic DDIM (Part 2), flow matching and the sampling-cost comparison (Part 3), a JAX port of a pretrained CIFAR-10 noise predictor (Part 4), and RePaint inpainting (Part 5).
 
 - **Full Documentation & Reproduction Guide**: [**`week7/README.md`**](week7/README.md)
 - **Live Interactive Lab (runs the trained network in the browser)**: [**Week 7 Diffusion Lab**](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week7-diffusion-lab.html)
+- **Configuration**: [`week7/diffusion.toml`](week7/diffusion.toml) and [`week7/flow.toml`](week7/flow.toml) pin the architecture, optimizer, seeds and checkpoint list.
 
 ### Key Results & Evidence Gallery
 
-#### 1. DDPM on the Gaussian mixture
-- **Forward diffusion**: at `t = 1000` the per-coordinate mean is `(-0.007, -0.003)` and the variance `(1.046, 0.990)`, both within the required 0.1 of the standard Gaussian.
-- **Training**: 25000 updates, batch 512, cosine decay to zero; the loss plateaus at **0.274**, not zero, because the added noise is still uncertain given the noisy point. Ten stages are saved, including initialization (endpoints up to `|x| ≈ 8.9e3`) and the final model.
-- **Generation** (2000 samples, 1000 steps): populations 0.2405/0.2590/0.2420/0.2585 (allowance 0.04), spreads 0.285–0.310 (allowance 0.03), largest centre error **0.019** (allowance 0.05).
-- **Denoiser check**: the Tweedie estimate matches the exact posterior mean to 0.056/0.052/0.046 posterior standard deviations at `t = 100, 300, 600`, degrading to 0.377 at `t = 900`, where Tweedie's formula amplifies predictor error.
+#### 1. DDPM on the Gaussian mixture (Algorithms 1-2)
+- **Forward diffusion**: at `t = 1000` the per-coordinate mean is `(-0.0064, 0.0070)` and the variance `(0.977, 1.021)`, within the required 0.1 of the standard Gaussian.
+- **Training**: 25,000 updates, batch 512, Adam with a cosine decay to zero, seed 2026; checkpoints at `0, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 25000`. The loss plateaus at **0.2316**, near the reference 0.25, because the added noise is still uncertain given the noisy point (Eq. 14).
+- **Generation** (2000 samples, 1000 steps): populations 0.2555/0.2675/0.2295/0.2475 (allowance 0.04), spreads 0.281-0.321 (allowance 0.03), largest centre error **0.040** (allowance 0.05). Denoiser control: 0.042/0.034/0.022 posterior standard deviations at `t = 100, 300, 600`, 0.243 at `t = 900`.
 
-#### 2. Fewer steps: DDIM and flow matching
-- **Determinism**: two DDIM runs over 1000 levels differ by **exactly 0**; two DDPM runs share their final cluster 27.3% of the time, the chance rate for four clusters.
-- **Learned marginal velocity**: relative RMS error **0.022, 0.053, 0.063** at `s = 0.1, 0.5, 0.9` (requirement < 0.1).
-- **Step-count sweep** (4000 samples per run, null 95% quantile 0.0021): flow matching reaches energy distance **0.0026 at 20 steps** (requirement < 0.005) with width error 0.029; DDIM reaches 0.0043 at 20 levels; DDPM needs about fifty levels (0.0017).
+#### 2. Deterministic DDIM (Algorithm 3)
+- Two DDIM runs over 1000 levels differ by **exactly 0**; two DDPM runs share their final cluster 23.5% of the time, the chance rate.
+- DDIM populations 0.2450-0.2615 (within 0.015 of 0.25); widths at most **0.311**, with 0.310 for the same starts under exact conditional-mean noise and 0.307 for exact target draws, so the whole band `[0.29, 0.32]` holds.
 
-#### 3. The downloaded predictor on photographs
+#### 3. Flow matching and fewer steps (Algorithms 4-5)
+- **Learned marginal velocity**: relative RMS error **0.020, 0.026, 0.066** at `s = 0.1, 0.5, 0.9` (requirement < 0.1).
+- **Step-count sweep** (4000 samples per run, null 95% quantile 0.0038): flow matching reaches energy distance **0.0023 at 20 steps** (requirement < 0.005) with width error 0.019; DDIM reaches 0.0027 at 20 levels; DDPM is accurate from about twenty levels in this run and was the slowest in the reference. One or two steps collapse toward the mean for every sampler.
+
+#### 4. The downloaded predictor on photographs
 - **Port verification**: the JAX re-implementation of the diffusers v0.40.0 `UNet2DModel` matches the reference predictions to **7.15e-6** on six fixed inputs; 35,746,307 parameters (about 35.7M).
-- **Generation**: four images from Gaussian noise with Part 1's 1000-step DDPM update, unclipped; structure appears between `t = 200` and `t = 50`. The weights were learned before the download; the reverse updates are computed here.
+- **Generation**: four images from Gaussian noise with Algorithm 2 unchanged, unclipped; structure appears between `t = 200` and `t = 50`. Weights learned before the download; the reverse updates are computed here.
 
-#### 4. RePaint inpainting
+#### 5. RePaint inpainting (Algorithm 6)
 - **Observed pixels**: hidden square rows/columns 6:26, 99 network evaluations per completion; the largest change of an observed pixel is **0.0** (requirement < 1e-5).
 - **Hidden content**: mean hidden-pixel MSE **0.221** over 16 completions (reference 0.24), differing between seeds inside the hole; the variance map shows where the observation leaves the content undetermined.
 
 | Trained DDPM recovers the four clusters | Flow matching and DDIM in tens of steps |
 | :---: | :---: |
-| ![Week 7 generation](week7/evidence/part1-generation.png) | ![Week 7 steps](week7/evidence/part2-steps.png) |
+| ![Week 7 generation](week7/evidence/part1-generation.png) | ![Week 7 steps](week7/evidence/part3-steps.png) |
 
 | Downloaded CIFAR-10 predictor | RePaint keeps every observed pixel |
 | :---: | :---: |
-| ![Week 7 CIFAR](week7/evidence/part3-cifar-samples.png) | ![Week 7 inpainting](week7/evidence/part4-inpainting.png) |
+| ![Week 7 CIFAR](week7/evidence/part4-cifar-samples.png) | ![Week 7 inpainting](week7/evidence/part5-inpainting.png) |
 
 ### Quick Reproducibility Commands
 
 From `week7/` (CPU):
 ```powershell
-python scripts/part1_diffusion.py        # forward diffusion, training, DDPM samples (~4 min)
-python scripts/part2_fewer_steps.py      # DDIM, exact noise, flow matching, step sweep (~7 min)
-python scripts/part3_cifar.py            # pretrained CIFAR-10 DDPM, four images (~13 min)
-python scripts/part4_inpaint.py          # RePaint inpainting (~4.5 min)
-python -m pytest tests -q                # 30 verification tests
+python scripts/part1_forward.py        # Part 1 first task: target + forward diffusion only
+python scripts/part1_diffusion.py      # Algorithms 1-2: training, DDPM, figures (~4 min)
+python scripts/part2_ddim.py           # Algorithm 3 (~1 min)
+python scripts/part3_flow.py           # Algorithms 4-5 and the step sweep (~6 min)
+python scripts/part4_cifar.py          # pretrained CIFAR-10 DDPM, four images (~13 min)
+python scripts/part5_inpaint.py        # Algorithm 6 (~4.5 min)
+python -m pytest tests -q              # 35 verification tests
 ```
 
 ---

@@ -300,10 +300,10 @@
   <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:8px">
     <h2 style="margin:0;font-size:20px;font-weight:700">Week 7 Verification Suite &amp; Evidence Gallery</h2>
     <p style="margin:0;color:var(--ink-muted);font-size:13px">
-      All 14 committed figures: forward and reverse movies, the training stages and loss plateau, generated samples with
-      mode populations and widths, the denoiser check, DDIM/DDPM determinism, the velocity-field comparison, the
-      step-count sweep, the pretrained CIFAR-10 reverse process and RePaint completions. Click a card for the metrics and
-      the command that produced it.
+      All 14 committed figures from the five parts: forward and reverse movies, the training stages and loss plateau, generated
+      samples with mode populations and widths, the denoiser check (Part 1); DDIM/DDPM determinism (Part 2); the velocity-field
+      comparison and the step-count sweep (Part 3); the pretrained CIFAR-10 reverse process (Part 4); RePaint completions and
+      their variation (Part 5). Click a card for the metrics and the command that produced it.
     </p>
     <div class="gallery-grid" id="galleryCardsGrid"></div>
   </div>
@@ -642,8 +642,8 @@ DATA.cifar.real.forEach((src, i) => {
   gallery.appendChild(tile);
 });
 document.getElementById("cifar-note").textContent =
-  `JAX port of diffusers v0.40.0: ${DATA.part3.param_count.toLocaleString()} parameters, maximum |difference| against the reference predictions ` +
-  `${DATA.part3.reference_max_abs_diff.toExponential(2)}. Weights fixed; the sampler performs 1000 reverse updates with level t passed as model index t − 1. ` +
+  `JAX port of diffusers v0.40.0: ${DATA.part4.param_count.toLocaleString()} parameters, maximum |difference| against the reference predictions ` +
+  `${DATA.part4.reference_max_abs_diff.toExponential(2)}. Weights fixed; the sampler performs 1000 reverse updates with level t passed as model index t − 1. ` +
   `CIFAR-10 images are 32 × 32 pixels, which is the model's native resolution: they are smooth-upscaled for display, so softness here is resolution and the ` +
   `model's own sampling quality, not a porting error.`;
 
@@ -748,54 +748,54 @@ const GALLERY_ITEMS = [
     cmd: "python scripts/part2_fewer_steps.py",
   },
   {
-    badge: "Part 2 • Velocity",
+    badge: "Part 3 • Velocity",
     title: "9. The learned velocity matches the exact marginal velocity",
-    img: "part2-velocity.png",
+    img: "part3-velocity.png",
     desc: "Learned and exact velocity fields at s = 0.1, 0.5 and 0.9 on a grid over the samples.",
     theory: "The network can only learn the conditional average over the unobserved endpoints; the figure overlays it on the exact marginal velocity derived from the mixture.",
     metrics: [["relative RMS at s=0.1", "0.022"], ["s=0.5", "0.053"], ["s=0.9", "0.063"], ["in-support grid values", "0.174 / 0.083 / 0.052"]],
     cmd: "python scripts/part2_fewer_steps.py",
   },
   {
-    badge: "Part 2 • Steps",
+    badge: "Part 3 • Steps",
     title: "10. Flow matching and DDIM need tens of steps; DDPM needs about fifty",
-    img: "part2-steps.png",
+    img: "part3-steps.png",
     desc: "Energy distance, largest cluster-fraction error and largest width error against the number of evaluations, with the null scale shaded.",
     theory: "One and two steps collapse toward the mean even with exact conditional quantities, so the failure there is discretisation, not learning.",
     metrics: [["null 95% quantile", "0.00213"], ["flow at 20 steps", "0.00262"], ["DDIM at 20 steps", "0.00426"], ["DDPM at 50 levels", "0.00174"], ["flow width error at 20 steps", "0.029"]],
     cmd: "python scripts/part2_fewer_steps.py",
   },
   {
-    badge: "Part 3 • Reverse process",
+    badge: "Part 4 • Reverse process",
     title: "11. Downloaded weights plus Part 1's update produce photographs",
-    img: "part3-cifar-generation.png",
+    img: "part4-cifar-generation.png",
     desc: "Four samples followed from t = 1000 to t = 0; structure appears between t = 200 and t = 50.",
     theory: "The 35.7M weights were learned by someone else on CIFAR-10; the schedule, the 1000 reverse updates and the t − 1 model index are computed here.",
     metrics: [["parameters", "35,746,307"], ["max |difference| vs diffusers v0.40.0", "7.15e-6"], ["evaluations", "1000"], ["sampling time", "793 s"]],
     cmd: "python scripts/part3_cifar.py",
   },
   {
-    badge: "Part 3 • Samples",
+    badge: "Part 4 • Samples",
     title: "12. Generated photographs compared with real CIFAR-10 images",
-    img: "part3-cifar-samples.png",
+    img: "part4-cifar-samples.png",
     desc: "Four generated images beside four real CIFAR-10 training images, with the unclipped pixel statistics.",
     theory: "The display map (x+1)/2 clips only for viewing; the sampler itself stays unclipped, as on the mixture.",
     metrics: [["images", "4"], ["display range", "[0, 1] after (x+1)/2"], ["sampling states", "unclipped"]],
     cmd: "python scripts/part3_cifar.py",
   },
   {
-    badge: "Part 4 • Inpainting",
+    badge: "Part 5 • Inpainting",
     title: "13. RePaint keeps every observed pixel and disagrees inside the hole",
-    img: "part4-inpainting.png",
+    img: "part5-inpainting.png",
     desc: "Truth, observation, four completions with their hidden-pixel MSE, and the pixelwise variance across completions.",
     theory: "Every merge overwrites the observed entries with the forward-noised observation, and the last merge uses the clean observation; the hidden entries are never observed, so seeds differ there.",
     metrics: [["largest change of an observed pixel", "0.0"], ["mean hidden-pixel MSE", "0.221"], ["range over 16 completions", "0.109 – 0.611"], ["network evaluations", "99 per completion"]],
     cmd: "python scripts/part4_inpaint.py",
   },
   {
-    badge: "Part 4 • Variation",
+    badge: "Part 5 • Variation",
     title: "14. Error against the truth versus variation between completions",
-    img: "part4-variation.png",
+    img: "part5-variation.png",
     desc: "Hidden-pixel MSE per image and seed, and the mean variance over seeds inside the hole.",
     theory: "A completion can be plausible and still wrong: the observation leaves the hidden square undetermined, so the variance measures sampler variation rather than error.",
     metrics: [["mean variance per image", "0.035 / 0.145 / 0.046 / 0.060"], ["completions", "16"], ["outside-hole disagreement", "0.0"]],
