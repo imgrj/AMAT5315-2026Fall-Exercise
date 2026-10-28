@@ -73,3 +73,14 @@ def sample_chain(p,count,start,seed,lag=1):
         context=output[i-lag] if i>=lag else start
         output[i]=np.searchsorted(cdf[context],draws[i],side='right')
     return output
+
+
+def sample_ngram(models,n,count,eos,seed):
+    """Start after one EOS; use shorter histories until n-1 tokens exist."""
+    rng=np.random.default_rng(seed);history=[eos];out=[]
+    for _ in range(count):
+        order=min(n,len(history)+1)
+        probs=models[order].probabilities(history[-(order-1):] if order>1 else [])
+        probs[eos]=0;probs/=probs.sum()
+        token=int(rng.choice(len(probs),p=probs));out.append(token);history.append(token)
+    return np.array(out,dtype=np.int32)

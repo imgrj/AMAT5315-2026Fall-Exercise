@@ -1,6 +1,6 @@
 from _common import ROOT,save_json,figure,plt,np
 from src.data import load_corpus
-from src.ngrams import NGram,enumerate_mass,sample_chain
+from src.ngrams import NGram,enumerate_mass,sample_chain,sample_ngram
 from src.sampling import chi_square
 from scipy.stats import chi2
 import pickle
@@ -41,13 +41,10 @@ def main():
     bad=sample_chain(p,250000,tok.eos_id(),1848,lag=2)
     chain=pooled_chain_test(p,good,tok.eos_id(),contexts)
     negative=pooled_chain_test(p,bad,tok.eos_id(),contexts)
-    rng=np.random.default_rng(1848);samples={'uniform':tok.decode(rng.integers(3,512,60).tolist())}
+    rng=np.random.default_rng(1848)
+    samples={'uniform':tok.decode(rng.choice(np.delete(np.arange(512),tok.eos_id()),60).tolist())}
     for n,m in models.items():
-        rng=np.random.default_rng(1848);context=[tok.eos_id()]*(n-1);out=[]
-        for _ in range(60):
-            prob=m.probabilities(context);prob[tok.eos_id()]=0;prob/=prob.sum()
-            token=int(rng.choice(512,p=prob));out.append(token);context=(context+[token])[-(n-1):] if n>1 else []
-        samples[f'{n}-gram']=tok.decode(out)
+        samples[f'{n}-gram']=tok.decode(sample_ngram(models,n,60,tok.eos_id(),1848).tolist())
     metrics={'models':records,'enumeration_masses':mass,'enumeration_max_error':max(abs(np.array(mass)-1)),
              'unnormalized_control_masses':bad_mass,'ancestral_test':chain,'lag2_negative_control':negative,
              'samples_seed1848':samples,'seconds':time.perf_counter()-start}

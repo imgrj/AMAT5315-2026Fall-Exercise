@@ -48,6 +48,8 @@ def main():
     for si,kind in enumerate(kinds):ax.loglog(dims,caps[:,si],'o-',label=f'{kind}: slope {slopes[si]:.2f}')
     ax.loglog(dims,metrics['correlated_capacities'],'s--',color='gray',label='outer, common direction 0.3')
     ax.set(xticks=dims,xticklabels=dims,xlabel='Dimension d',ylabel='Capacity at R = 1',title='Nonlinear memories store powers of the dimension');ax.legend()
+    from matplotlib.ticker import NullLocator
+    ax.xaxis.set_minor_locator(NullLocator())
     figure('part3-capacity.png',fig);print('Capacities',caps,'slopes',slopes,flush=True)
 
 

@@ -1,0 +1,21 @@
+60-token openings, T=1, seed 1848, EOS excluded for display.
+Ordered by held-out bits/character; control bytes shown as squares.
+The transformer uses JAX RNG; count models/MLP use NumPy RNG.
+
+Transformer: 1.219868 bits/character
+One day, a little girl named Lucy went for a walk. She saw a big picture with a bitter on a big closer lit up. Joined around the tre
+
+3-gram: 1.472583 bits/character
+Lily liked to do you thin b�5 c / �06myithMgch�b� bew�ge� Ho> so)�P�� playr��d##Z”□�ntt She made a toy c
+
+2-gram: 2.136233 bits/character
+Lily, there was very mad she a som we worited with it. Mick. She said. She flealan's the pris plag wat bared. re with elewing unt and anor
+
+MLP: 2.139711 bits/character
+Lily, there was very pen to tin and Sarain and said, but they werem so she looked the pairct the prat it Jil they whe flped to isee ye bathat
+
+1-gram: 3.402711 bits/character
+spd to. Lilyingilhe aed time a gededae.ur playu ee he Heououked  cAd the epingotey b goundndcc w go hea had withid to ss p
+
+uniform: 4.386331 bits/character
+N□�R� for he> weOo� L�he� to□ime□ in5� cv / �� m0�6ismy�ith�M�g toch �7bent�S beuw<��g□e��

@@ -1,0 +1,24 @@
+{
+  "browser": "Microsoft Edge, Playwright headless",
+  "desktop": [
+    1365,
+    1100
+  ],
+  "mobile": [
+    390,
+    844
+  ],
+  "figures_loaded": 14,
+  "page_errors": [],
+  "sampler_comparisons": 64,
+  "max_probability_error": 9.992007221626409e-16,
+  "checks": [
+    "HTTP 200",
+    "desktop/mobile no horizontal overflow",
+    "memory controls",
+    "sampler controls and draw",
+    "compute budget identity",
+    "14 loaded evidence images",
+    "lightbox open and Escape close"
+  ]
+}

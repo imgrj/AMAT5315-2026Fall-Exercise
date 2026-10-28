@@ -12,6 +12,17 @@ def test_mlp_cross_entropy_equals_numpy_bigram_table():
     assert float(cross_entropy(mlp(p,x),y)) == pytest.approx(-np.log(probs[np.arange(3),y]).mean(),abs=1e-6)
     grad=jax.grad(lambda z:cross_entropy(mlp(z,x),y))(p)
     assert all(np.all(np.isfinite(v)) for v in jax.tree.leaves(grad))
+    # Independent NumPy forward and chain-rule backward pass.
+    e=np.asarray(p['embedding'])[np.asarray(x)]
+    h=np.tanh(e@np.asarray(p['hidden']['w'])+np.asarray(p['hidden']['b']))
+    z=h@np.asarray(p['readout']['w'])+np.asarray(p['readout']['b'])
+    np.testing.assert_allclose(logits,z,atol=1e-7)
+    expected=np.exp(z-z.max(-1,keepdims=True));expected/=expected.sum(-1,keepdims=True)
+    expected[np.arange(3),np.asarray(y)]-=1;expected/=3
+    dh=(expected@np.asarray(p['readout']['w']).T)*(1-h*h)
+    np.testing.assert_allclose(grad['readout']['w'],h.T@expected,atol=1e-7)
+    np.testing.assert_allclose(grad['hidden']['w'],e.T@dh,atol=1e-7)
+    np.testing.assert_allclose(grad['hidden']['b'],dh.sum(0),atol=1e-7)
 
 
 def test_attention_matches_hand_computed_two_token_average():
@@ -52,3 +63,31 @@ def test_learning_rate_has_warmup_peak_and_one_tenth_final():
     assert float(learning_rate(0,6000,300,.003)) == 0
     assert float(learning_rate(300,6000,300,.003)) == pytest.approx(.003)
     assert float(learning_rate(5999,6000,300,.003)) == pytest.approx(.0003)
+
+
+@pytest.mark.parametrize('settings,expected', [
+    ({'top_p':.6},[.625,.375,0]),
+    ({'top_k':1},[1,0,0]),
+    ({'min_p':.5},[.625,.375,0]),
+])
+def test_jax_sampler_retains_and_renormalizes_correct_tokens(settings,expected):
+    from src.generation import probabilities
+    np.testing.assert_allclose(probabilities(jnp.log(jnp.array([.5,.3,.2])),**settings),expected,atol=1e-7)
+
+
+def test_generation_surprise_and_entropy_follow_original_model():
+    from src.generation import generate
+    from src.models import init_transformer
+    p=init_transformer(jax.random.key(9),vocab=5,dim=8,heads=2,layers=1,context=4)
+    # Zero readout makes every prediction exactly uniform, including sliding windows.
+    p['readout']['w']=jnp.zeros_like(p['readout']['w']);p['readout']['b']=jnp.zeros(5)
+    tokens,surprise,entropy=generate(p,seed=1,batch=3,length=9,eos=2,heads=2)
+    assert tokens.shape==(3,9)
+    np.testing.assert_allclose(surprise,np.log(5),atol=1e-6)
+    np.testing.assert_allclose(entropy,np.log(5),atol=1e-6)
+
+
+def test_shared_draw_helper_obeys_zero_probability_tokens():
+    from src.generation import draw_tokens
+    samples=draw_tokens(jax.random.key(11),jnp.array([0.,1.,0.]),shape=(1000,))
+    assert np.all(np.asarray(samples)==1)

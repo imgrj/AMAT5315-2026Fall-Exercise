@@ -50,6 +50,13 @@ def test_bigram_sampler_conditions_on_immediate_predecessor():
     assert sample_chain(np.array([[0., 1.], [1., 0.]]), 10, 0, 2).tolist() == [1,0]*5
 
 
+def test_trigram_opening_uses_bigram_until_two_tokens_are_available():
+    from src.ngrams import NGram,sample_ngram
+    tokens=np.array([2,0,1,0,1,0,1])
+    models={n:NGram.fit(tokens,n,3,k=0) for n in [1,2,3]}
+    assert sample_ngram(models,3,6,2,1848).tolist()==[0,1,0,1,0,1]
+
+
 def test_chisquare_pools_rare_categories_without_losing_mass():
     from src.sampling import chi_square
     stat, df, p = chi_square(np.array([50, 49, 1, 0]), np.array([.5, .48, .01, .01]))
@@ -79,6 +86,17 @@ def test_softmax_normalization_preserves_signal_to_interference():
     k=np.array([[1.,0.],[0.,1.]]); v=np.eye(2)
     out, own = recall(k,v,np.array([0]),'softmax',beta=2)
     np.testing.assert_allclose(out/own[:,None], [[1,np.exp(-2)]], atol=1e-13)
+
+
+def test_softmax_context_memory_is_invariant_to_pair_permutation():
+    from src.memory import recall
+    k=np.array([[1.,0.],[0.,1.],[-1.,0.]])
+    v=np.array([[2.,3.],[4.,-2.],[-1.,5.]])
+    a,wa=recall(k,v,np.array([0]),'softmax',beta=2)
+    order=np.array([1,2,0])
+    b,wb=recall(k[order],v[order],np.array([2]),'softmax',beta=2)
+    np.testing.assert_allclose(a,b,atol=1e-14)
+    np.testing.assert_allclose(wa,wb,atol=1e-14)
 
 
 def test_capacity_interpolates_in_log_space():

@@ -31,6 +31,7 @@ def main():
         ax.set(xlim=(-.45,1.05),ylim=(-1.1,1.1),aspect='equal',xlabel='Cosine to the other eight offsets',
                title=f'{name}\ntrained {real.mean():.3f} | shuffled {shuffled.mean():.3f}')
     fig.suptitle('Meaning as a direction: all nine pairs, with row-shuffled control',fontsize=15)
+    fig.tight_layout(rect=(0,0,1,.9))
     figure('part1-directions.png',fig)
     save_json('part1_metrics.json',{'shape':table.shape,'shuffle_seed':1730,'relations':results})
     print({k:(v['mean'],v['control_mean']) for k,v in results.items()},flush=True)
