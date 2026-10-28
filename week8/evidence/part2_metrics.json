@@ -1,0 +1,147 @@
+{
+  "models": [
+    {
+      "model": "uniform",
+      "n": 0,
+      "loss": 6.238324625039508,
+      "perplexity": 512,
+      "bits_per_character": 4.386331001867732
+    },
+    {
+      "model": "1-gram",
+      "n": 1,
+      "k": 0.0001,
+      "tuning_losses": {
+        "0.0001": 4.836186377419964,
+        "0.001": 4.836186404194696,
+        "0.01": 4.836186672002333,
+        "0.1": 4.836189355941954,
+        "1.0": 4.836216655969215
+      },
+      "loss": 4.839401114486396,
+      "perplexity": 126.39363374291466,
+      "bits_per_character": 3.4027108903154426,
+      "unseen_fraction": 0.0,
+      "observed_ngrams": 241,
+      "observed_contexts": 1
+    },
+    {
+      "model": "2-gram",
+      "n": 2,
+      "k": 0.01,
+      "tuning_losses": {
+        "0.0001": 3.0358762174608227,
+        "0.001": 3.0352400354529414,
+        "0.01": 3.0347028709117034,
+        "0.1": 3.035079596448983,
+        "1.0": 3.0439943595104757
+      },
+      "loss": 3.0381915920784572,
+      "perplexity": 20.867472190646303,
+      "bits_per_character": 2.1362328463089915,
+      "unseen_fraction": 0.00026506122358192243,
+      "observed_ngrams": 14920,
+      "observed_contexts": 241
+    },
+    {
+      "model": "3-gram",
+      "n": 3,
+      "k": 0.01,
+      "tuning_losses": {
+        "0.0001": 2.1146704906946914,
+        "0.001": 2.1004884828461745,
+        "0.01": 2.0918472885107593,
+        "0.1": 2.120255474838483,
+        "1.0": 2.329571634465039
+      },
+      "loss": 2.0943363624153717,
+      "perplexity": 8.120050411079777,
+      "bits_per_character": 1.472583276273998,
+      "unseen_fraction": 0.00632811088095867,
+      "observed_ngrams": 186615,
+      "observed_contexts": 14920
+    },
+    {
+      "model": "4-gram",
+      "n": 4,
+      "k": 0.01,
+      "tuning_losses": {
+        "0.0001": 1.971939423355323,
+        "0.001": 1.8957629631177662,
+        "0.01": 1.867936521415952,
+        "0.1": 2.035915491850028,
+        "1.0": 2.6817458278297712
+      },
+      "loss": 1.8627463796727155,
+      "perplexity": 6.441403039556768,
+      "bits_per_character": 1.3097462355485496,
+      "unseen_fraction": 0.04150903526803671,
+      "observed_ngrams": 799440,
+      "observed_contexts": 186615
+    },
+    {
+      "model": "5-gram",
+      "n": 5,
+      "k": 0.01,
+      "tuning_losses": {
+        "0.0001": 2.2875155119892976,
+        "0.001": 2.1244325029926996,
+        "0.01": 2.1001129358134296,
+        "0.1": 2.4662270270235536,
+        "1.0": 3.4036742727600986
+      },
+      "loss": 2.0825230219102666,
+      "perplexity": 8.02468986296884,
+      "bits_per_character": 1.4642770041885127,
+      "unseen_fraction": 0.12224361047754712,
+      "observed_ngrams": 1860191,
+      "observed_contexts": 799440
+    },
+    {
+      "model": "6-gram",
+      "n": 6,
+      "k": 0.001,
+      "tuning_losses": {
+        "0.0001": 2.797393047784654,
+        "0.001": 2.5817849849426526,
+        "0.01": 2.588265411861608,
+        "0.1": 3.0880165562846478,
+        "1.0": 4.094523273267397
+      },
+      "loss": 2.5503826593542915,
+      "perplexity": 12.812005478506922,
+      "bits_per_character": 1.7932414867366337,
+      "unseen_fraction": 0.23499154766671115,
+      "observed_ngrams": 3131047,
+      "observed_contexts": 1860191
+    }
+  ],
+  "enumeration_masses": [
+    1.0,
+    1.0000000000000007,
+    0.9999999999999968
+  ],
+  "enumeration_max_error": 3.219646771412954e-15,
+  "unnormalized_control_masses": [
+    3.718281828459045,
+    13.82561975584874,
+    51.407550705356755
+  ],
+  "ancestral_test": {
+    "statistic": 1325.6862791757974,
+    "df": 1355,
+    "p": 0.7103418554611362
+  },
+  "lag2_negative_control": {
+    "statistic": 27128768.278983127,
+    "df": 1355,
+    "p": 0.0
+  },
+  "samples_seed1848": {
+    "uniform": "N\u001c\ufffdR\ufffdall p@ weOq\ufffd th\ufffd a\ufffd b\time\n in7\ufffd hev\f\ufffd\ufffder1\ufffd8is e\ufffdig\ufffdM\ufffdg b Oncee\ufffd8b time\ufffdTverwx<\ufffd\ufffdh\u001bf\ufffd\ufffd",
+    "1-gram": "spd to. Lilyingilhe aed time a gededae.ur playu ee he Heououked  cAd the epingotey b goundndcc w go hea had withid to ss p",
+    "2-gram": "Lily, there was very mad she a som we worited with it. Mick. She said. She flealan's the pris plag wat bared. re with elewing unt and anor",
+    "3-gram": "\u001aR for>O\u0328\ufffd\u0007\b5 c\n\ufffd06myithMgch\ufffdb\ufffd bew\ufffdge\ufffd Ho> so)\ufffdP\ufffd\ufffd playr\ufffd\ufffdd##Z\u201d\u001d\ufffdntt She made a toy c"
+  },
+  "seconds": 10.255037700058892
+}
