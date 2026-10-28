@@ -4,6 +4,10 @@ Six completed parts of the [official learning sheet](https://giggleliu.github.io
 
 **[Open the interactive lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week8-language-lab.html)** · [Specification](SPEC.md) · [Numerical acceptance results](evidence/acceptance.json)
 
+The upper-right switch follows Week 7: **Interactive Studio** contains the memory, token-sampling and scaling controls; **Evidence & Verification (14)** contains the computed metrics, checks and 14 figures. Switching preserves control settings. Arrow keys, Home and End also select views. On narrow screens, the switch moves below the title.
+
+On 2026-10-28, a fresh official PDF download matched the supplied and committed PDF byte for byte (SHA256 `4e33bea929459c01511efc0298308a93d08d99ee7df38372bbf52e89be69cc35`). This layout revision therefore retains the existing calculations and evidence.
+
 The transformer reaches **1.220 bits per character**, below the best count model's **1.310**. All **34 unit tests** and **49 full-experiment acceptance checks** pass. An independent reviewer also reconstructed the token streams and checked the transformer against NumPy through the context-window rollover.
 
 ## Reproduce
@@ -246,5 +250,14 @@ At **C=5.76e23 FLOP**, N*=**73.19 billion**, D*=**1.312 trillion**, giving **17.
 The initial 27 tests failed before implementation in commit `0adf7f2`, following specification commit `ca22fab`. Additional sampling/history behavior tests were also observed failing before their implementations. Subsequent commits retain each completed part and its evidence. Independent review checked corpus provenance, raw-run summaries, and NumPy transformer predictions through the 64-token rollover; its identified verification gaps were fixed.
 
 `python scripts/build_web_lab.py` builds [the static lab](../docs/week8-language-lab.html). Browser QA checked desktop and mobile layouts, all 14 loaded figures, controls, lightbox and console errors. Across 64 context/temperature/sampler combinations, browser probabilities agree with independent NumPy targets to **1.0e−15**; details are in [web-validation.json](evidence/web-validation.json).
+
+To repeat the browser checks with Microsoft Edge installed, add the optional Playwright dependency to the active environment and run:
+
+```powershell
+uv pip install playwright==1.64.1
+python scripts/check_web.py
+```
+
+The check covers the header switch, exclusive panels, evidence-only metrics, preserved settings, keyboard navigation, and layouts at 390, 700, 1024 and 1440 pixels. Screenshots stay in ignored `artifacts/web-qa/`. Use `--url https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week8-language-lab.html` to check the deployed page. The header-position check failed against the old layout before implementation.
 
 The source and evidence are published to this exercise repository and its existing GitHub Pages site. Downloads, model checkpoints and raw runs remain excluded from Git.

@@ -74,9 +74,9 @@ def main():
         assert max(differences)<1e-12
         for width in [390,700,1024]:
             page.set_viewport_size({'width':width,'height':844})
-            assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth'),f'Overflow at {width}px'
             for tab,panel in [('evidence-tab','evidence'),('studio-tab','studio')]:
                 page.click('#'+tab);assert page.locator('#'+panel).is_visible()
+                assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth'),f'Overflow in {panel} at {width}px'
             page.evaluate('window.scrollTo(0,0)')
             page.screenshot(path=str(screenshots/f'studio-{width}.png'),full_page=False)
         assert not errors,errors

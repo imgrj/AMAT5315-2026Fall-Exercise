@@ -67,11 +67,17 @@ The supplied PDF, committed PDF and fresh cache-bypassing official download all
 match SHA256 `4e33bea929459c01511efc0298308a93d08d99ee7df38372bbf52e89be69cc35`.
 The user confirmed no scientific changes are needed if these versions match.
 
-- [ ] Write browser checks for a Week-7-style upper-right switch, mutually
+- [x] Write browser checks for a Week-7-style upper-right switch, mutually
   exclusive Studio/Evidence panels, evidence-only metrics, preserved control
   state, keyboard navigation and mobile layout; observe the current layout fail.
-- [ ] Change only the Week 8 template and rebuild its generated page. Use a flex
+- [x] Change only the Week 8 template and rebuild its generated page. Use a flex
   header with a title group and a right-aligned segmented tab list. Move metrics
   inside Evidence and implement accessible tab selection without resetting data.
 - [ ] Run browser checks and inspect screenshots, obtain independent review,
   update the guide, commit and push; verify the published page and remote SHA.
+
+The browser check failed on the old header before implementation and now passes.
+Independent read-only review approved the layout, confirmed unchanged embedded
+scientific data, and checked both panels at ten widths from 320 to 1920 pixels.
+Its suggested overflow assertion for the Evidence panel was added to the
+repeatable browser check. Publication verification remains pending below.
