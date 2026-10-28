@@ -1,0 +1,16 @@
+{
+  "train_stories": 24867,
+  "valid_stories": 2763,
+  "train_tokens": 9667036,
+  "valid_tokens": 1078997,
+  "train_characters": 19853989,
+  "valid_characters": 2213915,
+  "vocab": 512,
+  "eos": 2,
+  "roundtrip_exception_indices": [
+    50,
+    819,
+    2017
+  ],
+  "characters_per_token": 2.0518287370852164
+}
