@@ -1,0 +1,83 @@
+{
+  "artifact_commit": "766fca701085c7754a5e34d3cbc48f0aa2080a8b",
+  "pages_build_status": "built",
+  "url": "https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week8-language-lab.html",
+  "files": [
+    {
+      "path": "week8-language-lab.html",
+      "status": 200,
+      "sha256": "459d1cb620b76ef50ea38988848ff66317e745f93dcd696d4eefaebdf0bfc633"
+    },
+    {
+      "path": "assets/week8/part1-directions.png",
+      "status": 200,
+      "sha256": "cc4c92f59f050c4f2c135445ae6721fa9c6e60ce71763a280c89e6ce6d4bd8df"
+    },
+    {
+      "path": "assets/week8/part2-counts.png",
+      "status": 200,
+      "sha256": "b9f3c4eed6dd6dcca0c9d82999c16dd200e9091fa493dd261e0f6fb63fe8eaae"
+    },
+    {
+      "path": "assets/week8/part3-capacity.png",
+      "status": 200,
+      "sha256": "9f7b924f35d99ddfbc62fe6737be37bb0d3d8361caea444b13e01b07ce2018fa"
+    },
+    {
+      "path": "assets/week8/part3-interference.png",
+      "status": 200,
+      "sha256": "99a309b4fce4f05439bc2349371d3152a9c60eb0e1f6f34f6d30c94e6696c96e"
+    },
+    {
+      "path": "assets/week8/part3-mlp.png",
+      "status": 200,
+      "sha256": "33937e56ce3904fd2c52b04bffabc2925a02136cd4c1a4ce504777c2c692b902"
+    },
+    {
+      "path": "assets/week8/part4-recall.png",
+      "status": 200,
+      "sha256": "350f410b7f8a7fca4575012942b884748ecc96e311594cbdda006fe5d0e75152"
+    },
+    {
+      "path": "assets/week8/part5-attention.png",
+      "status": 200,
+      "sha256": "58e3f02f99fab66ff2eb33bf9f18e0ccd5c736477fe8aec029cb0e64da9a4b2c"
+    },
+    {
+      "path": "assets/week8/part5-comparison.png",
+      "status": 200,
+      "sha256": "1eefd1ea15c5d5e10289c953dedc31ac971f6951e92e92b20f36863377c92955"
+    },
+    {
+      "path": "assets/week8/part5-consistency.png",
+      "status": 200,
+      "sha256": "43c0ec8f25d5a8c3e559f379ab9c8f9fa1f70bdb19565972ccb811d7926f5c42"
+    },
+    {
+      "path": "assets/week8/part5-context.png",
+      "status": 200,
+      "sha256": "7f6c8b70804d515838821f784f95e735507a2c8707739987e15450f65b3d99f2"
+    },
+    {
+      "path": "assets/week8/part5-training.png",
+      "status": 200,
+      "sha256": "ec34ea51c9d90af7ff1b1ce5121e40a891b557e39ee18ff95475c2d11e8865e1"
+    },
+    {
+      "path": "assets/week8/part6-allocation.png",
+      "status": 200,
+      "sha256": "d507fd02691a2ee3d246c0d1d1362bebd33f01bdcfdbf23739373024aeee319f"
+    },
+    {
+      "path": "assets/week8/part6-fit.png",
+      "status": 200,
+      "sha256": "e4ea6591083c6e95eac40f8e8efb7b5ec79d58b7b6e83d808b391243e457b7d6"
+    },
+    {
+      "path": "assets/week8/part6-residuals.png",
+      "status": 200,
+      "sha256": "dacfb09976aff644625ef9add500150a8acfc3725103eca6f393856e539bc8da"
+    }
+  ],
+  "comparison": "Exact bytes for PNG, CRLF/LF normalized for HTML"
+}

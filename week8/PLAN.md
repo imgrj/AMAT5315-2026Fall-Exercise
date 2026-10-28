@@ -40,7 +40,7 @@ explicitly authorized execution, commits and push. No additional design approval
 - [x] 7. `scripts/verify_results.py` and `tests/`: audit each SPEC threshold;
   execute and record normalization/lag/top-p negative controls. Review source and
   evidence independently; repair substantive findings and rerun affected checks.
-- [ ] 8. `README.md`, root README, `docs/week8-language-lab.html`, site navigation:
+- [x] 8. `README.md`, root README, `docs/week8-language-lab.html`, site navigation:
   add measured figures, producing commands, explanations and interactive memory,
   token sampling and compute-budget views consistent with prior lab style.
   Inspect rendered figures/site. Commit, push main without force, verify remote
@@ -56,5 +56,7 @@ repeated after successful verification unless a related implementation changes.
 Independent numerical review approved after fixing shared sampling-path coverage,
 exact uniform acceptance, NumPy gradient regression, and initial trigram history.
 All 34 unit tests and 49 full-run checks pass. Local desktop/mobile browser QA
-passes, including 64 independent sampler comparisons. Publication is the final
-remaining action in Task 8.
+passes, including 64 independent sampler comparisons. Publication completed: origin/main received commit 766fca7 and GitHub Pages
+reported a successful build for that commit. The live HTML and all 14 PNGs
+returned HTTP 200 and matched the local deliverables byte for byte (HTML line
+endings normalized).
