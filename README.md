@@ -9,7 +9,8 @@ This repository stores weekly exercises for AMAT5315 (*Scientific Computing for 
   - [`week4/`](week4/README.md): Pseudospectral Continuum Fluid Dynamics (Navier–Stokes & Taylor–Green)
   - [`week5/`](week5/README.md): Acoustic Wave Simulation, Automatic Differentiation & Binomial Checkpointing
   - [`week6/`](week6/README.md): Energy-Based Models (RBM, Classical Hopfield & Softmax Attention)
-  - [**`week7/` (Latest)**](week7/README.md): **Diffusion Models & Flow Matching (DDPM, DDIM, pretrained CIFAR-10 U-Net, RePaint)**
+  - [`week7/`](week7/README.md): Diffusion Models & Flow Matching (DDPM, DDIM, pretrained CIFAR-10 U-Net, RePaint)
+  - [**`week8/` (Latest)**](week8/README.md): **Language Models & the Transformer (embeddings, n-grams, memory, attention, Chinchilla scaling)**
 
 - **Interactive GitHub Pages Web Labs**:
   - [Week 1: AI Agents & Monte Carlo $\pi$ Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week1-pi-lab.html)
@@ -19,10 +20,40 @@ This repository stores weekly exercises for AMAT5315 (*Scientific Computing for 
   - [Week 5: Seismic & Automatic Differentiation Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week5-seismic-lab.html)
   - [Week 6: Energy-Based Models & Softmax Attention Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week6-energy-lab.html)
   - [**Week 7: Diffusion & Flow Matching Lab**](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week7-diffusion-lab.html)
+  - [**Week 8: Language Models & Transformer Lab**](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week8-language-lab.html)
 
 ---
 
-## Week 7: Diffusion and Flow Matching (Latest Exercise)
+## Week 8: Language Models and the Transformer (Latest Exercise)
+
+The complete six-part learning sheet: pretrained embedding geometry; TinyStories count models; linear and nonlinear memory capacity; softmax picture recall; a JAX transformer trained from scratch; and a bootstrap refit of Chinchilla scaling.
+
+- **Guide and reproduction commands:** [week8/README.md](week8/README.md)
+- **Interactive Studio and 14 evidence figures:** [Week 8 Language Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week8-language-lab.html)
+- **Verification:** 34 independent tests, 49 full-experiment acceptance checks and deliberate negative controls.
+
+| Result | Measured evidence |
+| :--- | :--- |
+| Word relations become directions | Mean cosines 0.466 / 0.549 / 0.433; shuffled controls near zero |
+| Count models reach a data limit | 4-gram 1.310 bits/character; 6-gram falls to 1.793 |
+| MLP learns the bigram table | Loss difference +0.00495 nats/token |
+| Attention recalls among 4,096 pictures | Softmax interference/signal 0.057 |
+| Transformer beats all count models | **1.220 bits/character** after 6,000 CPU updates |
+| Compute-optimal scaling | α=0.3473, β=0.3672; **17.9 tokens/parameter**, 95% interval 7.4–35.4 |
+
+| Same validation stories, better predictions | Attention suppresses unrelated memories |
+| :---: | :---: |
+| ![Week 8 model comparison](week8/evidence/part5-comparison.png) | ![Week 8 memory recall](week8/evidence/part4-recall.png) |
+
+| Word relations as directions | Refit the compute-optimal allocation |
+| :---: | :---: |
+| ![Week 8 embeddings](week8/evidence/part1-directions.png) | ![Week 8 scaling](week8/evidence/part6-allocation.png) |
+
+The guide lists pinned downloads and one command beside each figure. Raw data and model checkpoints stay out of Git.
+
+---
+
+## Week 7: Diffusion and Flow Matching
 
 Generation by transporting fresh Gaussian noise, following the revised learning sheet's Algorithms 1-6: DDPM on a four-cluster mixture (Parts 1), deterministic DDIM (Part 2), flow matching and the sampling-cost comparison (Part 3), a JAX port of a pretrained CIFAR-10 noise predictor (Part 4), and RePaint inpainting (Part 5).
 

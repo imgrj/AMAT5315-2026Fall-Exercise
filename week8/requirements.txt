@@ -1,0 +1,12 @@
+jax==0.12.0.1
+jaxlib==0.12.0.1
+optax==0.2.8
+numpy==2.5.4
+scipy==1.18.1
+matplotlib==3.11.1
+pillow==12.2.0
+sentencepiece==0.2.2
+tokenizers==0.23.3
+safetensors==0.8.0
+threadpoolctl==3.6.0
+pytest==9.2.0
