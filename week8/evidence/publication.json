@@ -1,12 +1,12 @@
 {
-  "artifact_commit": "766fca701085c7754a5e34d3cbc48f0aa2080a8b",
+  "artifact_commit": "7ff325948fa96ac86cc3e624f1eecee17d4b2d93",
   "pages_build_status": "built",
   "url": "https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week8-language-lab.html",
   "files": [
     {
       "path": "week8-language-lab.html",
       "status": 200,
-      "sha256": "459d1cb620b76ef50ea38988848ff66317e745f93dcd696d4eefaebdf0bfc633"
+      "sha256": "92f2dc48e45e81b61c0e90ecb3cf3037acfe4a21f812925437e63498bd76a379"
     },
     {
       "path": "assets/week8/part1-directions.png",

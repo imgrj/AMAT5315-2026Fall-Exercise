@@ -73,11 +73,14 @@ The user confirmed no scientific changes are needed if these versions match.
 - [x] Change only the Week 8 template and rebuild its generated page. Use a flex
   header with a title group and a right-aligned segmented tab list. Move metrics
   inside Evidence and implement accessible tab selection without resetting data.
-- [ ] Run browser checks and inspect screenshots, obtain independent review,
+- [x] Run browser checks and inspect screenshots, obtain independent review,
   update the guide, commit and push; verify the published page and remote SHA.
 
 The browser check failed on the old header before implementation and now passes.
 Independent read-only review approved the layout, confirmed unchanged embedded
 scientific data, and checked both panels at ten widths from 320 to 1920 pixels.
 Its suggested overflow assertion for the Evidence panel was added to the
-repeatable browser check. Publication verification remains pending below.
+repeatable browser check. Commit `7ff3259` was pushed to origin/main and its
+GitHub Pages build completed successfully. The live HTML and all 14 PNGs returned
+HTTP 200 and matched the local files (HTML line endings normalized), recorded in
+`evidence/publication.json`.
