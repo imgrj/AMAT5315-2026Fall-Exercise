@@ -1,0 +1,291 @@
+{
+  "loss": 3.043138027191162,
+  "bigram_loss": 3.0381915920784572,
+  "difference": 0.004946435112704872,
+  "bits_per_character": 2.1397108156337197,
+  "seconds": 27.744654300040565,
+  "settings": {
+    "steps": 4000,
+    "batch": 16384,
+    "warmup": 200,
+    "peak_lr": 0.006,
+    "final_lr_fraction": 0.1,
+    "weight_decay": 0.01,
+    "seed": 1833,
+    "embedding": 64,
+    "hidden": 512,
+    "environment": {
+      "jax": "0.12.0.1",
+      "jaxlib": "0.12.0.1",
+      "optax": "0.2.8",
+      "numpy": "2.5.4",
+      "scipy": "1.18.1",
+      "matplotlib": "3.11.1",
+      "sentencepiece": "0.2.2",
+      "tokenizers": "0.23.3",
+      "safetensors": "0.8.0"
+    }
+  },
+  "history": [
+    {
+      "step": 0,
+      "valid_loss": 6.238338947296143
+    },
+    {
+      "step": 200,
+      "train_loss": 3.0688064098358154,
+      "valid_loss": 3.0977797508239746
+    },
+    {
+      "step": 400,
+      "train_loss": 3.075319528579712,
+      "valid_loss": 3.077716588973999
+    },
+    {
+      "step": 600,
+      "train_loss": 3.0744173526763916,
+      "valid_loss": 3.0708773136138916
+    },
+    {
+      "step": 800,
+      "train_loss": 3.063943386077881,
+      "valid_loss": 3.0711426734924316
+    },
+    {
+      "step": 1000,
+      "train_loss": 3.0827314853668213,
+      "valid_loss": 3.067284107208252
+    },
+    {
+      "step": 1200,
+      "train_loss": 3.07080078125,
+      "valid_loss": 3.0647823810577393
+    },
+    {
+      "step": 1400,
+      "train_loss": 3.0446856021881104,
+      "valid_loss": 3.064072370529175
+    },
+    {
+      "step": 1600,
+      "train_loss": 3.0451560020446777,
+      "valid_loss": 3.0612616539001465
+    },
+    {
+      "step": 1800,
+      "train_loss": 3.053225517272949,
+      "valid_loss": 3.059025287628174
+    },
+    {
+      "step": 2000,
+      "train_loss": 3.053288459777832,
+      "valid_loss": 3.0572149753570557
+    },
+    {
+      "step": 2200,
+      "train_loss": 3.0585310459136963,
+      "valid_loss": 3.0548651218414307
+    },
+    {
+      "step": 2400,
+      "train_loss": 3.0507333278656006,
+      "valid_loss": 3.0535635948181152
+    },
+    {
+      "step": 2600,
+      "train_loss": 3.04339337348938,
+      "valid_loss": 3.051147937774658
+    },
+    {
+      "step": 2800,
+      "train_loss": 3.0337917804718018,
+      "valid_loss": 3.049314022064209
+    },
+    {
+      "step": 3000,
+      "train_loss": 3.041309118270874,
+      "valid_loss": 3.0475528240203857
+    },
+    {
+      "step": 3200,
+      "train_loss": 3.0424022674560547,
+      "valid_loss": 3.0461878776550293
+    },
+    {
+      "step": 3400,
+      "train_loss": 3.032241106033325,
+      "valid_loss": 3.0446040630340576
+    },
+    {
+      "step": 3600,
+      "train_loss": 3.038269519805908,
+      "valid_loss": 3.0440828800201416
+    },
+    {
+      "step": 3800,
+      "train_loss": 3.037609338760376,
+      "valid_loss": 3.0436201095581055
+    },
+    {
+      "step": 4000,
+      "train_loss": 3.033872127532959,
+      "valid_loss": 3.043138027191162
+    }
+  ],
+  "trained_median_top5_share": 0.1607777699828148,
+  "initial_median_top5_share": 0.13274163007736206,
+  "most_concentrated_sides": [
+    {
+      "unit": 133,
+      "side": -1,
+      "share": 0.4754842221736908,
+      "previous": [
+        "3",
+        "<0x3D>",
+        "<0xC2>",
+        "im",
+        "\u2581s"
+      ],
+      "next": [
+        "\u2581upon",
+        "se",
+        "very",
+        "pp",
+        "ch"
+      ]
+    },
+    {
+      "unit": 296,
+      "side": -1,
+      "share": 0.45906686782836914,
+      "previous": [
+        "\u2581upon",
+        "\u2581had",
+        "\u2581of",
+        "\u2581was",
+        "\u2581in"
+      ],
+      "next": [
+        "\u2581time",
+        "V",
+        "\u00e9",
+        "Y",
+        "itt"
+      ]
+    },
+    {
+      "unit": 328,
+      "side": -1,
+      "share": 0.45433998107910156,
+      "previous": [
+        "\u2581sa",
+        "E",
+        "\u2019",
+        "\u2581upon",
+        "\u2581there"
+      ],
+      "next": [
+        "ittle",
+        "ll",
+        "d",
+        "ved",
+        "ve"
+      ]
+    },
+    {
+      "unit": 26,
+      "side": -1,
+      "share": 0.44618821144104004,
+      "previous": [
+        "\u2019",
+        "'",
+        "\u2581ha",
+        "\u2581wa",
+        "\u2581u"
+      ],
+      "next": [
+        "q",
+        "ould",
+        "<0x0A>",
+        "m",
+        "v"
+      ]
+    },
+    {
+      "unit": 438,
+      "side": 1,
+      "share": 0.4159070551395416,
+      "previous": [
+        "<0xC2>",
+        "2",
+        "\u2581h",
+        "1",
+        "\u2581very"
+      ],
+      "next": [
+        "Y",
+        "ir",
+        "itt",
+        "un",
+        "\u2581O"
+      ]
+    },
+    {
+      "unit": 172,
+      "side": -1,
+      "share": 0.40454718470573425,
+      "previous": [
+        "<0x3D>",
+        "<0x93>",
+        "\u2581upon",
+        "id",
+        ":"
+      ],
+      "next": [
+        "very",
+        "ith",
+        "nd",
+        "z",
+        "ily"
+      ]
+    },
+    {
+      "unit": 353,
+      "side": -1,
+      "share": 0.40228354930877686,
+      "previous": [
+        "\u2581upon",
+        ":",
+        "\u2581in",
+        "<0xC2>",
+        "ar"
+      ],
+      "next": [
+        "\u2581named",
+        "\u2581saw",
+        "\u2581want",
+        "v",
+        "\u2581had"
+      ]
+    },
+    {
+      "unit": 91,
+      "side": -1,
+      "share": 0.4003910720348358,
+      "previous": [
+        "<0xC2>",
+        "\u2581lo",
+        "\u2581O",
+        "at",
+        "ig"
+      ],
+      "next": [
+        "her",
+        "\u2581On",
+        "ri",
+        "z",
+        "ut"
+      ]
+    }
+  ]
+}
