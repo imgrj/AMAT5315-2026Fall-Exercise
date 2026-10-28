@@ -121,3 +121,16 @@ fit, versions, exact reproduction commands. Add Week 8 to root README and existi
 GitHub Pages lab navigation, preserving other weeks' exercises. Review with a
 separate reviewer as required by requesting-code-review. Push source/evidence to
 origin, verify remote HEAD and Pages. Do not edit the instructor's course website.
+
+## Website layout revision (2026-10-28)
+
+Rechecked the local, committed and freshly downloaded official PDFs, including a
+cache-bypassing request: all have the SHA256 above and identical extracted text.
+The user confirmed that unchanged learning-sheet content needs no recalculation.
+
+Match the Week 7 header's upper-right segmented switch: Interactive Studio on the
+left, Evidence & Verification (14) on the right. Show only the selected panel.
+Keep interactive controls in Studio and move the four computed summary metrics
+into Evidence alongside the verification table and all 14 figures. Preserve
+control state when switching. Keep the switch usable without horizontal overflow
+on mobile, and support arrow/Home/End keyboard navigation between the two tabs.

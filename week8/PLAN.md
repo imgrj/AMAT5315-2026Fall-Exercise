@@ -60,3 +60,18 @@ passes, including 64 independent sampler comparisons. Publication completed: ori
 reported a successful build for that commit. The live HTML and all 14 PNGs
 returned HTTP 200 and matched the local deliverables byte for byte (HTML line
 endings normalized).
+
+## Website layout revision (2026-10-28)
+
+The supplied PDF, committed PDF and fresh cache-bypassing official download all
+match SHA256 `4e33bea929459c01511efc0298308a93d08d99ee7df38372bbf52e89be69cc35`.
+The user confirmed no scientific changes are needed if these versions match.
+
+- [ ] Write browser checks for a Week-7-style upper-right switch, mutually
+  exclusive Studio/Evidence panels, evidence-only metrics, preserved control
+  state, keyboard navigation and mobile layout; observe the current layout fail.
+- [ ] Change only the Week 8 template and rebuild its generated page. Use a flex
+  header with a title group and a right-aligned segmented tab list. Move metrics
+  inside Evidence and implement accessible tab selection without resetting data.
+- [ ] Run browser checks and inspect screenshots, obtain independent review,
+  update the guide, commit and push; verify the published page and remote SHA.
