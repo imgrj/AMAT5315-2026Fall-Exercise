@@ -1,0 +1,60 @@
+{
+  "url": "https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html",
+  "artifact_commit": "c608f25652fef8b588a405aa5200b69a85d9a07b",
+  "pages_build_status": "built",
+  "pages_build_created_at": "2026-11-04T10:23:53Z",
+  "checked_from": "c608f25652fef8b588a405aa5200b69a85d9a07b",
+  "files": [
+    {
+      "path": "week9-inference-lab.html",
+      "status": 200,
+      "sha256": "bd62d1ff28ba13bf33c374c7be754eea15aa52748d00828dfb513b2eae588478"
+    },
+    {
+      "path": "assets/week9/graphs.svg",
+      "status": 200,
+      "sha256": "dd630d4b22b2c0514fd8f103473cdd45af1706657539326ac6eb8c224c93c163"
+    },
+    {
+      "path": "assets/week9/posteriors.png",
+      "status": 200,
+      "sha256": "5d53b50a4fd994d6570a298de24bc7136fd359c6081766efec21b0e5fe7977c8"
+    },
+    {
+      "path": "assets/week9/joint.png",
+      "status": 200,
+      "sha256": "4820ae82cffce2650861642f73197444ac5d075c91c091c4a6784512fb774c6b"
+    },
+    {
+      "path": "assets/week9/orders.png",
+      "status": 200,
+      "sha256": "812fc783efb623f3e2e85f768c675795142a95779c280124518f9343c37a342e"
+    },
+    {
+      "path": "assets/week9/bp-convergence.png",
+      "status": 200,
+      "sha256": "34c315b48cd1d6a9a37df9d69662ec9ca9d74882f304b211f3ff3735df26c4a7"
+    },
+    {
+      "path": "assets/week9/bp-accuracy.png",
+      "status": 200,
+      "sha256": "6a6a0eefa72f5ff0ce03ff736cd7ec744ad91b241c16a9c85db11dc7658cecb7"
+    },
+    {
+      "path": "assets/week9/promedus-orders.png",
+      "status": 200,
+      "sha256": "746d35ed3e80d488bf980e34281ccdd743342cefa825552c142c089cfc95df24"
+    },
+    {
+      "path": "assets/week9/promedus-bp.png",
+      "status": 200,
+      "sha256": "7e6fbbfea6a3b94f6db67374255bb0ce4a5273455d6718208360296b4f2dbe96"
+    },
+    {
+      "path": "index.html",
+      "status": 200,
+      "sha256": "0147b186a018f49c76a117c907d69ca8a1d8e33739d1d72f4fb16a0f7ced8b36"
+    }
+  ],
+  "comparison": "Exact bytes for PNG, CRLF/LF normalised for HTML and SVG"
+}

@@ -111,6 +111,7 @@ def main() -> None:
 
         assert not errors, errors
         result = {
+            'url': arguments.url,
             'browser': 'Microsoft Edge, Playwright headless',
             'desktop': [1440, 1000],
             'responsive_widths': [390, 700, 1024],
