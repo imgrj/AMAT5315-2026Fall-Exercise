@@ -16,7 +16,7 @@ number is checked against brute-force enumeration or the published UAI 2014 answ
   reading.
 - **Interactive lab:** [Week 9 Inference Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html)
   — *Interactive Studio* (posterior bars, a contraction-step player, a BP sweep player) and
-  *Evidence & Verification (8)* with every computed figure; each figure opens in a lightbox
+  *Evidence & Verification (9)* with every computed figure; each figure opens in a lightbox
   with an English caption, its producing command and previous/next navigation.
 - **Specification:** [`SPEC.md`](SPEC.md) records the acceptance criteria before the code.
 
@@ -251,6 +251,14 @@ error of correct loopy BP.
 | :--- | :--- | :--- |
 | `evidence/bp-convergence.png` | `python scripts/plot_bp.py` | undamped residual against sweeps for the three cases with the stop tolerance |
 | `evidence/bp-accuracy.png` | `python scripts/plot_bp.py` | max belief-minus-exact error against sweeps: convergence and accuracy side by side |
+| `evidence/bp-comparison.png` | `python scripts/plot_bp.py` | the lecture slide's ADX view: final probabilities exact vs loopy BP, with the residual and the largest probability error on one axis |
+
+The third figure reproduces the summary the sheet's page 13 prints: exact and loopy-BP
+probabilities side by side (tuberculosis 0.392 vs 0.381, lung cancer 0.444 vs 0.446,
+bronchitis 0.629 vs 0.625, smoking 0.702 vs 0.696) and a convergence panel where the message
+residual reaches 8.23e-11 while the largest probability error stays at 0.01061. The sheet
+requires the residual and error traces (the first two figures); this combined view adds the
+exact-versus-approximate comparison on one picture.
 
 ## Part 5 — the Promedus_14 benchmark
 
@@ -313,6 +321,7 @@ lightbox opens and closes).
 | `evidence/orders.png` | `python scripts/plot_orders.py` |
 | `evidence/bp-convergence.png` | `python scripts/plot_bp.py` |
 | `evidence/bp-accuracy.png` | `python scripts/plot_bp.py` |
+| `evidence/bp-comparison.png` | `python scripts/plot_bp.py` |
 | `evidence/promedus-orders.png` | `python scripts/plot_promedus.py` |
 | `evidence/promedus-bp.png` | `python scripts/plot_promedus.py` |
 

@@ -1,5 +1,5 @@
 {
-  "url": "https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html",
+  "url": "file:///D:/Desktop/AMAT5315-2026Fall-Exercise/docs/week9-inference-lab.html",
   "browser": "Microsoft Edge, Playwright headless",
   "desktop": [
     1440,
@@ -10,7 +10,7 @@
     700,
     1024
   ],
-  "figures_loaded": 8,
+  "figures_loaded": 9,
   "page_errors": [],
   "checks": [
     "upper-right segmented switch",
@@ -24,7 +24,7 @@
     "control state preserved across the switch",
     "arrow/Home/End tab navigation",
     "no horizontal overflow at 390/700/1024 px",
-    "8 evidence images loaded",
+    "9 evidence images loaded",
     "lightbox open and Escape close",
     "lightbox shows the English caption, command and figure counter",
     "lightbox previous/next navigate all figures"

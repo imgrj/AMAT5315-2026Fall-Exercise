@@ -31,7 +31,7 @@ This repository stores weekly exercises for AMAT5315 (*Scientific Computing for 
 The learning sheet's four builds: exact ASIA inference by one tensor contraction, contraction orders and their cost, loopy belief propagation, and the 414-variable Promedus_14 UAI benchmark. Rust 1.96.0 with tenferro-rs for tensors and omeco for order search; Python only for plots and tests.
 
 - **Guide and reproduction commands:** [week9/README.md](week9/README.md)
-- **Interactive Studio and 8 evidence figures:** [Week 9 Inference Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html)
+- **Interactive Studio and 9 evidence figures:** [Week 9 Inference Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html)
 - **Verification:** 39 independent tests, 29 acceptance checks and a deliberate negative control.
 
 | Result | Measured evidence |

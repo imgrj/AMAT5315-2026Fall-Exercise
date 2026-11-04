@@ -40,6 +40,11 @@ GALLERY = [
      'Maximum undamped message change max|F(m) - m| per synchronous damped sweep (damping 0.5). All three cases '
      'reach the 1e-10 stop tolerance: prior in 54 sweeps, AD in 93 and ADX in 94, where the residual is '
      '8.23e-11. The stop test uses this undamped residual, not the damped step size.'),
+    ('bp-comparison.png', '4 / ADX: loopy BP is close, not exact', 'plot_bp.py',
+     'The lecture slide view of the same ADX result. (a) Final probabilities, exact against loopy BP: '
+     'tuberculosis 0.392 vs 0.381, lung cancer 0.444 vs 0.446, bronchitis 0.629 vs 0.625 and smoking '
+     '0.702 vs 0.696. (b) Convergence: the message residual falls below 1e-10 after 94 sweeps while the '
+     'largest probability error stays at 0.01061, so the beliefs stop changing without becoming exact.'),
     ('bp-accuracy.png', '4 / Converged is not accurate', 'plot_bp.py',
      'Maximum belief-minus-exact marginal error over the same sweeps. On ASIA loops the error settles above '
      'zero: 0.00334 for prior, 0.01141 for AD and 0.01061 for ADX, so a small residual does not certify '

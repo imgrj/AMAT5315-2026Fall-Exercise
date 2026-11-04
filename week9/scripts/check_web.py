@@ -73,7 +73,7 @@ def main() -> None:
         assert page.locator('#row-plans').inner_text().startswith('greedy work')
         assert page.locator('#sheet-hash').inner_text().startswith('27c21a357be35035')
         assert page.locator('#ref-exhaustive').inner_text() == '44 / 50 / 52'
-        assert page.locator('#gallery article').count() == 8
+        assert page.locator('#gallery article').count() == 9
         page.locator('#gallery article').last.scroll_into_view_if_needed()
         page.wait_for_function(
             "Array.from(document.querySelectorAll('#gallery img')).every(i=>i.complete&&i.naturalWidth>0)")
@@ -82,12 +82,12 @@ def main() -> None:
         first_description = page.locator('#lightbox-desc').inner_text()
         assert len(first_description) > 120, first_description
         assert page.locator('#lightbox-command').inner_text().startswith('python scripts/')
-        assert page.locator('#lightbox-counter').inner_text() == '1 / 8'
+        assert page.locator('#lightbox-counter').inner_text() == '1 / 9'
         page.click('#lightbox-next')
-        assert page.locator('#lightbox-counter').inner_text() == '2 / 8'
+        assert page.locator('#lightbox-counter').inner_text() == '2 / 9'
         assert page.locator('#lightbox-desc').inner_text() != first_description
         page.click('#lightbox-prev')
-        assert page.locator('#lightbox-counter').inner_text() == '1 / 8'
+        assert page.locator('#lightbox-counter').inner_text() == '1 / 9'
         assert page.locator('#lightbox-desc').inner_text() == first_description
         page.keyboard.press('Escape')
         assert not page.locator('#lightbox').is_visible()
@@ -137,7 +137,7 @@ def main() -> None:
             'browser': 'Microsoft Edge, Playwright headless',
             'desktop': [1440, 1000],
             'responsive_widths': [390, 700, 1024],
-            'figures_loaded': 8,
+            'figures_loaded': 9,
             'page_errors': errors,
             'checks': [
                 'upper-right segmented switch',
@@ -151,7 +151,7 @@ def main() -> None:
                 'control state preserved across the switch',
                 'arrow/Home/End tab navigation',
                 'no horizontal overflow at 390/700/1024 px',
-                '8 evidence images loaded',
+                '9 evidence images loaded',
                 'lightbox open and Escape close',
                 'lightbox shows the English caption, command and figure counter',
                 'lightbox previous/next navigate all figures',
