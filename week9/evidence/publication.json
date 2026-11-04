@@ -1,14 +1,14 @@
 {
   "url": "https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html",
-  "artifact_commit": "7b3158d4e3f39176cc298660d1123ef2cffaf784",
+  "artifact_commit": "eeed950c29696efc7c266b7539989c34e1d23c8c",
   "pages_build_status": "built",
-  "pages_build_created_at": "2026-11-04T10:51:42Z",
-  "checked_from": "7b3158d4e3f39176cc298660d1123ef2cffaf784",
+  "pages_build_created_at": "2026-11-04T10:58:08Z",
+  "checked_from": "eeed950c29696efc7c266b7539989c34e1d23c8c",
   "files": [
     {
       "path": "week9-inference-lab.html",
       "status": 200,
-      "sha256": "d1a4752fd57cf2c7613177ee30fdf8ef5980a5b33eccdc55f31a4e7e16aaf48b"
+      "sha256": "75ec577f69a3b0a671c4df79120a9dc6a5491c06f38847d28d6115a5dfa9214a"
     },
     {
       "path": "assets/week9/graphs.svg",
