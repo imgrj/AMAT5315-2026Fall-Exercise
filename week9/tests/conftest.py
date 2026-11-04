@@ -39,7 +39,11 @@ def data() -> Path:
 @pytest.fixture(scope='session')
 def binary(data: Path) -> Path:
     subprocess.run(['cargo', '+1.96.0', 'build', '--release'], cwd=ROOT, check=True)
-    exe = ROOT / 'target' / 'release' / ('infer.exe' if sys.platform == 'win32' else 'infer')
+    metadata = subprocess.run(
+        ['cargo', '+1.96.0', 'metadata', '--format-version', '1', '--no-deps'],
+        cwd=ROOT, check=True, capture_output=True, text=True)
+    target = Path(json.loads(metadata.stdout)['target_directory'])
+    exe = target / 'release' / ('infer.exe' if sys.platform == 'win32' else 'infer')
     assert exe.exists(), exe
     return exe
 

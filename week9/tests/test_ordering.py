@@ -48,8 +48,9 @@ def test_plan_keeps_the_answer(method, seed, infer, asia_model):
         assert order.get('seed') is None
     else:
         assert order['seed'] == seed
-    assert len(order['steps']) == len(asia_model.factors) - 1
-    assert order['leaves'] == len(asia_model.factors)
+    leaves = len(asia_model.factors) + len(CASES['AD'])
+    assert order['leaves'] == leaves
+    assert len(order['steps']) == leaves - 1
 
     work, largest = recount(order['steps'], asia_model)
     assert complexity['work'] == pytest.approx(work, rel=1e-12)
