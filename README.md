@@ -1,4 +1,4 @@
-﻿# AMAT5315: Scientific Computing for Physicists - Weekly Exercises
+# AMAT5315: Scientific Computing for Physicists - Weekly Exercises
 
 This repository stores weekly exercises for AMAT5315 (*Scientific Computing for Physicists*). Each week contains complete source code, verification test suites, evidence figures, and interactive web laboratories.
 
@@ -10,7 +10,8 @@ This repository stores weekly exercises for AMAT5315 (*Scientific Computing for 
   - [`week5/`](week5/README.md): Acoustic Wave Simulation, Automatic Differentiation & Binomial Checkpointing
   - [`week6/`](week6/README.md): Energy-Based Models (RBM, Classical Hopfield & Softmax Attention)
   - [`week7/`](week7/README.md): Diffusion Models & Flow Matching (DDPM, DDIM, pretrained CIFAR-10 U-Net, RePaint)
-  - [**`week8/` (Latest)**](week8/README.md): **Language Models & the Transformer (embeddings, n-grams, memory, attention, Chinchilla scaling)**
+  - [`week8/`](week8/README.md): Language Models & the Transformer (embeddings, n-grams, memory, attention, Chinchilla scaling)
+  - [**`week9/` (Latest)**](week9/README.md): **Probabilistic Inference by Tensor Contraction (ASIA, contraction orders, loopy BP, Promedus_14)**
 
 - **Interactive GitHub Pages Web Labs**:
   - [Week 1: AI Agents & Monte Carlo $\pi$ Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week1-pi-lab.html)
@@ -19,12 +20,42 @@ This repository stores weekly exercises for AMAT5315 (*Scientific Computing for 
   - [Week 4: Continuum Fluid Dynamics Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week4-fluid-lab.html)
   - [Week 5: Seismic & Automatic Differentiation Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week5-seismic-lab.html)
   - [Week 6: Energy-Based Models & Softmax Attention Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week6-energy-lab.html)
-  - [**Week 7: Diffusion & Flow Matching Lab**](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week7-diffusion-lab.html)
-  - [**Week 8: Language Models & Transformer Lab**](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week8-language-lab.html)
+  - [Week 7: Diffusion & Flow Matching Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week7-diffusion-lab.html)
+  - [Week 8: Language Models & Transformer Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week8-language-lab.html)
+  - [**Week 9: Probabilistic Inference & Tensor Network Lab**](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html)
 
 ---
 
-## Week 8: Language Models and the Transformer (Latest Exercise)
+## Week 9: Probabilistic Inference by Tensor Contraction (Latest Exercise)
+
+The learning sheet's four builds: exact ASIA inference by one tensor contraction, contraction orders and their cost, loopy belief propagation, and the 414-variable Promedus_14 UAI benchmark. Rust 1.96.0 with tenferro-rs for tensors and omeco for order search; Python only for plots and tests.
+
+- **Guide and reproduction commands:** [week9/README.md](week9/README.md)
+- **Interactive Studio and 8 evidence figures:** [Week 9 Inference Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html)
+- **Verification:** 39 independent tests, 29 acceptance checks and a deliberate negative control.
+
+| Result | Measured evidence |
+| :--- | :--- |
+| ASIA contraction vs 256-row enumeration | max marginal error 2.2 × 10⁻¹⁶; relative evidence error 1.3 × 10⁻¹⁵ |
+| Evidence masses (prior / AD / ADX) | 1 / 0.004501375 / 0.00098822675 |
+| Exhaustive pair-order work | **44 / 50 / 52** terms, matching the sheet |
+| Loopy BP on ASIA (ADX) | 94 sweeps, residual 8.23 × 10⁻¹¹, marginal error **0.01061** |
+| Promedus_14 exact | log₁₀ Z = **−7.80674630458244** (published −7.80675); MAR within 4.4 × 10⁻⁷ |
+| Promedus_14 loopy BP | 1000 sweeps, **unconverged**, query error up to 0.3824 |
+
+| Saved plans for one query | The joint keeps the dependence |
+| :---: | :---: |
+| ![Week 9 orders](week9/evidence/orders.png) | ![Week 9 joint](week9/evidence/joint.png) |
+
+| Priors and posteriors | Converged loopy BP is not accurate |
+| :---: | :---: |
+| ![Week 9 posteriors](week9/evidence/posteriors.png) | ![Week 9 BP accuracy](week9/evidence/bp-accuracy.png) |
+
+The guide lists the pinned data hashes and one command beside each figure.
+
+---
+
+## Week 8: Language Models and the Transformer
 
 The complete six-part learning sheet: pretrained embedding geometry; TinyStories count models; linear and nonlinear memory capacity; softmax picture recall; a JAX transformer trained from scratch; and a bootstrap refit of Chinchilla scaling.
 
