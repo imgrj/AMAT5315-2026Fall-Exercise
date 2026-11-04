@@ -14,14 +14,47 @@ from pypdf import PdfReader
 from _common import ARTIFACTS, EVIDENCE, ROOT, plan_leaves, read_json
 
 GALLERY = [
-    ('graphs.svg', '2 / The AD query as a tensor diagram', 'plot_graphs.py'),
-    ('posteriors.png', '2 / Priors and posteriors agree with enumeration', 'plot_posteriors.py'),
-    ('joint.png', '2 / The joint keeps the dependence', 'plot_posteriors.py'),
-    ('orders.png', '3 / Two saved plans, one answer', 'plot_orders.py'),
-    ('bp-convergence.png', '4 / The messages stop changing', 'plot_bp.py'),
-    ('bp-accuracy.png', '4 / Converged is not accurate', 'plot_bp.py'),
-    ('promedus-orders.png', '5 / Promedus plan costs', 'plot_promedus.py'),
-    ('promedus-bp.png', '5 / Promedus is unconverged and inaccurate', 'plot_promedus.py'),
+    ('graphs.svg', '2 / The AD query as a tensor diagram', 'plot_graphs.py',
+     'The AD tuberculosis query drawn as a tensor network. Each factor is a box whose legs are the axes of its '
+     'UAI table; a label is one shared index, joined in every table that uses it. The visit to Asia and the '
+     'dyspnoea observation carry (1,0) caps, smoking joins p(s), p(l|s) and p(b|s), and only T stays open, so '
+     'the same picture answers p(T | A=0, D=0). Replacing both caps by (1,1) closes the network and returns the '
+     'evidence mass 0.004501375.'),
+    ('posteriors.png', '2 / Priors and posteriors agree with enumeration', 'plot_posteriors.py',
+     'Exact node marginals for the three patient cases: the bars are one tensor contraction and the white ticks '
+     'are the independent 256-row enumeration. A positive X-ray raises tuberculosis from 0.0878 to 0.3917 and '
+     'lung cancer from 0.0995 to 0.4443 while bronchitis falls from 0.8114 to 0.6288. The largest disagreement '
+     'between the two methods is 2.2e-16, and every marginal sums to one.'),
+    ('joint.png', '2 / The joint keeps the dependence', 'plot_posteriors.py',
+     'p(T,L) beside the product of its marginals, and their difference. In ADX the joint gives '
+     'p(T=0,L=0) = 0.022214 while the product gives 0.174026, a dependence of -0.151812 that no product of '
+     'marginals can represent; the prior, where tuberculosis and lung cancer are independent, shows zero to '
+     'machine precision. This is why a joint marginal keeps a shared cause or a shared effect.'),
+    ('orders.png', '3 / Two saved plans, one answer', 'plot_orders.py',
+     'The random (seed 42) and greedy contraction trees for the same AD evidence query. An internal node keeps '
+     'the labels that another tensor or the output still needs and sums the rest; the number above a node is '
+     "that step's work, the number under a leaf is its entry count, and the highlighted node is the largest "
+     'intermediate. Random costs 204 terms with a 32-entry tensor, greedy 52 with 8, and both return '
+     'p(A=0,D=0) = 0.004501375.'),
+    ('bp-convergence.png', '4 / The messages stop changing', 'plot_bp.py',
+     'Maximum undamped message change max|F(m) - m| per synchronous damped sweep (damping 0.5). All three cases '
+     'reach the 1e-10 stop tolerance: prior in 54 sweeps, AD in 93 and ADX in 94, where the residual is '
+     '8.23e-11. The stop test uses this undamped residual, not the damped step size.'),
+    ('bp-accuracy.png', '4 / Converged is not accurate', 'plot_bp.py',
+     'Maximum belief-minus-exact marginal error over the same sweeps. On ASIA loops the error settles above '
+     'zero: 0.00334 for prior, 0.01141 for AD and 0.01061 for ADX, so a small residual does not certify '
+     'accurate marginals. On the committed nonuniform tree the same code is exact to 8.3e-16, which separates '
+     'a correct implementation from the approximation error of correct loopy BP.'),
+    ('promedus-orders.png', '5 / Promedus plan costs', 'plot_promedus.py',
+     'Exact contraction work and peak intermediate for the two saved plans on the 414-variable benchmark. '
+     'Time-only TreeSA uses 11,415,062 terms with a 131,072-entry largest tensor, against greedy 383,630,739 '
+     'and 1,048,576. Both plans return log10 Z_evidence = -7.80674630458244, 3.7e-6 from the published PR, '
+     'and the same three state-ordered marginals.'),
+    ('promedus-bp.png', '5 / Promedus is unconverged and inaccurate', 'plot_promedus.py',
+     'Loopy belief propagation with the ASIA settings on Promedus_14. After the 1000-sweep limit the residual '
+     'is still 2.17e-10, above the 1e-10 tolerance, and the state-1 beliefs of IDs 59, 102 and 139 are off by '
+     '0.1975, 0.1495 and 0.3824. It is reported as unconverged and inaccurate for these queries rather than '
+     'tuned to look converged.'),
 ]
 LETTERS = 'ATSLBEXD'
 NAMES = {'A': 'visit Asia', 'T': 'tuberculosis', 'S': 'smoking', 'L': 'lung cancer',
@@ -179,7 +212,7 @@ def main() -> None:
         'summary': summary,
         'gallery': GALLERY,
     }
-    for name, _, _ in GALLERY:
+    for name, _, _, _ in GALLERY:
         shutil.copyfile(EVIDENCE / name, assets / name)
     template = (ROOT / 'web' / 'lab_template.html').read_text(encoding='utf-8')
     rendered = template.replace('__DATA__', json.dumps(data, ensure_ascii=True).replace('</', '<\\/'))

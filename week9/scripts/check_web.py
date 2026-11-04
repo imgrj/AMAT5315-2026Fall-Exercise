@@ -79,6 +79,16 @@ def main() -> None:
             "Array.from(document.querySelectorAll('#gallery img')).every(i=>i.complete&&i.naturalWidth>0)")
         page.locator('#gallery button').first.click()
         assert page.locator('#lightbox').is_visible()
+        first_description = page.locator('#lightbox-desc').inner_text()
+        assert len(first_description) > 120, first_description
+        assert page.locator('#lightbox-command').inner_text().startswith('python scripts/')
+        assert page.locator('#lightbox-counter').inner_text() == '1 / 8'
+        page.click('#lightbox-next')
+        assert page.locator('#lightbox-counter').inner_text() == '2 / 8'
+        assert page.locator('#lightbox-desc').inner_text() != first_description
+        page.click('#lightbox-prev')
+        assert page.locator('#lightbox-counter').inner_text() == '1 / 8'
+        assert page.locator('#lightbox-desc').inner_text() == first_description
         page.keyboard.press('Escape')
         assert not page.locator('#lightbox').is_visible()
         page.evaluate('window.scrollTo(0,0)')
@@ -143,6 +153,8 @@ def main() -> None:
                 'no horizontal overflow at 390/700/1024 px',
                 '8 evidence images loaded',
                 'lightbox open and Escape close',
+                'lightbox shows the English caption, command and figure counter',
+                'lightbox previous/next navigate all figures',
             ],
         }
         (ROOT / 'evidence' / 'web-validation.json').write_text(json.dumps(result, indent=2) + '\n')

@@ -16,7 +16,8 @@ number is checked against brute-force enumeration or the published UAI 2014 answ
   reading.
 - **Interactive lab:** [Week 9 Inference Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html)
   — *Interactive Studio* (posterior bars, a contraction-step player, a BP sweep player) and
-  *Evidence & Verification (8)* with every computed figure.
+  *Evidence & Verification (8)* with every computed figure; each figure opens in a lightbox
+  with an English caption, its producing command and previous/next navigation.
 - **Specification:** [`SPEC.md`](SPEC.md) records the acceptance criteria before the code.
 
 | Result | Measured value |

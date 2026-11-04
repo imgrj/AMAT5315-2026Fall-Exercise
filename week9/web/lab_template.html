@@ -70,9 +70,15 @@ td.mono{font-family:'JetBrains Mono',Consolas,monospace}
 .gallery button{padding:0;border:1px solid var(--line);background:#0b1120;border-radius:10px;overflow:hidden;width:100%}
 .gallery img{display:block;width:100%;height:auto}
 .gallery code{display:block;color:var(--muted);font-size:11.5px;margin-top:4px;word-break:break-word}
-dialog#lightbox{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);max-width:94vw;max-height:94vh;padding:14px}
-dialog#lightbox img{max-width:88vw;max-height:74vh;display:block;border-radius:8px}
+dialog#lightbox{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);max-width:94vw;max-height:94vh;padding:14px;overflow:auto}
+dialog#lightbox img{max-width:88vw;max-height:64vh;display:block;border-radius:8px;margin:0 auto}
 dialog#lightbox .row{justify-content:space-between;align-items:center;margin-bottom:10px}
+.lightbox-caption{max-width:88vw;margin-top:12px}
+#lightbox-desc{margin:0 0 8px;font-size:13px;line-height:1.6;color:var(--ink)}
+#lightbox-command{display:block;color:var(--muted);font-family:'JetBrains Mono',Consolas,monospace;font-size:11.5px}
+.lightbox-nav{margin-top:12px;margin-bottom:0}
+.lightbox-nav button{padding:7px 12px}
+#lightbox-counter{font-family:'JetBrains Mono',Consolas,monospace}
 dialog::backdrop{background:rgba(3,7,15,.82)}
 footer{max-width:1208px;margin:auto;padding:18px 24px 40px;color:var(--muted);font-size:12px}
 @media(max-width:900px){.split{grid-template-columns:1fr}.gallery{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}}
@@ -187,7 +193,12 @@ footer{max-width:1208px;margin:auto;padding:18px 24px 40px;color:var(--muted);fo
   </section>
   <div class="gallery" id="gallery"></div>
 </div>
-</main><dialog id="lightbox"><div class="row"><strong id="lightbox-title"></strong><button id="close-lightbox" aria-label="Close enlarged figure">Close ✕</button></div><img id="lightbox-image" alt=""></dialog>
+</main><dialog id="lightbox">
+<div class="row"><strong id="lightbox-title"></strong><button id="close-lightbox" aria-label="Close enlarged figure">Close ✕</button></div>
+<img id="lightbox-image" alt="">
+<div class="lightbox-caption"><p id="lightbox-desc"></p><code id="lightbox-command"></code></div>
+<div class="row lightbox-nav"><button id="lightbox-prev">← Previous</button><span id="lightbox-counter" class="note"></span><button id="lightbox-next">Next →</button></div>
+</dialog>
 <footer>AMAT5315 · Scientific Computing for Physicists · <a href="https://giggleliu.github.io/AMAT5315-2026Fall/week9-learning-sheet.html">Learning sheet</a> · <a href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise/tree/main/week9">Source, evidence &amp; verification</a></footer>
 <script>
 const DATA=__DATA__;
@@ -408,17 +419,31 @@ el('ref-bp').textContent=`${DATA.bp.ADX.final.residual.toExponential(2)} / ${DAT
 el('ref-promedus-greedy').textContent=`${big(DATA.promedus.greedy.work)} / ${big(DATA.promedus.greedy.largest)}`;
 el('ref-promedus-treesa').textContent=`${big(DATA.promedus.treesa.work)} / ${big(DATA.promedus.treesa.largest)}`;
 el('ref-promedus-bp').textContent=`${DATA.promedus.bp.final.residual.toExponential(2)} / ${DATA.promedus.bp.final.error.toFixed(5)}`;
-for(const [file,title,command] of DATA.gallery){
+let lightboxIndex=0;
+function openLightbox(index){
+  const [file,title,command,description]=DATA.gallery[index];
+  lightboxIndex=index;
+  el('lightbox-title').textContent=title;
+  el('lightbox-image').src='assets/week9/'+file;
+  el('lightbox-image').alt=title;
+  el('lightbox-desc').textContent=description;
+  el('lightbox-command').textContent='python scripts/'+command;
+  el('lightbox-counter').textContent=`${index+1} / ${DATA.gallery.length}`;
+  if(!el('lightbox').open)el('lightbox').showModal();
+}
+for(const [file,title,command,description] of DATA.gallery){
   const card=document.createElement('article');
   card.className='card';
   const button=document.createElement('button'),image=document.createElement('img');
   image.src='assets/week9/'+file;image.alt=title;image.loading='lazy';
   button.append(image);
   button.setAttribute('aria-label','Enlarge '+title);
-  button.onclick=()=>{el('lightbox-title').textContent=title;el('lightbox-image').src=image.src;el('lightbox-image').alt=title;el('lightbox').showModal();};
+  button.onclick=()=>openLightbox(DATA.gallery.findIndex(entry=>entry[0]===file));
   const heading=document.createElement('h3');heading.textContent=title;
   const code=document.createElement('code');code.textContent='python scripts/'+command;
   card.append(button,heading,code);el('gallery').append(card);
 }
+el('lightbox-prev').onclick=()=>openLightbox((lightboxIndex-1+DATA.gallery.length)%DATA.gallery.length);
+el('lightbox-next').onclick=()=>openLightbox((lightboxIndex+1)%DATA.gallery.length);
 el('close-lightbox').onclick=()=>el('lightbox').close();
 </script></body></html>
