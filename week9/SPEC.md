@@ -39,8 +39,12 @@ and `mroavi/uai-2014-inference-competition` revision `2200584` (`uai2014/PR/Prom
 
 Build the binary from `infer.design.toml` with `cargo +1.96.0 install --locked --path .`
 (equivalently `cargo +1.96.0 build --release` for local runs). The design file records the
-arguments `model`, `evidence`, `out`, `ordering`, `bp` and the files each run writes. IDs
-0-7 are A,T,S,L,B,E,X,D; state 0 means yes/present/positive.
+arguments `model`, `evidence`, `out`, `query`, `ordering`, `bp` and the files each run
+writes. IDs 0-7 are A,T,S,L,B,E,X,D; state 0 means yes/present/positive. `--query` lists the
+variable IDs kept open as marginals; it is required above 16 variables (the benchmark asks
+for IDs 59, 102, 139) and defaults to every node otherwise. Every `run.json` also carries the
+parsed model (scope, dimensions and table entries per factor) so the table reading can be
+checked against an independent parser.
 
 * Parse MARKOV UAI files: variable count, dimensions, scopes, and table entry counts in
   scope order (last axis varies fastest). Do not reorder tables or normalize the factors.
@@ -157,10 +161,11 @@ Deliverables: `artifacts/bp-prior`, `artifacts/bp-AD`, `artifacts/bp-ADX`,
 
 ## 4. Promedus_14 benchmark (Part 5)
 
-Use the downloaded model with its nine observations. 414 binary variables, 2414 assignments,
+Use the downloaded model with its nine observations. 414 binary variables, 2^414 assignments,
 unnormalized MARKOV potentials. Extend exact inference to this model with omeco greedy and
 seeded time-only TreeSA (`ScoreFunction::time_optimized()`), saving plans and search
-settings. Keep the tables unchanged and retain a logarithmic scale whenever intermediate
+settings. Observations come from the sibling `<model>.evid` file when `--evidence` is not
+given; an explicit `--evidence prior` always means "no observations". Keep the tables unchanged and retain a logarithmic scale whenever intermediate
 tensors are rescaled, so the evidence partition sum does not underflow. Compute
 `log10 Z_evidence` and the state-ordered marginals of IDs 59, 102 and 139. Run BP with the
 ASIA settings (damping 0.5, tolerance 1e-10, max sweeps 1000).

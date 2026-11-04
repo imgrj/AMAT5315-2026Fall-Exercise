@@ -1,0 +1,4 @@
+# Keep build output inside week9/ so the documented commands and the tests agree
+# on where the `infer` binary lives, regardless of a machine-wide CARGO_TARGET_DIR.
+[build]
+target-dir = "target"
