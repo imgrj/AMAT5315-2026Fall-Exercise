@@ -299,11 +299,11 @@ function drawBp(){
   const x=sweep=>left+(right-left)*(sweep-1)/Math.max(1,total-1);
   ctx.strokeStyle='#26344c';ctx.lineWidth=1;ctx.font='11px Segoe UI';
   ctx.fillStyle='#9aaec5';
-  const decades=7;
+  const decades=12;
   for(let d=0;d<=decades;d++){
     const y=bottom-(bottom-top)*d/decades;
     ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();
-    ctx.fillText('1e-'+(decades-d),6,y+4);
+    ctx.fillText('1e-'+d,6,y+4);
   }
   const y=value=>bottom-(bottom-top)*Math.min(decades,Math.max(0,-Math.log10(Math.max(value,1e-16))))/decades;
   const plot=(values,colour,width=1.8)=>{
