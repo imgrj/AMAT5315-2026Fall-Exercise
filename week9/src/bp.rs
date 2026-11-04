@@ -124,10 +124,8 @@ impl FactorGraph {
                     }
                     let mut weight = *entry;
                     for (_variable, edge, axis) in &self.factor_edges[index] {
-                        if axis == target_axis {
-                            continue;
-                        }
-                        // Algorithm 1 reads the current messages m, not the proposal.
+                        // Deliberate defect (negative control): the recipient's own
+                        // message is included instead of being left out.
                         weight *= v2f[*edge][state[*axis]];
                     }
                     values[state[*target_axis]] += weight;
