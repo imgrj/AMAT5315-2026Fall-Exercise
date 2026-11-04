@@ -1,9 +1,9 @@
 {
   "url": "https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html",
-  "artifact_commit": "ac9d0125f4b24a76f878f8078dd7e41aa012a20d",
+  "artifact_commit": "e69bcdbb4deb54bac5541ab5bad0fd99d29fc015",
   "pages_build_status": "built",
-  "pages_build_created_at": "2026-11-04T11:32:51Z",
-  "checked_from": "ac9d0125f4b24a76f878f8078dd7e41aa012a20d",
+  "pages_build_created_at": "2026-11-04T11:34:14Z",
+  "checked_from": "e69bcdbb4deb54bac5541ab5bad0fd99d29fc015",
   "files": [
     {
       "path": "week9-inference-lab.html",
@@ -34,6 +34,11 @@
       "path": "assets/week9/bp-convergence.png",
       "status": 200,
       "sha256": "34c315b48cd1d6a9a37df9d69662ec9ca9d74882f304b211f3ff3735df26c4a7"
+    },
+    {
+      "path": "assets/week9/bp-comparison.png",
+      "status": 200,
+      "sha256": "e9cb1a314b9632a9733aa458f811f9a281e8ee8c5e00eb2208e36441025ac263"
     },
     {
       "path": "assets/week9/bp-accuracy.png",

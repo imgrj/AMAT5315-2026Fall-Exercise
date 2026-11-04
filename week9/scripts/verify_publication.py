@@ -24,6 +24,7 @@ FILES = [
     'assets/week9/joint.png',
     'assets/week9/orders.png',
     'assets/week9/bp-convergence.png',
+    'assets/week9/bp-comparison.png',
     'assets/week9/bp-accuracy.png',
     'assets/week9/promedus-orders.png',
     'assets/week9/promedus-bp.png',
