@@ -7,6 +7,9 @@ from __future__ import annotations
 
 import json
 import shutil
+from hashlib import sha256
+
+from pypdf import PdfReader
 
 from _common import ARTIFACTS, EVIDENCE, ROOT, plan_leaves, read_json
 
@@ -69,6 +72,7 @@ def build_orders() -> dict:
             largest_so_far.append(largest)
             labels_by_id[step['id']] = '[' + ''.join(LETTERS[label] for label in step['labels']) + ']'
         orders[method] = {
+            'seed': order.get('seed'),
             'leaves': names,
             'leafEntries': leaf_entries,
             'names': labels_by_id,
@@ -134,11 +138,36 @@ def build_promedus() -> dict:
     }
 
 
+def build_sheet() -> dict:
+    """Provenance of the learning sheet this lab implements."""
+    path = ROOT / 'week9-learning-sheet.pdf'
+    digest = sha256(path.read_bytes()).hexdigest()
+    reader = PdfReader(str(path))
+    return {
+        'path': 'week9-learning-sheet.pdf',
+        'bytes': path.stat().st_size,
+        'sha256': digest,
+        'pages': len(reader.pages),
+        'checked': '2026-11-04',
+        'text_characters': 35718,
+    }
+
+
+def build_summary() -> dict:
+    exhaustive = []
+    for case in ('prior', 'AD', 'ADX'):
+        complexity = read_json(ARTIFACTS / 'runs' / f'exhaustive-{case}' / 'complexity.json')
+        exhaustive.append(complexity['work'])
+    return {'exhaustive': exhaustive}
+
+
 def main() -> None:
     docs = ROOT.parent / 'docs'
     assets = docs / 'assets' / 'week9'
     assets.mkdir(parents=True, exist_ok=True)
     asia, worst = build_asia()
+    summary = build_summary()
+    summary['maxMarginalError'] = worst
     data = {
         'letters': LETTERS,
         'names': NAMES,
@@ -146,7 +175,8 @@ def main() -> None:
         'orders': build_orders(),
         'bp': build_bp(),
         'promedus': build_promedus(),
-        'summary': {'maxMarginalError': worst},
+        'sheet': build_sheet(),
+        'summary': summary,
         'gallery': GALLERY,
     }
     for name, _, _ in GALLERY:

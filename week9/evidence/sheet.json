@@ -1,0 +1,17 @@
+{
+  "path": "week9-learning-sheet.pdf",
+  "bytes": 1025405,
+  "sha256": "27c21a357be350350d3d2ccc3cefdb3fd2be30aaea45b91764b7b70520c77397",
+  "pages": 15,
+  "text_characters": 35545,
+  "text_sha256": "2dfee386698ec0b010b983f7a335269cf94538e8f23f5cb287b906af8db0661c",
+  "creator": "Typst 0.14.2",
+  "mod_date": "D:20261104063859Z",
+  "official_url": "https://giggleliu.github.io/AMAT5315-2026Fall/pdfs/week9-learning-sheet.pdf",
+  "checked": "2026-11-04",
+  "official": {
+    "bytes": 1025405,
+    "sha256": "27c21a357be350350d3d2ccc3cefdb3fd2be30aaea45b91764b7b70520c77397",
+    "identical": true
+  }
+}

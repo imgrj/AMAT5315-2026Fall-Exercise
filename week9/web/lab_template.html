@@ -167,6 +167,24 @@ footer{max-width:1208px;margin:auto;padding:18px 24px 40px;color:var(--muted);fo
       <tr><td>Promedus_14 loopy BP</td><td class="mono" id="row-promedus-bp"></td></tr>
     </table>
   </section>
+  <section class="card"><h2>Learning sheet version and the sheet's reference numbers</h2>
+    <p class="note">This lab implements the 15-page Week 9 learning sheet, SHA256 <code id="sheet-hash"></code>
+      (checked <span id="sheet-checked"></span>) — the PDF is byte-identical to the official copy, and its
+      extracted text matches the version the code and tests were written against.</p>
+    <table>
+      <tr><th>Quantity</th><th>Sheet reference</th><th>This lab, recounted from the saved plans</th></tr>
+      <tr><td>AD random plan: work / largest tensor</td><td class="mono">408 / 64</td><td class="mono" id="ref-random"></td></tr>
+      <tr><td>AD greedy plan: work / largest tensor</td><td class="mono">54 / 8</td><td class="mono" id="ref-greedy"></td></tr>
+      <tr><td>Exhaustive optima, prior / AD / ADX</td><td class="mono">44 / 50 / 52</td><td class="mono" id="ref-exhaustive"></td></tr>
+      <tr><td>ADX loopy BP: residual / sweeps / error</td><td class="mono">8.23e-11 / 93 / 0.01061</td><td class="mono" id="ref-bp"></td></tr>
+      <tr><td>Promedus greedy plan: work / largest</td><td class="mono">667,111,481 / 4,194,304</td><td class="mono" id="ref-promedus-greedy"></td></tr>
+      <tr><td>Promedus TreeSA plan: work / largest</td><td class="mono">10,635,220 / 131,072</td><td class="mono" id="ref-promedus-treesa"></td></tr>
+      <tr><td>Promedus loopy BP: residual / query error</td><td class="mono">2.12e-10 / 0.38235</td><td class="mono" id="ref-promedus-bp"></td></tr>
+    </table>
+    <p class="note">Plan costs are heuristic and the sheet says so: "Your random generator or tie-breaking may produce
+      different plans. Judge the saved trees and their recounted costs, not a prescribed speedup." Every probability,
+      evidence mass, exhaustive optimum, BP residual/error and Promedus PR/MAR comparison above agrees with the sheet.</p>
+  </section>
   <div class="gallery" id="gallery"></div>
 </div>
 </main><dialog id="lightbox"><div class="row"><strong id="lightbox-title"></strong><button id="close-lightbox" aria-label="Close enlarged figure">Close ✕</button></div><img id="lightbox-image" alt=""></dialog>
@@ -381,6 +399,15 @@ el('row-reference').textContent=`log10 Z ${DATA.promedus.treesa.log10.toFixed(12
   +`max MAR difference ${DATA.promedus.marDifference.toExponential(1)}`;
 el('row-promedus-bp').textContent=`${DATA.promedus.bp.sweeps.length} sweeps, residual ${DATA.promedus.bp.final.residual.toExponential(2)}, `
   +`max query error ${DATA.promedus.bp.final.error.toFixed(5)} (not converged)`;
+el('sheet-hash').textContent=DATA.sheet.sha256.slice(0,16)+'…';
+el('sheet-checked').textContent=DATA.sheet.checked;
+el('ref-random').textContent=`${big(DATA.orders.random.work)} / ${big(DATA.orders.random.largest)} (seed ${DATA.orders.random.seed})`;
+el('ref-greedy').textContent=`${big(DATA.orders.greedy.work)} / ${big(DATA.orders.greedy.largest)}`;
+el('ref-exhaustive').textContent=DATA.summary.exhaustive.map(value=>big(value)).join(' / ');
+el('ref-bp').textContent=`${DATA.bp.ADX.final.residual.toExponential(2)} / ${DATA.bp.ADX.final.sweeps} / ${DATA.bp.ADX.final.error.toFixed(5)}`;
+el('ref-promedus-greedy').textContent=`${big(DATA.promedus.greedy.work)} / ${big(DATA.promedus.greedy.largest)}`;
+el('ref-promedus-treesa').textContent=`${big(DATA.promedus.treesa.work)} / ${big(DATA.promedus.treesa.largest)}`;
+el('ref-promedus-bp').textContent=`${DATA.promedus.bp.final.residual.toExponential(2)} / ${DATA.promedus.bp.final.error.toFixed(5)}`;
 for(const [file,title,command] of DATA.gallery){
   const card=document.createElement('article');
   card.className='card';

@@ -71,6 +71,8 @@ def main() -> None:
         assert page.locator('#evidence').is_visible() and page.locator('.metrics').is_visible()
         assert page.locator('#metric-mass').inner_text()
         assert page.locator('#row-plans').inner_text().startswith('greedy work')
+        assert page.locator('#sheet-hash').inner_text().startswith('27c21a357be35035')
+        assert page.locator('#ref-exhaustive').inner_text() == '44 / 50 / 52'
         assert page.locator('#gallery article').count() == 8
         page.locator('#gallery article').last.scroll_into_view_if_needed()
         page.wait_for_function(
@@ -131,6 +133,7 @@ def main() -> None:
                 'upper-right segmented switch',
                 'mutually exclusive studio and evidence panels',
                 'computed metrics only in Evidence',
+                'learning-sheet version and reference numbers shown',
                 'disease bars follow the observation selector',
                 'contraction player advances one pair step at a time',
                 'contraction player runs to the end, reports completion and resets',

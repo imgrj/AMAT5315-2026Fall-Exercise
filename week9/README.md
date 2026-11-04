@@ -9,6 +9,11 @@ number is checked against brute-force enumeration or the published UAI 2014 answ
 - **Learning sheet:** [`week9-learning-sheet.pdf`](week9-learning-sheet.pdf)
   ([web](https://giggleliu.github.io/AMAT5315-2026Fall/week9-learning-sheet.html)) —
   Part 1 is the instructor-led reading tutorial and has no deliverable.
+  **Version check (2026-11-04):** 15 pages, Typst 0.14.2, 1,025,405 bytes, SHA256
+  `27c21a357be350350d3d2ccc3cefdb3fd2be30aaaea45b91764b7b70520c77397`; the local file is
+  byte-identical to a cache-bypassing download of the official PDF, and its extracted text is
+  identical to the text this implementation was written against — no revision since the first
+  reading.
 - **Interactive lab:** [Week 9 Inference Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html)
   — *Interactive Studio* (posterior bars, a contraction-step player, a BP sweep player) and
   *Evidence & Verification (8)* with every computed figure.
@@ -23,6 +28,24 @@ number is checked against brute-force enumeration or the published UAI 2014 answ
 | Promedus_14 exact | log10 Z = **-7.80674630458244** (published -7.80675, diff 3.7e-6) |
 | Promedus_14 marginals (IDs 59/102/139) | MAR within **4.4e-7** |
 | Promedus_14 loopy BP | **1000 sweeps, unconverged** (residual 2.17e-10), query error up to **0.3824** |
+
+### The sheet's printed reference beside our recount
+
+| Quantity | Sheet reference | This lab |
+| :--- | :--- | :--- |
+| AD random plan: work / largest tensor | 408 / 64 | 204 / 32 (own generator, seed 42) |
+| AD greedy plan: work / largest tensor | 54 / 8 | 52 / 8 |
+| Exhaustive optima, prior / AD / ADX | 44 / 50 / 52 | **44 / 50 / 52** |
+| ADX loopy BP: residual / sweeps / error | 8.23e-11 / 93 / 0.01061 | **8.23e-11 / 94 / 0.01061** |
+| Promedus greedy: work / largest | 667,111,481 / 4,194,304 | 383,630,739 / 1,048,576 |
+| Promedus TreeSA: work / largest | 10,635,220 / 131,072 | 11,415,062 / **131,072** |
+| Promedus loopy BP: residual / query error | 2.12e-10 / 0.38235 | **2.17e-10 / 0.38235** |
+
+Only the two plan costs move: the sheet measures its own random generator and greedy
+tie-breaking, and says to judge the saved trees and their recounted costs rather than a
+prescribed speedup. Every probability, evidence mass, exhaustive optimum, BP residual/error
+and Promedus PR/MAR comparison agrees with the sheet. The same table is on the lab page
+under **Evidence & Verification**, generated from `artifacts/`.
 
 ## What was built
 

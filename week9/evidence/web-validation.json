@@ -1,5 +1,5 @@
 {
-  "url": "https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html",
+  "url": "file:///D:/Desktop/AMAT5315-2026Fall-Exercise/docs/week9-inference-lab.html",
   "browser": "Microsoft Edge, Playwright headless",
   "desktop": [
     1440,
@@ -16,6 +16,7 @@
     "upper-right segmented switch",
     "mutually exclusive studio and evidence panels",
     "computed metrics only in Evidence",
+    "learning-sheet version and reference numbers shown",
     "disease bars follow the observation selector",
     "contraction player advances one pair step at a time",
     "contraction player runs to the end, reports completion and resets",
