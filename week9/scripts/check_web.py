@@ -99,6 +99,16 @@ def main() -> None:
         page.keyboard.press('ArrowRight')
         assert page.locator('#studio-tab').get_attribute('aria-selected') == 'true'
 
+        # The player runs to the end, says so, disables Step, and Reset restores the plan.
+        page.click('#play')
+        page.wait_for_function("document.getElementById('step').disabled", timeout=20000)
+        assert 'plan complete' in page.locator('#step-detail').inner_text()
+        assert page.locator('#order-stat').inner_text().startswith('9/9 steps')
+        page.click('#reset')
+        assert page.locator('#step').is_disabled() is False
+        assert page.locator('#order-stat').inner_text().startswith('9 pair steps')
+        assert page.locator('#chips .chip').count() == 10
+
         for width in (390, 700, 1024):
             page.set_viewport_size({'width': width, 'height': 844})
             for tab, panel in (('evidence-tab', 'evidence'), ('studio-tab', 'studio')):
@@ -123,6 +133,7 @@ def main() -> None:
                 'computed metrics only in Evidence',
                 'disease bars follow the observation selector',
                 'contraction player advances one pair step at a time',
+                'contraction player runs to the end, reports completion and resets',
                 'BP sweep slider follows the recorded traces',
                 'control state preserved across the switch',
                 'arrow/Home/End tab navigation',

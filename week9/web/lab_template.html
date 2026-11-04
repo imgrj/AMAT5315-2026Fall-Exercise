@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Week 9 — Probabilistic Inference by Tensor Contraction</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230f172a'/%3E%3Cpath d='M5 5 L11 11' stroke='%239aaec5' stroke-width='1.2'/%3E%3Ccircle cx='5' cy='5' r='2.2' fill='%2338bdf8'/%3E%3Ccircle cx='11' cy='11' r='2.2' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
 :root{color-scheme:dark;--bg:#080c16;--panel:#0f172a;--line:#26344c;--ink:#edf3fa;--muted:#9aaec5;--blue:#38bdf8;--green:#4ade80;--amber:#f6a45c;--red:#f7768e}
 *{box-sizing:border-box}
@@ -18,6 +19,8 @@ button,select,input{font:inherit}
 button,select{background:#16243b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:9px 13px}
 button{cursor:pointer}
 button:hover{border-color:var(--blue)}
+button:disabled{opacity:.45;cursor:not-allowed;border-color:var(--line)}
+button:active:not(:disabled){transform:translateY(1px)}
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
 .tabs{display:flex;gap:6px;margin:0 0 0 auto;padding:4px;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:6px}
 .tabs button{flex:1 1 auto;min-width:0;padding:7px 15px;border:0;border-radius:4px;background:transparent;color:var(--muted);font-size:12px;font-weight:600}
@@ -223,10 +226,11 @@ el('case').onchange=renderCase;renderCase();
 
 /* --- Part 3: contraction player ---------------------------------------- */
 let plan=null,planState=[],planIndex=0,planTimer=null;
+function planSummary(){
+  return `${plan.steps.length} pair steps · total work ${big(plan.work)} · largest tensor ${big(plan.largest)} entries`;
+}
 function loadPlan(){
   plan=DATA.orders[el('order').value];
-  const capPlan=plan.leaves.length>plan.steps.length+1;
-  el('order-stat').textContent=`${plan.steps.length} pair steps · total work ${big(plan.work)} · largest tensor ${big(plan.largest)} entries`;
   resetPlan();
 }
 function resetPlan(){
@@ -234,7 +238,9 @@ function resetPlan(){
   planState=plan.leaves.map((name,index)=>({id:index,label:name,entries:plan.leafEntries[index],merged:false}));
   planIndex=0;
   el('work-bar').style.width='0%';
-  el('step-detail').textContent='Press Step to contract the first pair.';
+  el('step-detail').textContent='Press Step to contract the first pair, or Play to run the whole plan.';
+  el('order-stat').textContent=planSummary();
+  el('step').disabled=false;el('play').disabled=false;
   renderChips(null);
 }
 function renderChips(step){
@@ -266,7 +272,11 @@ function stepPlan(){
   renderChips({...step,output:step.id});
   el('order-stat').textContent=`${planIndex}/${plan.steps.length} steps · work so far ${big(plan.cumulative[planIndex-1])} of ${big(plan.work)}\n`
     +`largest tensor so far ${big(plan.largestSoFar[planIndex-1])} entries · ${planState.filter(n=>!n.merged).length} tensors left`;
-  if(planIndex>=plan.steps.length){clearInterval(planTimer);planTimer=null;el('play').textContent='Play';}
+  if(planIndex>=plan.steps.length){
+    clearInterval(planTimer);planTimer=null;el('play').textContent='Play';
+    el('step').disabled=true;
+    el('step-detail').textContent+=`\nplan complete: work ${big(plan.work)}, largest tensor ${big(plan.largest)} entries. Press Reset to replay it.`;
+  }
 }
 el('order').onchange=()=>{loadPlan();};
 el('step').onclick=stepPlan;
