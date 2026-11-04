@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
+import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from urllib.request import Request, urlopen
@@ -39,11 +40,20 @@ def main() -> None:
     print(f"pages build {build['status']} for {build['commit'][:7]} (site root {BASE})")
 
     def check(path: str) -> dict:
-        request = Request(BASE + path + '?verify=' + build['commit'],
-                          headers={'Cache-Control': 'no-cache'})
-        with urlopen(request, timeout=60) as response:
-            status, remote = response.status, response.read()
         local = (root / 'docs' / path).read_bytes()
+        last_error = None
+        for attempt in range(3):
+            request = Request(BASE + path + '?verify=' + build['commit'] + f'&attempt={attempt}',
+                              headers={'Cache-Control': 'no-cache'})
+            try:
+                with urlopen(request, timeout=90) as response:
+                    status, remote = response.status, response.read()
+                break
+            except Exception as error:  # transient CDN reads happen; retry the file
+                last_error = error
+                time.sleep(2)
+        else:
+            raise AssertionError(f'{path}: {last_error}')
         if path.endswith(('.html', '.svg')):
             local = local.replace(b'\r\n', b'\n')
             remote = remote.replace(b'\r\n', b'\n')
