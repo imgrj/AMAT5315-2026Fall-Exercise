@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Week 9 — Probabilistic Inference by Tensor Contraction</title>
+<style>
+:root{color-scheme:dark;--bg:#080c16;--panel:#0f172a;--line:#26344c;--ink:#edf3fa;--muted:#9aaec5;--blue:#38bdf8;--green:#4ade80;--amber:#f6a45c;--red:#f7768e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 Inter,Segoe UI,sans-serif}
+a{color:var(--blue);text-decoration:none}
+nav{display:flex;flex-wrap:wrap;gap:8px;padding:12px 24px;background:#0b1120;border-bottom:1px solid var(--line)}
+nav a{padding:5px 10px;color:var(--muted);border-radius:6px}
+nav a.active{color:var(--blue);background:#123147}
+nav a:last-child{margin-left:auto}
+header{padding:26px max(24px,calc((100% - 1160px)/2));background:linear-gradient(120deg,#101d33,#0f172a);border-bottom:1px solid var(--line)}
+.eyebrow{color:var(--blue);font-size:11px;letter-spacing:.16em;font-weight:700}
+h1{font-size:28px;line-height:1.25;margin:8px 0}
+header p{color:var(--muted);max-width:760px;margin:8px 0}
+button,select,input{font:inherit}
+button,select{background:#16243b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:9px 13px}
+button{cursor:pointer}
+button:hover{border-color:var(--blue)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.tabs{display:flex;gap:6px;margin:0 0 0 auto;padding:4px;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:6px}
+.tabs button{flex:1 1 auto;min-width:0;padding:7px 15px;border:0;border-radius:4px;background:transparent;color:var(--muted);font-size:12px;font-weight:600}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected=true]{background:#162036;color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:18px 26px;background:var(--panel)}
+.header-copy{flex:1 1 560px;min-width:0}
+.title-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+header h1{font-size:1.3rem;margin:0;letter-spacing:-.02em}
+header p{font-size:12.5px;margin:4px 0 0}
+.badge{color:var(--blue);font-size:11.5px;font-weight:600;white-space:nowrap;padding:3px 10px;border:1px solid rgba(56,189,248,.35);background:rgba(56,189,248,.08);border-radius:999px}
+main{max-width:1208px;margin:auto;padding:24px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.metric,.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px}
+.metric strong{font-size:24px;color:var(--blue);display:block}
+.metric span{font-size:12px;color:var(--muted)}
+h2{font-size:19px;margin:0 0 6px}
+h3{font-size:16px;margin:18px 0 6px}
+.tag{font-size:11px;color:var(--green);letter-spacing:.1em}
+.note{color:var(--muted);font-size:12px}
+section.card{margin-bottom:20px}
+.split{display:grid;grid-template-columns:1fr 1.45fr;gap:25px;margin-top:16px}
+.controls{display:flex;flex-direction:column;gap:12px}
+.controls label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.result{font-family:'JetBrains Mono',Consolas,monospace;font-size:12px;background:#0b1120;border:1px solid var(--line);border-radius:8px;padding:10px;white-space:pre-line}
+.gauge{height:10px;background:#0b1120;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.gauge i{display:block;height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#4ade80);transition:width .25s ease}
+.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:120px;align-content:flex-start}
+.chip{border:1px solid var(--line);border-radius:9px;padding:7px 10px;background:#0b1120;font-size:11.5px;transition:transform .2s ease,border-color .2s ease}
+.chip b{display:block;font-size:12px;color:var(--blue)}
+.chip small{color:var(--muted)}
+.chip.input{border-color:var(--amber);transform:translateY(-3px)}
+.chip.output{border-color:var(--green)}
+.chip.merged{opacity:.28}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:74px 1fr 58px;align-items:center;gap:10px;font-size:12px}
+.bar i{display:block;height:14px;border-radius:4px;background:var(--blue);transition:width .35s ease}
+.bar span:last-child{font-family:'JetBrains Mono',Consolas,monospace;color:var(--muted)}
+canvas{width:100%;height:auto;background:#0b1120;border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12.5px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600;background:rgba(0,0,0,.2)}
+td.mono{font-family:'JetBrains Mono',Consolas,monospace}
+.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.gallery article{margin:0}
+.gallery button{padding:0;border:1px solid var(--line);background:#0b1120;border-radius:10px;overflow:hidden;width:100%}
+.gallery img{display:block;width:100%;height:auto}
+.gallery code{display:block;color:var(--muted);font-size:11.5px;margin-top:4px;word-break:break-word}
+dialog#lightbox{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);max-width:94vw;max-height:94vh;padding:14px}
+dialog#lightbox img{max-width:88vw;max-height:74vh;display:block;border-radius:8px}
+dialog#lightbox .row{justify-content:space-between;align-items:center;margin-bottom:10px}
+dialog::backdrop{background:rgba(3,7,15,.82)}
+footer{max-width:1208px;margin:auto;padding:18px 24px 40px;color:var(--muted);font-size:12px}
+@media(max-width:900px){.split{grid-template-columns:1fr}.gallery{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){header{padding:18px 16px}.tabs{width:100%}.tabs button{padding:9px 10px}main{padding:16px}}
+</style></head><body>
+<nav aria-label="Weekly labs"><a href="week1-pi-lab.html">Week 1 · π</a><a href="index.html">Week 2 · MD</a><a href="week3-ising-lab.html">Week 3 · Ising</a><a href="week4-fluid-lab.html">Week 4 · Fluids</a><a href="week5-seismic-lab.html">Week 5 · AD</a><a href="week6-energy-lab.html">Week 6 · Energy</a><a href="week7-diffusion-lab.html">Week 7 · Diffusion</a><a href="week8-language-lab.html">Week 8 · Language</a><a href="week9-inference-lab.html" class="active" aria-current="page">Week 9 · Inference</a><a href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise/tree/main/week9">Source ↗</a></nav>
+<header>
+  <div class="header-copy">
+    <div class="title-row"><h1>Probabilistic Inference by Tensor Contraction</h1><span class="badge">Week 9 Interactive</span></div>
+    <p>ASIA exact inference, contraction orders and loopy belief propagation, then the 414-variable Promedus_14 benchmark</p>
+  </div>
+  <div class="tabs" role="tablist" aria-label="Lab views">
+    <button id="studio-tab" role="tab" aria-selected="true" aria-controls="studio" tabindex="0">Interactive Studio</button>
+    <button id="evidence-tab" role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1">Evidence &amp; Verification (8)</button>
+  </div>
+</header>
+<main>
+<div id="studio" role="tabpanel" aria-labelledby="studio-tab">
+  <section class="card"><span class="tag">PART 2 / OBSERVATIONS AND POSTERIORS</span>
+    <h2>What do the observations do to the diseases?</h2>
+    <p class="note">Pick a patient case. The bars are exact node marginals from one tensor contraction, with the observed indices capped and every other index summed.</p>
+    <div class="split">
+      <div class="controls">
+        <div><label for="case">Patient case</label><select id="case">
+          <option value="prior">prior · no observations</option>
+          <option value="AD" selected>AD · visit to Asia + dyspnoea</option>
+          <option value="ADX">ADX · plus a positive X-ray</option>
+        </select></div>
+        <div class="result" id="case-stat" aria-live="polite"></div>
+        <p class="note">A positive X-ray raises tuberculosis and lung cancer while lowering bronchitis. The disease probabilities move because the evidence mass is no longer one.</p>
+      </div>
+      <div><div class="bars" id="disease-bars"></div><p class="note" id="case-note"></p></div>
+    </div>
+  </section>
+  <section class="card"><span class="tag">PART 3 / CONTRACTION ORDER</span>
+    <h2>Watch the evidence query contract</h2>
+    <p class="note">Each pair step multiplies two tensors and sums the labels nothing else needs. Step through a saved plan and watch the work and the largest tensor grow.</p>
+    <div class="split">
+      <div class="controls">
+        <div><label for="order">Saved plan</label><select id="order">
+          <option value="random">random · seed 42</option>
+          <option value="greedy" selected>greedy</option>
+          <option value="exhaustive">exhaustive search</option>
+        </select></div>
+        <div class="row"><button id="play">Play</button><button id="step">Step</button><button id="reset">Reset</button></div>
+        <div class="gauge" aria-hidden="true"><i id="work-bar"></i></div>
+        <div class="result" id="order-stat" aria-live="polite"></div>
+        <p class="note">Work adds one multiply-add per entry of the union of the two inputs' labels; the answer is the same for every order.</p>
+      </div>
+      <div><div class="chips" id="chips"></div><div class="result" id="step-detail" style="margin-top:12px"></div></div>
+    </div>
+  </section>
+  <section class="card"><span class="tag">PART 4 / LOOPY BELIEF PROPAGATION</span>
+    <h2>Convergence is not accuracy</h2>
+    <p class="note">Drag through the recorded sweeps: the residual falls to the stop tolerance while the marginal error settles above zero.</p>
+    <div class="split">
+      <div class="controls">
+        <div><label for="bp-case">Patient case</label><select id="bp-case">
+          <option value="prior">prior</option>
+          <option value="AD">AD</option>
+          <option value="ADX" selected>ADX</option>
+        </select></div>
+        <div><label for="bp-sweep">Sweep <span id="sweep-label">0</span></label><input id="bp-sweep" type="range" min="1" max="100" value="1"></div>
+        <div class="row"><button id="bp-play">Play</button></div>
+        <div class="result" id="bp-stat" aria-live="polite"></div>
+        <p class="note">Beliefs use every incoming message; each update leaves the recipient's message out. On a tree this is exact; ASIA has loops.</p>
+      </div>
+      <div><canvas id="bp-canvas" width="600" height="320" aria-label="Residual and marginal error against sweeps"></canvas>
+        <div class="bars" id="belief-bars" style="margin-top:14px"></div></div>
+    </div>
+  </section>
+</div>
+<div id="evidence" role="tabpanel" aria-labelledby="evidence-tab" hidden>
+  <div class="metrics">
+    <div class="metric"><strong id="metric-mass"></strong><span>AD evidence mass p(A=0,D=0)</span></div>
+    <div class="metric"><strong id="metric-error"></strong><span>Max marginal error vs enumeration</span></div>
+    <div class="metric"><strong id="metric-bp"></strong><span>ADX loopy BP marginal error</span></div>
+    <div class="metric"><strong id="metric-logz"></strong><span>Promedus log₁₀ Z evidence</span></div>
+  </div>
+  <section class="card"><h2>Four builds, independently checked</h2>
+    <p class="note">Each figure is produced by the command on its card. The full <a href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise/blob/main/week9/README.md">reproduction guide</a> records data revisions, settings, tests and negative controls. Click a figure to inspect it.</p>
+    <table>
+      <tr><th>Check</th><th>Measured result</th></tr>
+      <tr><td>ASIA contraction vs 256-row enumeration</td><td>Max marginal error 2.2 × 10⁻¹⁶; relative evidence error 1.3 × 10⁻¹⁵</td></tr>
+      <tr><td>Exhaustive pair-order optima (prior / AD / ADX)</td><td class="mono">44 / 50 / 52 work</td></tr>
+      <tr><td>Saved greedy and random plans (AD)</td><td class="mono" id="row-plans"></td></tr>
+      <tr><td>Replayed plan</td><td>Same mass to 1 × 10⁻¹⁴; costs recounted from the steps</td></tr>
+      <tr><td>Loopy BP on ASIA (ADX)</td><td class="mono" id="row-bp"></td></tr>
+      <tr><td>BP on a nonuniform tree</td><td>Matches enumeration below 1 × 10⁻¹²</td></tr>
+      <tr><td>Promedus_14 exact plans</td><td class="mono" id="row-promedus"></td></tr>
+      <tr><td>Promedus_14 published PR / MAR</td><td class="mono" id="row-reference"></td></tr>
+      <tr><td>Promedus_14 loopy BP</td><td class="mono" id="row-promedus-bp"></td></tr>
+    </table>
+  </section>
+  <div class="gallery" id="gallery"></div>
+</div>
+</main><dialog id="lightbox"><div class="row"><strong id="lightbox-title"></strong><button id="close-lightbox" aria-label="Close enlarged figure">Close ✕</button></div><img id="lightbox-image" alt=""></dialog>
+<footer>AMAT5315 · Scientific Computing for Physicists · <a href="https://giggleliu.github.io/AMAT5315-2026Fall/week9-learning-sheet.html">Learning sheet</a> · <a href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise/tree/main/week9">Source, evidence &amp; verification</a></footer>
+<script>
+const DATA=__DATA__;
+const el=id=>document.getElementById(id);
+const letters=DATA.letters;
+const names=DATA.names;
+const tabNames=['studio','evidence'];
+function selectTab(name,focus=false){
+  for(const other of tabNames){
+    const selected=other===name,button=el(other+'-tab');
+    el(other).hidden=!selected;
+    button.setAttribute('aria-selected',String(selected));
+    button.tabIndex=selected?0:-1;
+    if(selected&&focus)button.focus();
+  }
+}
+for(const [index,name] of tabNames.entries()){
+  const button=el(name+'-tab');
+  button.onclick=()=>selectTab(name);
+  button.onkeydown=event=>{
+    const offsets={ArrowLeft:-1,ArrowRight:1};
+    let next;
+    if(event.key in offsets)next=(index+offsets[event.key]+tabNames.length)%tabNames.length;
+    else if(event.key==='Home')next=0;
+    else if(event.key==='End')next=tabNames.length-1;
+    else return;
+    event.preventDefault();selectTab(tabNames[next],true);
+  };
+}
+const fmt=(value,digits=3)=>Number(value).toFixed(digits);
+const big=value=>Number(value).toLocaleString('en-US',{maximumFractionDigits:0});
+
+/* --- Part 2: posteriors ------------------------------------------------- */
+const DISEASES=[1,3,4];
+function renderCase(){
+  const caseName=el('case').value,data=DATA.asia[caseName];
+  el('disease-bars').replaceChildren();
+  for(const variable of DISEASES){
+    const value=data.marginals[String(variable)][0];
+    const row=document.createElement('div');row.className='bar';
+    const label=document.createElement('span');label.textContent=letters[variable]+' · '+names[letters[variable]];
+    const bar=document.createElement('i');bar.style.width=(100*Math.max(value,0.002))+'%';
+    bar.style.background=value>0.5?'#38bdf8':'#4ade80';
+    const number=document.createElement('span');number.textContent=fmt(value,4);
+    row.append(label,bar,number);el('disease-bars').append(row);
+  }
+  const dependence=data.dependence;
+  el('case-stat').textContent=`evidence mass = ${data.mass.toExponential(6)}\n`
+    +`p(T=0,L=0) = ${fmt(data.joint[0][0],5)}   p(T=0)p(L=0) = ${fmt(data.joint[0][0]-dependence[0][0],5)}\n`
+    +`dependence = ${dependence[0][0]>=0?'+':''}${fmt(dependence[0][0],5)}`;
+  el('case-note').textContent=`The T,L joint keeps a dependence of ${fmt(dependence[0][0],4)} that the product of the marginals drops.`;
+}
+el('case').onchange=renderCase;renderCase();
+
+/* --- Part 3: contraction player ---------------------------------------- */
+let plan=null,planState=[],planIndex=0,planTimer=null;
+function loadPlan(){
+  plan=DATA.orders[el('order').value];
+  const capPlan=plan.leaves.length>plan.steps.length+1;
+  el('order-stat').textContent=`${plan.steps.length} pair steps · total work ${big(plan.work)} · largest tensor ${big(plan.largest)} entries`;
+  resetPlan();
+}
+function resetPlan(){
+  clearInterval(planTimer);planTimer=null;el('play').textContent='Play';
+  planState=plan.leaves.map((name,index)=>({id:index,label:name,entries:plan.leafEntries[index],merged:false}));
+  planIndex=0;
+  el('work-bar').style.width='0%';
+  el('step-detail').textContent='Press Step to contract the first pair.';
+  renderChips(null);
+}
+function renderChips(step){
+  el('chips').replaceChildren();
+  for(const node of planState){
+    if(node.merged)continue;
+    const chip=document.createElement('div');chip.className='chip';
+    if(step&&step.left===node.id)chip.classList.add('input');
+    if(step&&step.right===node.id)chip.classList.add('input');
+    if(step&&step.output===node.id)chip.classList.add('output');
+    const title=document.createElement('b');title.textContent=node.label;
+    const size=document.createElement('small');
+    size.textContent=node.id>=plan.leaves.length?'tensor · '+big(node.entries)+' entries':'factor · '+big(node.entries)+' entries';
+    chip.append(title,size);el('chips').append(chip);
+  }
+}
+function stepPlan(){
+  if(planIndex>=plan.steps.length){clearInterval(planTimer);planTimer=null;el('play').textContent='Play';return;}
+  const step=plan.steps[planIndex];
+  for(const node of planState){if(node.id===step.left||node.id===step.right)node.merged=true;}
+  const output={id:step.id,label:'['+step.labels.map(l=>letters[l]).join(',')+']',entries:step.entries,merged:false};
+  planState.push(output);
+  planIndex+=1;
+  const done=planIndex/plan.steps.length;
+  el('work-bar').style.width=(100*Math.min(1,done))+'%';
+  el('step-detail').textContent=`step ${planIndex}/${plan.steps.length}: ${plan.names[step.left]} × ${plan.names[step.right]}\n`
+    +`  → keeps [${step.labels.map(l=>letters[l]).join(',')}] (${big(step.entries)} entries)\n`
+    +`  work ${big(step.work)} (${fmt(100*step.work/plan.work,1)}% of the plan)`;
+  renderChips({...step,output:step.id});
+  el('order-stat').textContent=`${planIndex}/${plan.steps.length} steps · work so far ${big(plan.cumulative[planIndex-1])} of ${big(plan.work)}\n`
+    +`largest tensor so far ${big(plan.largestSoFar[planIndex-1])} entries · ${planState.filter(n=>!n.merged).length} tensors left`;
+  if(planIndex>=plan.steps.length){clearInterval(planTimer);planTimer=null;el('play').textContent='Play';}
+}
+el('order').onchange=()=>{loadPlan();};
+el('step').onclick=stepPlan;
+el('reset').onclick=resetPlan;
+el('play').onclick=()=>{
+  if(planTimer){clearInterval(planTimer);planTimer=null;el('play').textContent='Play';return;}
+  if(planIndex>=plan.steps.length)resetPlan();
+  el('play').textContent='Pause';
+  planTimer=setInterval(stepPlan,850);
+};
+loadPlan();
+
+/* --- Part 4: belief propagation player --------------------------------- */
+let bpCase='ADX',bpData=null,bpIndex=1;
+function loadBp(){
+  bpCase=el('bp-case').value;
+  bpData=DATA.bp[bpCase];
+  const slider=el('bp-sweep');
+  slider.max=bpData.sweeps.length;
+  slider.value=bpData.sweeps.length;
+  bpIndex=bpData.sweeps.length;
+  renderBp();
+}
+function drawBp(){
+  const canvas=el('bp-canvas'),ctx=canvas.getContext('2d');
+  const width=canvas.width,height=canvas.height;
+  ctx.clearRect(0,0,width,height);
+  const left=52,right=width-16,top=26,bottom=height-34;
+  const total=bpData.sweeps.length;
+  const x=sweep=>left+(right-left)*(sweep-1)/Math.max(1,total-1);
+  ctx.strokeStyle='#26344c';ctx.lineWidth=1;ctx.font='11px Segoe UI';
+  ctx.fillStyle='#9aaec5';
+  const decades=7;
+  for(let d=0;d<=decades;d++){
+    const y=bottom-(bottom-top)*d/decades;
+    ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();
+    ctx.fillText('1e-'+(decades-d),6,y+4);
+  }
+  const y=value=>bottom-(bottom-top)*Math.min(decades,Math.max(0,-Math.log10(Math.max(value,1e-16))))/decades;
+  const plot=(values,colour,width=1.8)=>{
+    ctx.strokeStyle=colour;ctx.lineWidth=width;ctx.beginPath();
+    values.forEach((value,index)=>{const px=x(index+1),py=y(value);index?ctx.lineTo(px,py):ctx.moveTo(px,py);});
+    ctx.stroke();
+  };
+  plot(bpData.sweeps.map(record=>record.residual),'#f7768e');
+  plot(bpData.sweeps.map(record=>record.max_node_error),'#38bdf8');
+  ctx.strokeStyle='#e0af68';ctx.setLineDash([5,4]);ctx.beginPath();
+  const toleranceY=y(1e-10);ctx.moveTo(left,toleranceY);ctx.lineTo(right,toleranceY);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#f7768e';ctx.fillText('undamped residual',left+8,top+2);
+  ctx.fillStyle='#38bdf8';ctx.fillText('max marginal error',left+150,top+2);
+  ctx.fillStyle='#e0af68';ctx.fillText('stop tolerance 1e-10',right-142,toleranceY-6);
+  const marker=x(bpIndex);
+  ctx.strokeStyle='#edf3fa';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(marker,top);ctx.lineTo(marker,bottom);ctx.stroke();
+}
+function renderBp(){
+  const record=bpData.sweeps[bpIndex-1];
+  el('sweep-label').textContent=`${bpIndex} / ${bpData.sweeps.length}`;
+  el('bp-stat').textContent=`sweep ${bpIndex}\nresidual = ${record.residual.toExponential(3)}\n`
+    +`marginal error = ${record.max_node_error.toExponential(3)}\n`
+    +`cumulative update work = ${big(record.cumulative_work)}\n`
+    +`final: ${bpData.final.converged?'converged':'NOT converged'} at residual ${bpData.final.residual.toExponential(2)}`;
+  el('belief-bars').replaceChildren();
+  for(const variable of bpData.watch){
+    const belief=record.beliefs[String(variable)];
+    const exact=bpData.exact[String(variable)];
+    const row=document.createElement('div');row.className='bar';
+    const label=document.createElement('span');label.textContent=letters[variable]+' belief';
+    const bar=document.createElement('i');bar.style.width=(100*belief[0])+'%';
+    bar.style.background=Math.abs(belief[0]-exact[0])>1e-3?'#f7768e':'#4ade80';
+    const value=document.createElement('span');value.textContent=`${fmt(belief[0],4)} / ${fmt(exact[0],4)}`;
+    row.append(label,bar,value);el('belief-bars').append(row);
+  }
+  drawBp();
+}
+el('bp-case').onchange=loadBp;
+el('bp-sweep').oninput=()=>{bpIndex=Number(el('bp-sweep').value);renderBp();};
+let bpTimer=null;
+el('bp-play').onclick=()=>{
+  if(bpTimer){clearInterval(bpTimer);bpTimer=null;el('bp-play').textContent='Play';return;}
+  el('bp-play').textContent='Pause';
+  if(bpIndex>=bpData.sweeps.length)bpIndex=1;
+  bpTimer=setInterval(()=>{
+    bpIndex=Math.min(bpData.sweeps.length,bpIndex+1);
+    el('bp-sweep').value=bpIndex;renderBp();
+    if(bpIndex>=bpData.sweeps.length){clearInterval(bpTimer);bpTimer=null;el('bp-play').textContent='Play';}
+  },90);
+};
+loadBp();
+
+/* --- Evidence tab ------------------------------------------------------- */
+el('metric-mass').textContent=DATA.asia.AD.mass.toExponential(4);
+el('metric-error').textContent=DATA.summary.maxMarginalError.toExponential(1);
+el('metric-bp').textContent=DATA.bp.ADX.final.error.toFixed(4);
+el('metric-logz').textContent=DATA.promedus.treesa.log10.toFixed(6);
+el('row-plans').textContent=`greedy work ${big(DATA.orders.greedy.work)}, largest ${big(DATA.orders.greedy.largest)}; `
+  +`random work ${big(DATA.orders.random.work)}, largest ${big(DATA.orders.random.largest)}`;
+el('row-bp').textContent=`${DATA.bp.ADX.final.sweeps} sweeps, residual ${DATA.bp.ADX.final.residual.toExponential(2)}, `
+  +`marginal error ${DATA.bp.ADX.final.error.toFixed(5)}`;
+el('row-promedus').textContent=`TreeSA work ${big(DATA.promedus.treesa.work)} vs greedy ${big(DATA.promedus.greedy.work)}; `
+  +`largest ${big(DATA.promedus.treesa.largest)} vs ${big(DATA.promedus.greedy.largest)}`;
+el('row-reference').textContent=`log10 Z ${DATA.promedus.treesa.log10.toFixed(12)} vs PR ${DATA.promedus.pr.toFixed(5)}; `
+  +`max MAR difference ${DATA.promedus.marDifference.toExponential(1)}`;
+el('row-promedus-bp').textContent=`${DATA.promedus.bp.sweeps.length} sweeps, residual ${DATA.promedus.bp.final.residual.toExponential(2)}, `
+  +`max query error ${DATA.promedus.bp.final.error.toFixed(5)} (not converged)`;
+for(const [file,title,command] of DATA.gallery){
+  const card=document.createElement('article');
+  card.className='card';
+  const button=document.createElement('button'),image=document.createElement('img');
+  image.src='assets/week9/'+file;image.alt=title;image.loading='lazy';
+  button.append(image);
+  button.setAttribute('aria-label','Enlarge '+title);
+  button.onclick=()=>{el('lightbox-title').textContent=title;el('lightbox-image').src=image.src;el('lightbox-image').alt=title;el('lightbox').showModal();};
+  const heading=document.createElement('h3');heading.textContent=title;
+  const code=document.createElement('code');code.textContent='python scripts/'+command;
+  card.append(button,heading,code);el('gallery').append(card);
+}
+el('close-lightbox').onclick=()=>el('lightbox').close();
+</script></body></html>
