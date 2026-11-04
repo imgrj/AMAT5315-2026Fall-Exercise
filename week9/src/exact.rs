@@ -1,4 +1,4 @@
-﻿//! Exact inference: one contraction per query, plus full enumeration for ASIA.
+//! Exact inference: one contraction per query, plus full enumeration for ASIA.
 
 use std::collections::BTreeMap;
 
@@ -75,6 +75,28 @@ fn plan_query(
         None => plan::search(request.search, &leaf_labels, &request.model.dims, labels)?,
     };
     let plan = plan::analyze(&tree, &context);
+    if std::env::var_os("INFER_PLAN_DEBUG").is_some() {
+        eprintln!(
+            "plan {labels:?}: work {:.0}, largest {}, {} steps",
+            plan.work,
+            plan.largest_entries,
+            plan.steps.len()
+        );
+        for step in plan.steps.iter().take(5) {
+            eprintln!(
+                "  step {}: {}x{} left {:?} right {:?} -> {:?} work {:.0} entries {}",
+                step.id, step.left, step.right, step.left_labels, step.right_labels,
+                step.labels, step.work, step.entries
+            );
+        }
+        for step in plan.steps.iter().rev().take(3).rev() {
+            eprintln!(
+                "  step {}: {}x{} left {:?} right {:?} -> {:?} work {:.0} entries {}",
+                step.id, step.left, step.right, step.left_labels, step.right_labels,
+                step.labels, step.work, step.entries
+            );
+        }
+    }
     let contracted: Contracted = contract(request.model, request.observations, &plan.steps, engine)?;
     Ok((
         QueryResult {

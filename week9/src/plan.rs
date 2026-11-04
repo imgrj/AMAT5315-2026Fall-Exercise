@@ -1,8 +1,8 @@
-﻿//! Contraction plans: binary pair steps, their costs, and the order searches.
+//! Contraction plans: binary pair steps, their costs, and the order searches.
 
 use std::collections::HashMap;
 
-use omeco::{GreedyMethod, Initializer, ScoreFunction, TreeSA};
+use omeco::{Initializer, ScoreFunction, TreeSA};
 use serde_json::{json, Value};
 
 /// A binary contraction tree over the network's leaves.
@@ -328,6 +328,129 @@ pub fn exhaustive_tree(
     Ok(build(masks - 1, &choice))
 }
 
+/// Greedy: at every step contract the pair with the smallest step cost (the
+/// product over the union of the two inputs' labels), breaking ties by the
+/// smallest result and then by node order.
+///
+/// The pair cost is the quantity the sheet's cost model charges, so the plan is
+/// never driven into an astronomically wide pair just because its output is
+/// small. omeco's `GreedyMethod` comes from a priority queue whose tie-breaking
+/// follows the per-process hash order, which made the same query return
+/// 0.5-35.6e9 work on repeated runs; the plan below is stable, and is still
+/// saved, replayed and recounted like any other.
+pub fn greedy_tree(leaves: &[Vec<u32>], dims: &[usize], query: &[u32]) -> PlanTree {
+    struct Node {
+        tree: PlanTree,
+        carried: Vec<u32>,
+        counts: Vec<(u32, u32)>,
+    }
+    let mut totals = vec![0u32; dims.len()];
+    for labels in leaves {
+        for label in labels {
+            totals[*label as usize] += 1;
+        }
+    }
+    let mut nodes: Vec<Node> = leaves
+        .iter()
+        .enumerate()
+        .map(|(index, labels)| {
+            let mut counts: Vec<(u32, u32)> = labels.iter().map(|label| (*label, 1)).collect();
+            counts.sort_unstable();
+            Node {
+                tree: PlanTree::Leaf(index),
+                carried: labels.clone(),
+                counts,
+            }
+        })
+        .collect();
+    let size = |labels: &[u32]| -> f64 {
+        labels
+            .iter()
+            .map(|label| dims[*label as usize] as f64)
+            .product()
+    };
+    while nodes.len() > 1 {
+        let mut best: Option<(u8, usize, usize, f64, f64)> = None;
+        for first in 0..nodes.len() {
+            for second in (first + 1)..nodes.len() {
+                let shares = nodes[first]
+                    .carried
+                    .iter()
+                    .any(|label| nodes[second].carried.contains(label));
+                let merged = merge_sparse(&nodes[first].counts, &nodes[second].counts);
+                let entries = merged
+                    .iter()
+                    .filter(|(label, count)| *count < totals[*label as usize] || query.contains(label))
+                    .fold(1.0f64, |product, (label, _)| product * dims[*label as usize] as f64);
+                let work = size(&union(&nodes[first].carried, &nodes[second].carried));
+                // Prefer a pair with a shared label; then the smallest
+                // work x result, which keeps both the loop and the
+                // intermediate small; then node order.
+                let penalty = if shares { 0u8 } else { 1u8 };
+                let score = work * entries;
+                let better = match best {
+                    None => true,
+                    Some((best_penalty, _, _, _, best_score)) => {
+                        penalty < best_penalty
+                            || (penalty == best_penalty && score < best_score - 1e-9)
+                    }
+                };
+                if better {
+                    best = Some((penalty, first, second, entries, score));
+                }
+            }
+        }
+        let (_, first, second, _, _) = best.expect("two nodes remain");
+        let merged = merge_sparse(&nodes[first].counts, &nodes[second].counts);
+        let carried: Vec<u32> = merged
+            .iter()
+            .filter(|(label, count)| *count < totals[*label as usize] || query.contains(label))
+            .map(|(label, _)| *label)
+            .collect();
+        let right = nodes.swap_remove(second);
+        let left = nodes.swap_remove(first);
+        nodes.push(Node {
+            tree: PlanTree::Pair(Box::new(left.tree), Box::new(right.tree)),
+            carried,
+            counts: merged,
+        });
+    }
+    nodes.pop().expect("a network has at least one leaf").tree
+}
+
+fn merge_sparse(first: &[(u32, u32)], second: &[(u32, u32)]) -> Vec<(u32, u32)> {
+    let mut merged = Vec::with_capacity(first.len() + second.len());
+    let mut left = first.iter().peekable();
+    let mut right = second.iter().peekable();
+    loop {
+        match (left.peek(), right.peek()) {
+            (Some((a, count_a)), Some((b, count_b))) => {
+                if a < b {
+                    merged.push((*a, *count_a));
+                    left.next();
+                } else if b < a {
+                    merged.push((*b, *count_b));
+                    right.next();
+                } else {
+                    merged.push((*a, *count_a + *count_b));
+                    left.next();
+                    right.next();
+                }
+            }
+            (Some((a, count_a)), None) => {
+                merged.push((*a, *count_a));
+                left.next();
+            }
+            (None, Some((b, count_b))) => {
+                merged.push((*b, *count_b));
+                right.next();
+            }
+            (None, None) => break,
+        }
+    }
+    merged
+}
+
 /// Plan a query with the requested search; `settings` is filled for TreeSA.
 pub fn search(
     method: &Search,
@@ -341,28 +464,98 @@ pub fn search(
             exhaustive_tree(leaves, dims, query)?,
             json!({ "method": "dynamic program over factor subsets, at most 16 factors" }),
         )),
-        Search::Greedy | Search::Treesa => {
+        Search::Greedy => greedy_with_omeco(leaves, dims, query),
+        Search::Treesa => {
             let code = omeco::EinCode::new(leaves.to_vec(), query.to_vec());
             let sizes: HashMap<u32, usize> = dims
                 .iter()
                 .enumerate()
                 .map(|(label, size)| (label as u32, *size))
                 .collect();
-            let (nested, settings) = match method {
-                Search::Greedy => (
-                    omeco::optimize_code(&code, &sizes, &GreedyMethod::default()),
-                    json!({ "alpha": 0.0, "temperature": 0.0 }),
-                ),
-                Search::Treesa => {
-                    let (settings, record) = treesa_settings();
-                    (omeco::optimize_code(&code, &sizes, &settings), record)
-                }
-                _ => unreachable!(),
-            };
-            let nested = nested.ok_or_else(|| "the order search returned no plan".to_string())?;
-            Ok((from_nested(&nested)?, settings))
+            let (settings, record) = treesa_settings();
+            let nested = omeco::optimize_code(&code, &sizes, &settings)
+                .ok_or_else(|| "the order search returned no plan".to_string())?;
+            Ok((from_nested(&nested)?, record))
         }
     }
+}
+
+/// Greedy planning: keep the cheapest feasible plan among our deterministic
+/// pass and a few omeco `GreedyMethod` runs.
+///
+/// A plan is feasible when no pair step would have to loop over more than
+/// `network::TERM_LIMIT` terms. Greedy heuristics can be driven into an
+/// astronomically wide last merge (we measured 1.4e12 and 4.4e12 terms), so the
+/// feasible minimum is chosen instead of trusting one run.
+fn greedy_with_omeco(
+    leaves: &[Vec<u32>],
+    dims: &[usize],
+    query: &[u32],
+) -> Result<(PlanTree, Value), String> {
+    let context = Context {
+        leaf_labels: leaves,
+        dims,
+        query,
+    };
+    let mut candidates: Vec<Value> = Vec::new();
+    let mut best: Option<(PlanTree, Plan, &'static str)> = None;
+    let mut consider = |tree: PlanTree, source: &'static str| {
+        let plan = analyze(&tree, &context);
+        let terms = widest_step(&plan, dims);
+        let feasible = terms <= crate::network::TERM_LIMIT;
+        candidates.push(json!({
+            "source": source,
+            "work": plan.work,
+            "largest_entries": plan.largest_entries,
+            "widest_step_terms": terms,
+            "feasible": feasible,
+        }));
+        if !feasible {
+            return;
+        }
+        if best.as_ref().map_or(true, |(_, current, _)| plan.work < current.work) {
+            best = Some((tree, plan, source));
+        }
+    };
+    consider(greedy_tree(leaves, dims, query), "deterministic");
+    let code = omeco::EinCode::new(leaves.to_vec(), query.to_vec());
+    let sizes: HashMap<u32, usize> = dims
+        .iter()
+        .enumerate()
+        .map(|(label, size)| (label as u32, *size))
+        .collect();
+    for _ in 0..20 {
+        if let Some(nested) = omeco::optimize_code(&code, &sizes, &omeco::GreedyMethod::default()) {
+            if let Ok(tree) = from_nested(&nested) {
+                consider(tree, "omeco-greedy");
+            }
+        }
+    }
+    match best {
+        Some((tree, plan, source)) => Ok((
+            tree,
+            json!({
+                "rule": "smallest result among connected pairs, cheapest feasible plan of the candidates",
+                "chosen": source,
+                "work": plan.work,
+                "largest_entries": plan.largest_entries,
+                "candidates": candidates,
+            }),
+        )),
+        None => Err("no feasible greedy plan was found; try --order treesa".into()),
+    }
+}
+
+fn widest_step(plan: &Plan, dims: &[usize]) -> f64 {
+    plan.steps
+        .iter()
+        .map(|step| {
+            union(&step.left_labels, &step.right_labels)
+                .iter()
+                .map(|label| dims[*label as usize] as f64)
+                .product::<f64>()
+        })
+        .fold(0.0f64, f64::max)
 }
 
 pub fn tree_to_json(tree: &PlanTree) -> Value {
@@ -439,5 +632,6 @@ pub fn validate(tree: &PlanTree, leaves: usize) -> Result<(), String> {
     }
     Ok(())
 }
+
 
 

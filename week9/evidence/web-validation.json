@@ -1,0 +1,27 @@
+{
+  "browser": "Microsoft Edge, Playwright headless",
+  "desktop": [
+    1440,
+    1000
+  ],
+  "responsive_widths": [
+    390,
+    700,
+    1024
+  ],
+  "figures_loaded": 8,
+  "page_errors": [],
+  "checks": [
+    "upper-right segmented switch",
+    "mutually exclusive studio and evidence panels",
+    "computed metrics only in Evidence",
+    "disease bars follow the observation selector",
+    "contraction player advances one pair step at a time",
+    "BP sweep slider follows the recorded traces",
+    "control state preserved across the switch",
+    "arrow/Home/End tab navigation",
+    "no horizontal overflow at 390/700/1024 px",
+    "8 evidence images loaded",
+    "lightbox open and Escape close"
+  ]
+}

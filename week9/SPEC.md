@@ -94,9 +94,9 @@ of its marginals, with the difference labelled as dependence). Saved runs in
 
 ## 2. Contraction order (Part 3)
 
-Extend `infer` with `[args.ordering]`: `--order random|greedy` (default greedy), `--seed`
-(required with random, absent otherwise), `--plan` (replay a saved scalar-query plan) and
-`--analyze` (analyse a saved plan without contraction). `order`, `plan` and `analyze` are
+Extend `infer` with `[args.ordering]`: `--order random|greedy|exhaustive` (default greedy),
+`--seed` (required with random, absent otherwise), `--plan` (replay a saved scalar-query plan)
+and `--analyze` (analyse a saved plan without contraction). `order`, `plan` and `analyze` are
 mutually exclusive; a normal exact run also saves its own scalar plan.
 
 A plan is a binary tree of pair steps over the factor leaves. Each intermediate keeps
@@ -108,6 +108,15 @@ Costs depend only on index sizes:
 * largest tensor = the maximum entry count among all inputs and intermediates,
 * per-step retained labels and costs are saved so the totals can be recounted
   independently.
+
+Greedy planning keeps the cheapest *feasible* plan among a deterministic "smallest result
+among connected pairs" pass and 20 `omeco` `GreedyMethod` runs, because omeco's priority queue
+breaks ties in per-process hash order (repeated runs on Promedus_14 measured 0.49e9-35.6e9
+work). A plan is feasible when no pair step exceeds 3e10 terms, the largest step dense
+tensors can evaluate in reasonable time; an infeasible plan is reported rather than attempted.
+Exhaustive search is a dynamic program over factor subsets limited to 16 factors (ASIA uses
+10-11 leaves), and TreeSA reuses omeco's time-only score with the settings recorded in
+`order.json`.
 
 `<out>/order.json` records the planning method, random seed (with random) or the omeco
 TreeSA settings, the tree, and the reconstructed step list. `<out>/complexity.json` records

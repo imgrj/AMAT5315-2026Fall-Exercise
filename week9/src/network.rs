@@ -168,6 +168,24 @@ pub fn contract(
         .collect();
     let mut log_scale = network.scalar.ln();
     for step in steps {
+        // A pair whose union is astronomically wide cannot be evaluated with
+        // dense tensors; report it instead of attempting the allocation.
+        let mut labels = step.left_labels.clone();
+        for label in &step.right_labels {
+            if !labels.contains(label) {
+                labels.push(*label);
+            }
+        }
+        let terms: f64 = labels
+            .iter()
+            .map(|label| model.dims[*label as usize] as f64)
+            .product();
+        if terms > TERM_LIMIT {
+            return Err(format!(
+                "step {} ({} x {}) would loop over {terms:.3e} terms; choose a cheaper order",
+                step.id, step.left, step.right
+            ));
+        }
         let left = take(&mut nodes, step.left)?;
         let right = take(&mut nodes, step.right)?;
         let subscripts = EinsumSubscripts::new(
@@ -213,12 +231,15 @@ pub fn contract(
         log_scale += scale.ln();
         product
     };
-    let _ = model;
     Ok(Contracted {
         log_scale,
         array: final_array,
     })
 }
+
+/// Dense tensors should not loop over more terms than this; a plan that needs
+/// more is reported as an error rather than attempted.
+pub const TERM_LIMIT: f64 = 3.0e10;
 
 fn take(nodes: &mut Vec<Option<Array>>, index: usize) -> Result<Array, String> {
     nodes

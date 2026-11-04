@@ -87,20 +87,6 @@ def asia_model(data: Path):
 @pytest.fixture(scope='session')
 def tree_model() -> Path:
     """A small nonuniform chain: BP must be exact on a tree."""
-    directory = ARTIFACTS / 'tree'
-    directory.mkdir(parents=True, exist_ok=True)
-    path = directory / 'tree.uai'
-    factors = [
-        ((0,), [0.3, 0.7]),
-        ((1, 0), [0.2, 0.9, 0.8, 0.1]),
-        ((2, 1), [0.6, 0.05, 0.4, 0.95]),
-        ((3, 2), [0.25, 0.75, 0.75, 0.25]),
-    ]
-    lines = ['MARKOV', '4', '2 2 2 2', str(len(factors))]
-    lines += [' '.join(str(v) for v in (len(scope), *scope)) for scope, _ in factors]
-    lines.append('')
-    for _, values in factors:
-        lines.append(str(len(values)))
-        lines.append(' '.join(repr(v) for v in values))
-    path.write_text('\n'.join(lines) + '\n')
+    path = ROOT / 'tests' / 'data' / 'tree.uai'
+    assert path.exists(), path
     return path

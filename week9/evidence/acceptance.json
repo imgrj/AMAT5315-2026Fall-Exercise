@@ -1,0 +1,509 @@
+{
+  "data": {
+    "asia.uai": {
+      "bytes": 265,
+      "sha256": "0d78314c96b1cbbfd94682f0e99f73461cb50a935a1da85cbc814c70e3fff32d"
+    },
+    "Promedus_14.uai": {
+      "bytes": 48170,
+      "sha256": "f213b76a7f145a06f39daa9061408981dbd525e4ce2e5156edb83a7073d71349"
+    },
+    "Promedus_14.uai.evid": {
+      "bytes": 47,
+      "sha256": "e345a4ebecf02cdd9fdaf42e7456afa5f6ecafa989b6a3c15ef525abe736a403"
+    },
+    "Promedus_14.uai.PR": {
+      "bytes": 12,
+      "sha256": "d52ca345f79e79f0385f7bd91a3c2e3521eff165b3dcb7b29be1e56ca5f96dfc"
+    },
+    "Promedus_14.uai.MAR": {
+      "bytes": 8607,
+      "sha256": "06e3145bb59fd0a22af235af43bc7c45bee71a764647e152314bdded4f0d256f"
+    }
+  },
+  "checks": [
+    {
+      "name": "prior: contraction mass vs enumeration",
+      "measured": 0.0,
+      "requirement": "relative error < 1e-10",
+      "pass": true
+    },
+    {
+      "name": "prior: node and joint marginals vs enumeration",
+      "measured": 2.220446049250313e-16,
+      "requirement": "max absolute error < 1e-10",
+      "pass": true
+    },
+    {
+      "name": "prior: every marginal sums to one",
+      "measured": 0.0,
+      "requirement": "< 1e-12",
+      "pass": true
+    },
+    {
+      "name": "AD: contraction mass vs enumeration",
+      "measured": 1.1561290556619749e-15,
+      "requirement": "relative error < 1e-10",
+      "pass": true
+    },
+    {
+      "name": "AD: node and joint marginals vs enumeration",
+      "measured": 2.220446049250313e-16,
+      "requirement": "max absolute error < 1e-10",
+      "pass": true
+    },
+    {
+      "name": "AD: every marginal sums to one",
+      "measured": 1.1102230246251565e-16,
+      "requirement": "< 1e-12",
+      "pass": true
+    },
+    {
+      "name": "ADX: contraction mass vs enumeration",
+      "measured": 4.388475306848371e-16,
+      "requirement": "relative error < 1e-10",
+      "pass": true
+    },
+    {
+      "name": "ADX: node and joint marginals vs enumeration",
+      "measured": 1.1102230246251565e-16,
+      "requirement": "max absolute error < 1e-10",
+      "pass": true
+    },
+    {
+      "name": "ADX: every marginal sums to one",
+      "measured": 2.220446049250313e-16,
+      "requirement": "< 1e-12",
+      "pass": true
+    },
+    {
+      "name": "evidence masses",
+      "measured": {
+        "prior": 1.0,
+        "AD": 0.0045013750000000045,
+        "ADX": 0.0009882267500000003
+      },
+      "requirement": "prior 1, AD 0.004501375, ADX 0.00098822675",
+      "pass": true
+    },
+    {
+      "name": "ADX joint minus product of marginals",
+      "measured": -0.1518124393537491,
+      "requirement": "about -0.151812 (dependence kept)",
+      "pass": true
+    },
+    {
+      "name": "exhaustive optimum, prior",
+      "measured": 44.0,
+      "requirement": "44 terms",
+      "pass": true
+    },
+    {
+      "name": "exhaustive optimum, AD",
+      "measured": 50.0,
+      "requirement": "50 terms",
+      "pass": true
+    },
+    {
+      "name": "exhaustive optimum, ADX",
+      "measured": 52.0,
+      "requirement": "52 terms",
+      "pass": true
+    },
+    {
+      "name": "greedy plan costs no more than the random plan",
+      "measured": {
+        "greedy": 52.0,
+        "random": 204.0
+      },
+      "requirement": "greedy <= random",
+      "pass": true
+    },
+    {
+      "name": "exhaustive search reaches the optimum",
+      "measured": {
+        "exhaustive": 50,
+        "independent dynamic program": 50.0
+      },
+      "requirement": "both 50 terms",
+      "pass": true
+    },
+    {
+      "name": "replayed plan keeps the evidence mass",
+      "measured": 0.0,
+      "requirement": "difference < 1e-14",
+      "pass": true
+    },
+    {
+      "name": "analysis writes costs without inference",
+      "measured": false,
+      "requirement": "no run.json",
+      "pass": true
+    },
+    {
+      "name": "BP prior: converges below the stop tolerance",
+      "measured": 7.025592607678988e-11,
+      "requirement": "< 1e-10",
+      "pass": true
+    },
+    {
+      "name": "BP AD: converges below the stop tolerance",
+      "measured": 9.943634804443491e-11,
+      "requirement": "< 1e-10",
+      "pass": true
+    },
+    {
+      "name": "BP ADX: converges below the stop tolerance",
+      "measured": 8.22506507347498e-11,
+      "requirement": "< 1e-10",
+      "pass": true
+    },
+    {
+      "name": "BP ADX: converged but about 1% away from exact",
+      "measured": 0.010611745265879213,
+      "requirement": "0.005 < error < 0.02",
+      "pass": true
+    },
+    {
+      "name": "BP is exact on the nonuniform tree",
+      "measured": 8.326672684688674e-16,
+      "requirement": "< 1e-12",
+      "pass": true
+    },
+    {
+      "name": "Promedus: greedy and TreeSA agree on log10 Z",
+      "measured": 6.217248937900877e-15,
+      "requirement": "< 1e-10",
+      "pass": true
+    },
+    {
+      "name": "Promedus: log10 Z against the published PR",
+      "measured": 3.69541756395364e-06,
+      "requirement": "< 1e-4",
+      "pass": true
+    },
+    {
+      "name": "Promedus: state-1 marginals against the published MAR",
+      "measured": 4.323191905852841e-07,
+      "requirement": "< 1e-5",
+      "pass": true
+    },
+    {
+      "name": "Promedus: TreeSA uses less work than greedy",
+      "measured": {
+        "greedy": 376927211.0,
+        "treesa": 13786862.0
+      },
+      "requirement": "treesa < greedy",
+      "pass": true
+    },
+    {
+      "name": "Promedus: BP is unconverged and inaccurate",
+      "measured": {
+        "residual": 2.1713575382165118e-10,
+        "max_node_error": 0.38235291743569566
+      },
+      "requirement": "residual > 1e-10 and error > 0.1",
+      "pass": true
+    },
+    {
+      "name": "Promedus negative control: no .evid file misses PR",
+      "measured": 7.80675,
+      "requirement": "> 1e-2",
+      "pass": true
+    }
+  ],
+  "all_pass": true,
+  "asia": {
+    "prior": {
+      "mass": 1.0,
+      "log10_mass": 0.0,
+      "max_marginal_error": 2.220446049250313e-16,
+      "mass_relative_error": 0.0,
+      "marginals": {
+        "0": [
+          0.01,
+          0.99
+        ],
+        "1": [
+          0.0104,
+          0.9896
+        ],
+        "2": [
+          0.5,
+          0.5
+        ],
+        "3": [
+          0.055000000000000014,
+          0.9450000000000001
+        ],
+        "4": [
+          0.45,
+          0.55
+        ],
+        "5": [
+          0.06482800000000001,
+          0.935172
+        ],
+        "6": [
+          0.11029004000000002,
+          0.88970996
+        ],
+        "7": [
+          0.43597060000000004,
+          0.5640294
+        ]
+      },
+      "joint_TL": [
+        [
+          0.000572,
+          0.009828
+        ],
+        [
+          0.05442800000000001,
+          0.935172
+        ]
+      ],
+      "dependence_TL": [
+        [
+          -1.0842021724855044e-19,
+          0.0
+        ],
+        [
+          -6.938893903907228e-18,
+          -1.1102230246251565e-16
+        ]
+      ],
+      "enumeration_mass": 1.0,
+      "plan_work": 48.0,
+      "largest_entries": 8
+    },
+    "AD": {
+      "mass": 0.0045013750000000045,
+      "log10_mass": -2.346654805402612,
+      "max_marginal_error": 2.220446049250313e-16,
+      "mass_relative_error": 1.1561290556619749e-15,
+      "marginals": {
+        "0": [
+          1.0,
+          0.0
+        ],
+        "1": [
+          0.08775096498292187,
+          0.9122490350170781
+        ],
+        "2": [
+          0.6259198578212213,
+          0.3740801421787787
+        ],
+        "3": [
+          0.09952514509455443,
+          0.9004748549054455
+        ],
+        "4": [
+          0.8114020715892365,
+          0.18859792841076337
+        ],
+        "5": [
+          0.1822998528227486,
+          0.8177001471772514
+        ],
+        "6": [
+          0.2195388631251562,
+          0.7804611368748439
+        ],
+        "7": [
+          1.0,
+          0.0
+        ]
+      },
+      "joint_TL": [
+        [
+          0.004976257254727723,
+          0.08277470772819416
+        ],
+        [
+          0.0945488878398267,
+          0.8177001471772514
+        ]
+      ],
+      "dependence_TL": [
+        [
+          -0.0037571702673847417,
+          0.0037571702673847573
+        ],
+        [
+          0.0037571702673847435,
+          -0.0037571702673847573
+        ]
+      ],
+      "enumeration_mass": 0.004501374999999999,
+      "plan_work": 52.0,
+      "largest_entries": 8
+    },
+    "ADX": {
+      "mass": 0.0009882267500000003,
+      "log10_mass": -3.005143394506351,
+      "max_marginal_error": 1.1102230246251565e-16,
+      "mass_relative_error": 4.388475306848371e-16,
+      "marginals": {
+        "0": [
+          1.0,
+          0.0
+        ],
+        "1": [
+          0.39171172000757926,
+          0.6082882799924209
+        ],
+        "2": [
+          0.7020251172112068,
+          0.2979748827887931
+        ],
+        "3": [
+          0.4442705077554316,
+          0.5557294922445684
+        ],
+        "4": [
+          0.6288217759739857,
+          0.37117822402601425
+        ],
+        "5": [
+          0.8137687023752394,
+          0.18623129762476076
+        ],
+        "6": [
+          1.0,
+          0.0
+        ],
+        "7": [
+          1.0,
+          0.0
+        ]
+      },
+      "joint_TL": [
+        [
+          0.02221352538777158,
+          0.3694981946198076
+        ],
+        [
+          0.42205698236766,
+          0.1862312976247607
+        ]
+      ],
+      "dependence_TL": [
+        [
+          -0.1518124393537491,
+          0.15181243935374905
+        ],
+        [
+          0.15181243935374905,
+          -0.15181243935374916
+        ]
+      ],
+      "enumeration_mass": 0.0009882267499999999,
+      "plan_work": 52.0,
+      "largest_entries": 8
+    },
+    "exhaustive_reference": {
+      "prior": 44.0,
+      "AD": 50.0,
+      "ADX": 52.0
+    },
+    "plan_random": {
+      "work": 204.0,
+      "largest_entries": 32,
+      "steps": 9,
+      "method": "random",
+      "seed": 42
+    },
+    "plan_greedy": {
+      "work": 52.0,
+      "largest_entries": 8,
+      "steps": 9,
+      "method": "greedy",
+      "seed": null
+    },
+    "promedus": {
+      "greedy": {
+        "work": 376927211.0,
+        "largest_entries": 4194304,
+        "log10_mass": -7.806746304582442
+      },
+      "treesa": {
+        "work": 13786862.0,
+        "largest_entries": 262144,
+        "log10_mass": -7.806746304582436
+      },
+      "published_pr": -7.80675,
+      "pr_difference": 3.69541756395364e-06,
+      "mar_difference": 4.323191905852841e-07,
+      "marginals_state1": {
+        "59": 0.19758825818897477,
+        "102": 0.14975343231919058,
+        "139": 0.6175220183808904
+      },
+      "bp": {
+        "sweeps": 1000,
+        "residual": 2.1713575382165118e-10,
+        "converged": false,
+        "max_node_error": 0.38235291743569566
+      },
+      "no_observations_log10": 9.64327466553287e-17
+    }
+  },
+  "bp": {
+    "prior": {
+      "sweeps": 54,
+      "residual": 7.025592607678988e-11,
+      "converged": true,
+      "max_node_error": 0.003339900003366647,
+      "work_per_sweep": 100.0
+    },
+    "AD": {
+      "sweeps": 93,
+      "residual": 9.943634804443491e-11,
+      "converged": true,
+      "max_node_error": 0.01140696150841794,
+      "work_per_sweep": 78.0
+    },
+    "ADX": {
+      "sweeps": 94,
+      "residual": 8.22506507347498e-11,
+      "converged": true,
+      "max_node_error": 0.010611745265879213,
+      "work_per_sweep": 74.0
+    }
+  },
+  "promedus": {
+    "greedy": {
+      "work": 376927211.0,
+      "largest_entries": 4194304,
+      "log10_mass": -7.806746304582442
+    },
+    "treesa": {
+      "work": 13786862.0,
+      "largest_entries": 262144,
+      "log10_mass": -7.806746304582436
+    },
+    "published_pr": -7.80675,
+    "pr_difference": 3.69541756395364e-06,
+    "mar_difference": 4.323191905852841e-07,
+    "marginals_state1": {
+      "59": 0.19758825818897477,
+      "102": 0.14975343231919058,
+      "139": 0.6175220183808904
+    },
+    "bp": {
+      "sweeps": 1000,
+      "residual": 2.1713575382165118e-10,
+      "converged": false,
+      "max_node_error": 0.38235291743569566
+    },
+    "no_observations_log10": 9.64327466553287e-17
+  },
+  "notes": [
+    "Every number comes from the saved artifacts/ runs, never from a live recomputation.",
+    "The exhaustive optima use observed variables as (1,0) cap tensors, as drawn in the sheet.",
+    "omeco greedy and TreeSA plans are heuristics; the saved plan is replayed and recounted."
+  ]
+}
