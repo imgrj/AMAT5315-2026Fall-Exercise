@@ -172,7 +172,7 @@
     },
     {
       "name": "Promedus: greedy and TreeSA agree on log10 Z",
-      "measured": 6.217248937900877e-15,
+      "measured": 8.881784197001252e-15,
       "requirement": "< 1e-10",
       "pass": true
     },
@@ -184,15 +184,15 @@
     },
     {
       "name": "Promedus: state-1 marginals against the published MAR",
-      "measured": 4.323191905852841e-07,
+      "measured": 4.323191903632395e-07,
       "requirement": "< 1e-5",
       "pass": true
     },
     {
       "name": "Promedus: TreeSA uses less work than greedy",
       "measured": {
-        "greedy": 376927211.0,
-        "treesa": 13786862.0
+        "greedy": 383630739.0,
+        "treesa": 11415062.0
       },
       "requirement": "treesa < greedy",
       "pass": true
@@ -201,7 +201,7 @@
       "name": "Promedus: BP is unconverged and inaccurate",
       "measured": {
         "residual": 2.1713575382165118e-10,
-        "max_node_error": 0.38235291743569566
+        "max_node_error": 0.38235291743569577
       },
       "requirement": "residual > 1e-10 and error > 0.1",
       "pass": true
@@ -222,7 +222,7 @@
       "mass_relative_error": 0.0,
       "marginals": {
         "0": [
-          0.01,
+          0.010000000000000002,
           0.99
         ],
         "1": [
@@ -425,30 +425,30 @@
     },
     "promedus": {
       "greedy": {
-        "work": 376927211.0,
-        "largest_entries": 4194304,
-        "log10_mass": -7.806746304582442
+        "work": 383630739.0,
+        "largest_entries": 1048576,
+        "log10_mass": -7.806746304582445
       },
       "treesa": {
-        "work": 13786862.0,
-        "largest_entries": 262144,
+        "work": 11415062.0,
+        "largest_entries": 131072,
         "log10_mass": -7.806746304582436
       },
       "published_pr": -7.80675,
       "pr_difference": 3.69541756395364e-06,
-      "mar_difference": 4.323191905852841e-07,
+      "mar_difference": 4.323191903632395e-07,
       "marginals_state1": {
         "59": 0.19758825818897477,
-        "102": 0.14975343231919058,
-        "139": 0.6175220183808904
+        "102": 0.14975343231919036,
+        "139": 0.6175220183808903
       },
       "bp": {
         "sweeps": 1000,
         "residual": 2.1713575382165118e-10,
         "converged": false,
-        "max_node_error": 0.38235291743569566
+        "max_node_error": 0.38235291743569577
       },
-      "no_observations_log10": 9.64327466553287e-17
+      "no_observations_log10": 2.8929823996598605e-16
     }
   },
   "bp": {
@@ -476,30 +476,30 @@
   },
   "promedus": {
     "greedy": {
-      "work": 376927211.0,
-      "largest_entries": 4194304,
-      "log10_mass": -7.806746304582442
+      "work": 383630739.0,
+      "largest_entries": 1048576,
+      "log10_mass": -7.806746304582445
     },
     "treesa": {
-      "work": 13786862.0,
-      "largest_entries": 262144,
+      "work": 11415062.0,
+      "largest_entries": 131072,
       "log10_mass": -7.806746304582436
     },
     "published_pr": -7.80675,
     "pr_difference": 3.69541756395364e-06,
-    "mar_difference": 4.323191905852841e-07,
+    "mar_difference": 4.323191903632395e-07,
     "marginals_state1": {
       "59": 0.19758825818897477,
-      "102": 0.14975343231919058,
-      "139": 0.6175220183808904
+      "102": 0.14975343231919036,
+      "139": 0.6175220183808903
     },
     "bp": {
       "sweeps": 1000,
       "residual": 2.1713575382165118e-10,
       "converged": false,
-      "max_node_error": 0.38235291743569566
+      "max_node_error": 0.38235291743569577
     },
-    "no_observations_log10": 9.64327466553287e-17
+    "no_observations_log10": 2.8929823996598605e-16
   },
   "notes": [
     "Every number comes from the saved artifacts/ runs, never from a live recomputation.",

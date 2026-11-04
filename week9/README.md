@@ -234,15 +234,17 @@ logarithms accumulate, so `log10 Z_evidence` survives the dynamic range.
 
 | Exact plan | Work (terms) | Largest tensor | log10 Z_evidence |
 | :--- | ---: | ---: | ---: |
-| greedy (cheapest feasible candidate) | 376,927,211 | 4,194,304 | -7.806746304582442 |
-| TreeSA (time-only, 2 trials × 10 iterations × 30 betas) | **13,786,862** | **262,144** | -7.806746304582436 |
+| greedy (cheapest feasible candidate) | 383,630,739 | 1,048,576 | -7.806746304582445 |
+| TreeSA (time-only, 2 trials × 10 iterations × 30 betas) | **11,415,062** | **131,072** | -7.806746304582436 |
 
-The two plans agree to 6e-15; the published PR (-7.80675) is 3.7e-6 away (tolerance 1e-4) and
+The two plans agree to 9e-15; the published PR (-7.80675) is 3.7e-6 away (tolerance 1e-4) and
 the state-1 marginals of IDs 59, 102 and 139 are 0.1975882582, 0.1497534323 and 0.6175220184,
 all within 4.4e-7 of the published MAR (tolerance 1e-5) and within 1e-9 of the sheet's printed
 values. The sheet's own reference plans are greedy 667,111,481 / 4,194,304 and TreeSA
 10,635,220 / 131,072; our TreeSA settings are lighter, and the greedy candidate set is
-different, so only the *answer* is expected to agree.
+different, so only the *answer* is expected to agree. Plan costs move between runs (greedy
+measured 180-384e6 and TreeSA 11-22e6 on this machine); the saved plan in `order.json` is
+what the tables and figures above report.
 
 Loopy BP with the ASIA settings does not converge here: after 1000 sweeps the residual is
 2.17e-10 (tolerance 1e-10) and the state-1 beliefs of the three queried variables are off by
