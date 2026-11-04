@@ -1,0 +1,12 @@
+[project]
+name = "amat5315-week9"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = ["numpy>=2", "matplotlib>=3.10"]
+
+[dependency-groups]
+dev = ["pytest>=8", "playwright>=1.50"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

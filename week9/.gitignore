@@ -1,0 +1,9 @@
+target/
+.venv/
+__pycache__/
+.pytest_cache/
+.scratch/
+artifacts/
+runs/
+asia.uai
+promedus/
