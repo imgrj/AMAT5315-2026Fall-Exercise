@@ -112,6 +112,8 @@ python scripts/plot_bp.py                       # evidence/bp-convergence.png, e
 python scripts/plot_promedus.py                 # evidence/promedus-orders.png, evidence/promedus-bp.png
 python scripts/build_web_lab.py                 # docs/week9-inference-lab.html + assets
 python scripts/check_web.py                     # browser checks -> evidence/web-validation.json
+python scripts/verify_results.py                # acceptance.json from the saved runs
+python scripts/verify_publication.py            # Pages build + deployed files -> evidence/publication.json
 python -m pytest tests -q                       # 39 independent checks (~20 s)
 ```
 
