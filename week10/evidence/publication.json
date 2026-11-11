@@ -1,0 +1,55 @@
+{
+  "url": "https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week10-tensor-lab.html",
+  "artifact_commit": "e8ae3a0066054ae82cf201a9f7093bdb6b687523",
+  "pages_build_status": "built",
+  "pages_build_created_at": "2026-11-11T09:26:08Z",
+  "checked_from": "e8ae3a0066054ae82cf201a9f7093bdb6b687523",
+  "files": [
+    {
+      "path": "week10-tensor-lab.html",
+      "status": 200,
+      "sha256": "e198ccada0479008ddac54dea16d70861c5148cf55c3857bd320d0340787b2ab"
+    },
+    {
+      "path": "assets/week10/svd.png",
+      "status": 200,
+      "sha256": "d3148e0b0ef04122c0e392556a525810fd05dabba02121211f11cb491e016fb0"
+    },
+    {
+      "path": "assets/week10/boundary-critical.png",
+      "status": 200,
+      "sha256": "37b6b2c5b34dfb58afb6e147387e7b750bf29e633b7f3d9870dad45c9225856c"
+    },
+    {
+      "path": "assets/week10/trg-critical.png",
+      "status": 200,
+      "sha256": "ba0cc49101f9c164e6589333d4e254f2d8adc3c901369d89f6bc52c5ce7e1e55"
+    },
+    {
+      "path": "assets/week10/g-curves.png",
+      "status": 200,
+      "sha256": "cee7b78ede9dc17cceec349290b4ae729973d59ec0b3beb237a42ea1c54e6200"
+    },
+    {
+      "path": "assets/week10/phase-compare.png",
+      "status": 200,
+      "sha256": "0a07be83bec7c581f462c9bd50877dac2ba4f8bdd4920671dedb8e87219778e1"
+    },
+    {
+      "path": "assets/week10/boundary-rows.png",
+      "status": 200,
+      "sha256": "7c84886be23000bf40680bef1e63ceeacee028eee3f34f90d79a044af8fb79f4"
+    },
+    {
+      "path": "assets/week10/trg-steps.png",
+      "status": 200,
+      "sha256": "e9d68fabf02bf5a58ba447c25269d1494c1f792dba0bb8f123c9e614abfaa879"
+    },
+    {
+      "path": "index.html",
+      "status": 200,
+      "sha256": "41b09231671a54116d41511e8c1a9f332bc0443e2ad8c2176cfac07a350ea2a1"
+    }
+  ],
+  "comparison": "Exact bytes for PNG, CRLF/LF normalised for HTML"
+}
