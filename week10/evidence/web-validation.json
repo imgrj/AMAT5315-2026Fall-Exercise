@@ -1,0 +1,31 @@
+{
+  "url": "file:///D:/Desktop/AMAT5315-2026Fall-Exercise/docs/week10-tensor-lab.html",
+  "browser": "Microsoft Edge, Playwright headless 1.64.1",
+  "desktop": [
+    1440,
+    1000
+  ],
+  "responsive_widths": [
+    390,
+    700,
+    1024
+  ],
+  "figures_loaded": 7,
+  "page_errors": [],
+  "checks": [
+    "upper-right segmented switch reaches the header edge",
+    "mutually exclusive studio and evidence panels",
+    "computed metrics only in Evidence",
+    "SVD rank slider changes the storage verdict and the 10% verdict",
+    "boundary row player absorbs rows, reports g and resets",
+    "TRG player runs twenty rounds to the closure and resets",
+    "all three studio canvases drew",
+    "learning-sheet version and reference comparison table",
+    "control state preserved across the switch",
+    "arrow/Home/End tab navigation",
+    "no horizontal overflow at 390/700/1024 px",
+    "7 evidence images loaded",
+    "lightbox shows the English caption, command and figure counter",
+    "lightbox previous/next navigate all figures and Escape closes"
+  ]
+}

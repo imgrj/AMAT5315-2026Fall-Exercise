@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Week 10 — Approximate Tensor Contraction for the Ising Model</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230f172a'/%3E%3Cpath d='M4 8 L12 8 M8 4 L8 12' stroke='%239aaec5' stroke-width='1.2'/%3E%3Ccircle cx='4' cy='8' r='2.2' fill='%2338bdf8'/%3E%3Ccircle cx='12' cy='8' r='2.2' fill='%234ade80'/%3E%3Ccircle cx='8' cy='4' r='2.2' fill='%23f6a45c'/%3E%3Ccircle cx='8' cy='12' r='2.2' fill='%23e06c75'/%3E%3C/svg%3E">
+<style>
+:root{color-scheme:dark;--bg:#080c16;--panel:#0f172a;--line:#26344c;--ink:#edf3fa;--muted:#9aaec5;--blue:#38bdf8;--green:#4ade80;--amber:#f6a45c;--red:#f7768e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 Inter,Segoe UI,sans-serif}
+a{color:var(--blue);text-decoration:none}
+nav{display:flex;flex-wrap:wrap;gap:8px;padding:12px 24px;background:#0b1120;border-bottom:1px solid var(--line)}
+nav a{padding:5px 10px;color:var(--muted);border-radius:6px}
+nav a.active{color:var(--blue);background:#123147}
+nav a:last-child{margin-left:auto}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:18px 26px;background:var(--panel);border-bottom:1px solid var(--line)}
+.header-copy{flex:1 1 520px;min-width:0}
+.title-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+header h1{font-size:1.3rem;margin:0;letter-spacing:-.02em}
+header p{font-size:12.5px;margin:4px 0 0;color:var(--muted)}
+.badge{color:var(--blue);font-size:11.5px;font-weight:600;white-space:nowrap;padding:3px 10px;border:1px solid rgba(56,189,248,.35);background:rgba(56,189,248,.08);border-radius:999px}
+.tabs{display:flex;gap:6px;margin:0 0 0 auto;padding:4px;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:6px}
+.tabs button{flex:1 1 auto;min-width:0;padding:7px 15px;border:0;border-radius:4px;background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected=true]{background:#162036;color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+button,select,input{font:inherit}
+button,select{background:#16243b;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:9px 13px;cursor:pointer}
+button:hover{border-color:var(--blue)}
+button:disabled{opacity:.45;cursor:not-allowed;border-color:var(--line)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+main{max-width:1208px;margin:auto;padding:24px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.metric,.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px}
+.metric strong{font-size:22px;color:var(--blue);display:block}
+.metric span{font-size:12px;color:var(--muted)}
+h2{font-size:19px;margin:0 0 6px}
+h3{font-size:16px;margin:18px 0 6px}
+.tag{font-size:11px;color:var(--green);letter-spacing:.1em}
+.note{color:var(--muted);font-size:12px}
+section.card{margin-bottom:20px}
+.split{display:grid;grid-template-columns:1fr 1.35fr;gap:25px;margin-top:16px}
+.controls{display:flex;flex-direction:column;gap:12px}
+.controls label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.result{font-family:'JetBrains Mono',Consolas,monospace;font-size:12px;background:#0b1120;border:1px solid var(--line);border-radius:8px;padding:10px;white-space:pre-line}
+.gauge{height:10px;background:#0b1120;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.gauge i{display:block;height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#4ade80);transition:width .25s ease}
+canvas{width:100%;height:auto;background:#0b1120;border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12.5px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600;background:rgba(0,0,0,.2)}
+td.mono,.mono{font-family:'JetBrains Mono',Consolas,monospace}
+.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.gallery article{margin:0}
+.gallery button{padding:0;border:1px solid var(--line);background:#0b1120;border-radius:10px;overflow:hidden;width:100%}
+.gallery img{display:block;width:100%;height:auto}
+.gallery code{display:block;color:var(--muted);font-size:11.5px;margin-top:4px;word-break:break-word}
+dialog#lightbox{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);max-width:94vw;max-height:94vh;padding:14px;overflow:auto}
+dialog#lightbox img{max-width:88vw;max-height:64vh;display:block;border-radius:8px;margin:0 auto}
+dialog#lightbox .row{justify-content:space-between;align-items:center;margin-bottom:10px}
+.lightbox-caption{max-width:88vw;margin-top:12px}
+#lightbox-desc{margin:0 0 8px;font-size:13px;line-height:1.6;color:var(--ink)}
+#lightbox-command{display:block;color:var(--muted);font-family:'JetBrains Mono',Consolas,monospace;font-size:11.5px}
+.lightbox-nav{margin-top:12px;margin-bottom:0}
+.lightbox-nav button{padding:7px 12px}
+#lightbox-counter{font-family:'JetBrains Mono',Consolas,monospace}
+dialog::backdrop{background:rgba(3,7,15,.82)}
+footer{max-width:1208px;margin:auto;padding:18px 24px 40px;color:var(--muted);font-size:12px}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pills button{padding:6px 10px;font-size:12px}
+@media(max-width:900px){.split{grid-template-columns:1fr}.gallery{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){header{padding:18px 16px}.tabs{width:100%}.tabs button{padding:9px 10px}main{padding:16px}.tabs{margin:0}}
+</style></head><body>
+<nav aria-label="Weekly labs"><a href="week1-pi-lab.html">Week 1 · π</a><a href="index.html">Week 2 · MD</a><a href="week3-ising-lab.html">Week 3 · Ising</a><a href="week4-fluid-lab.html">Week 4 · Fluids</a><a href="week5-seismic-lab.html">Week 5 · AD</a><a href="week6-energy-lab.html">Week 6 · Energy</a><a href="week7-diffusion-lab.html">Week 7 · Diffusion</a><a href="week8-language-lab.html">Week 8 · Language</a><a href="week9-inference-lab.html">Week 9 · Inference</a><a href="week10-tensor-lab.html" class="active" aria-current="page">Week 10 · Tensor RG</a><a href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise/tree/main/week10">Source ↗</a></nav>
+<header>
+  <div class="header-copy">
+    <div class="title-row"><h1>Approximate Tensor Contraction for the Ising Model</h1><span class="badge">Week 10 Interactive</span></div>
+    <p>Truncated SVD, boundary-MPS row absorption and tensor renormalization group — locating the Ising transition from the specific-heat peaks</p>
+  </div>
+  <div class="tabs" role="tablist" aria-label="Lab views">
+    <button id="studio-tab" role="tab" aria-selected="true" aria-controls="studio" tabindex="0">Interactive Studio</button>
+    <button id="evidence-tab" role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1">Evidence &amp; Verification (7)</button>
+  </div>
+</header>
+<main>
+<div id="studio" role="tabpanel" aria-labelledby="studio-tab">
+  <section class="card"><span class="tag">PART 1 / COMPRESS A MATRIX</span>
+    <h2>What does keeping χ directions cost?</h2>
+    <p class="note">A 512×512 matrix of independent standard normals, seed 2026. Move the rank and read the two costs the sheet asks for: the error against the discarded spectrum, and the storage of the two thin factors against the original 262,144 entries.</p>
+    <div class="split">
+      <div class="controls">
+        <div><label for="svd-rank">Retained rank χ = <span id="svd-rank-label">16</span></label>
+          <input id="svd-rank" type="range" min="1" max="512" value="16" style="width:100%"></div>
+        <div class="pills"><button data-rank="16">χ = 16</button><button data-rank="64">χ = 64</button><button data-rank="256">χ = 256</button><button data-rank="395">χ = 395</button></div>
+        <div class="result" id="svd-stat" aria-live="polite"></div>
+        <p class="note">The relative error is <span class="mono">‖M − M_χ‖_F / ‖M‖_F</span> and equals the discarded weight exactly; the factors store <span class="mono">(m+n)χ</span> entries. Below χ = 256 the factors are smaller than the matrix; 10% error only arrives at χ = 395.</p>
+      </div>
+      <div><canvas id="svd-canvas" width="640" height="340" aria-label="Relative error against retained rank"></canvas></div>
+    </div>
+  </section>
+  <section class="card"><span class="tag">PART 2 / BOUNDARY MPS ON AN OPEN SQUARE</span>
+    <h2>Absorb the rows, watch the bonds grow and come back</h2>
+    <p class="note">Each row is contracted into the boundary MPS, every horizontal bond grows to at most 2χ, the compression returns it to χ, and the row's scale is stored in <span class="mono">ℓ</span>. This is the stated case: open 64×64, K = 0.45, χ = 16.</p>
+    <div class="split">
+      <div class="controls">
+        <div class="row"><button id="row-play">Play</button><button id="row-step">Step</button><button id="row-reset">Reset</button></div>
+        <div class="gauge" aria-hidden="true"><i id="row-progress"></i></div>
+        <div class="result" id="row-stat" aria-live="polite"></div>
+        <p class="note" id="row-note">The chain has one core per column; its height is the current right bond dimension. Nothing here is a spin sample — the boundary holds Boltzmann weights that may be negative.</p>
+      </div>
+      <div><canvas id="row-canvas" width="640" height="360" aria-label="Boundary MPS bond dimensions row by row"></canvas></div>
+    </div>
+  </section>
+  <section class="card"><span class="tag">PART 3 / TRG ON A PERIODIC SQUARE</span>
+    <h2>Coarse-grain a million spins in twenty rounds</h2>
+    <p class="note">Two SVD splits and one exact regrouping per round; the tensor count halves, the surviving legs are capped at χ, and <span class="mono">N log c</span> goes into <span class="mono">ℓ</span>. This is the stated case: periodic 1024×1024, K = 0.44, χ = 16.</p>
+    <div class="split">
+      <div class="controls">
+        <div class="row"><button id="trg-play">Play</button><button id="trg-step">Step</button><button id="trg-reset">Reset</button></div>
+        <div class="gauge" aria-hidden="true"><i id="trg-progress"></i></div>
+        <div class="result" id="trg-stat" aria-live="polite"></div>
+        <p class="note">The last round closes the network with <span class="mono">z = Σ_{i,j} A[i,j,i,j]</span>; setting all four indices equal would define a different network, which is one of the recorded negative controls.</p>
+      </div>
+      <div><canvas id="trg-canvas" width="640" height="360" aria-label="TRG rounds, tensor count, bond dimensions and split spectrum"></canvas></div>
+    </div>
+  </section>
+</div>
+<div id="evidence" role="tabpanel" aria-labelledby="evidence-tab" hidden>
+  <div class="metrics">
+    <div class="metric"><strong id="metric-svd"></strong><span>Gaussian e₁₆ at seed 2026</span></div>
+    <div class="metric"><strong id="metric-open"></strong><span>Open-square T_c (all sizes)</span></div>
+    <div class="metric"><strong id="metric-periodic"></strong><span>Periodic T_c (all sizes)</span></div>
+    <div class="metric"><strong id="metric-checks"></strong><span>Acceptance checks passed</span></div>
+  </div>
+  <section class="card"><h2>Three builds, independently checked</h2>
+    <p class="note">Every figure is produced by the command on its card and opens in a lightbox with its caption. The full <a href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise/blob/main/week10/README.md">reproduction guide</a> records the settings, the tables, the tests and the negative controls.</p>
+    <table>
+      <tr><th>Check</th><th>Measured result</th><th>Requirement</th></tr>
+      <tr><td>Measured error vs the discarded spectrum (5 ranks)</td><td class="mono" id="row-svd-prediction"></td><td class="mono">≤ 1e-8</td></tr>
+      <tr><td>Independent recomputation from the saved matrices</td><td class="mono" id="row-svd-independent"></td><td class="mono">≤ 1e-8</td></tr>
+      <tr><td>Full-rank reconstruction e₅₁₂</td><td class="mono" id="row-svd-full"></td><td class="mono">&lt; 1e-8</td></tr>
+      <tr><td>Open 4×4 at χ = 8 vs 2¹⁶-configuration enumeration</td><td class="mono" id="row-open-enum"></td><td class="mono">≤ 1e-8</td></tr>
+      <tr><td>Open 4×4 c_V (h = 0.0025) vs K² Var(H)/16</td><td class="mono" id="row-open-cv"></td><td class="mono">≤ 1e-3</td></tr>
+      <tr><td>Periodic 2×2 at χ = 16 vs enumeration</td><td class="mono" id="row-periodic-enum"></td><td class="mono">≤ 1e-8</td></tr>
+      <tr><td>Periodic 2×2 c_V vs K² Var(H)/4</td><td class="mono" id="row-periodic-cv"></td><td class="mono">≤ 1e-3</td></tr>
+      <tr><td>Periodic 4×4 at χ = 8 vs enumeration</td><td class="mono" id="row-periodic4"></td><td class="mono">≤ 2e-3</td></tr>
+      <tr><td>Open T_c against 2/log(1+√2)</td><td class="mono" id="row-open-tc"></td><td class="mono">≤ 1%</td></tr>
+      <tr><td>Periodic T_c against 2/log(1+√2)</td><td class="mono" id="row-periodic-tc"></td><td class="mono">≤ 1%</td></tr>
+      <tr><td>Peak stability, χ 16 → 32 and h 0.0025 → 0.00125</td><td class="mono" id="row-peak-stability"></td><td class="mono">≤ 1%</td></tr>
+      <tr><td>Negative controls (3 deliberate defects)</td><td class="mono" id="row-controls"></td><td class="mono">must fail</td></tr>
+    </table>
+  </section>
+  <section class="card"><h2>The sheet's reference numbers beside our recount</h2>
+    <p class="note">This lab implements the 15-page Week 10 learning sheet, SHA256 <code id="sheet-hash"></code> (<span id="sheet-pages"></span> pages, checked <span id="sheet-checked"></span>). The reference plots in the sheet come from an independent NumPy baseline, so our Gaussian matrix has its own spectrum; every random-matrix number is checked against its own saved singular values instead of against the sheet's seed.</p>
+    <table>
+      <tr><th>Quantity</th><th>Sheet reference</th><th>This lab</th></tr>
+      <tr><td>Gaussian e₁₆ / e₂₅₆</td><td class="mono">0.943 / 0.326</td><td class="mono" id="ref-svd-errors"></td></tr>
+      <tr><td>First rank reaching 10% error</td><td class="mono">χ = 395 (1.54× storage)</td><td class="mono" id="ref-crossing"></td></tr>
+      <tr><td>Open peaks, L = 16 / 32 / 64</td><td class="mono">2.093 / 2.180 / 2.224</td><td class="mono" id="ref-open-peaks"></td></tr>
+      <tr><td>Open T_c, all sizes / largest two</td><td class="mono">2.268 / 2.269</td><td class="mono" id="ref-open-tc"></td></tr>
+      <tr><td>Open 4×4 c_V at K = 0.44</td><td class="mono">0.439397</td><td class="mono" id="ref-open-cv"></td></tr>
+      <tr><td>Periodic peaks, L = 64 / 256 / 1024</td><td class="mono">2.282 / 2.272 / 2.270</td><td class="mono" id="ref-periodic-peaks"></td></tr>
+      <tr><td>Periodic T_c, all sizes / largest two</td><td class="mono">2.2692 / 2.2693</td><td class="mono" id="ref-periodic-tc"></td></tr>
+      <tr><td>Periodic 2×2 c_V at K = 0.44</td><td class="mono">0.404278</td><td class="mono" id="ref-periodic-cv"></td></tr>
+      <tr><td>Onsager T_c = 2/log(1+√2)</td><td class="mono">2.269185</td><td class="mono" id="ref-onsager"></td></tr>
+    </table>
+  </section>
+  <div class="gallery" id="gallery"></div>
+</div>
+</main><dialog id="lightbox">
+<div class="row"><strong id="lightbox-title"></strong><button id="close-lightbox" aria-label="Close enlarged figure">Close ✕</button></div>
+<img id="lightbox-image" alt="">
+<div class="lightbox-caption"><p id="lightbox-desc"></p><code id="lightbox-command"></code></div>
+<div class="row lightbox-nav"><button id="lightbox-prev">← Previous</button><span id="lightbox-counter" class="note"></span><button id="lightbox-next">Next →</button></div>
+</dialog>
+<footer>AMAT5315 · Scientific Computing for Physicists · <a href="https://giggleliu.github.io/AMAT5315-2026Fall/week10-learning-sheet.html">Learning sheet</a> · <a href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise/tree/main/week10">Source, evidence &amp; verification</a></footer>
+<script>
+const DATA=__DATA__;
+const el=id=>document.getElementById(id);
+const tabNames=['studio','evidence'];
+function selectTab(name,focus=false){
+  for(const other of tabNames){
+    const selected=other===name,button=el(other+'-tab');
+    el(other).hidden=!selected;
+    button.setAttribute('aria-selected',String(selected));
+    button.tabIndex=selected?0:-1;
+    if(selected&&focus)button.focus();
+  }
+}
+for(const [index,name] of tabNames.entries()){
+  const button=el(name+'-tab');
+  button.onclick=()=>selectTab(name);
+  button.onkeydown=event=>{
+    const offsets={ArrowLeft:-1,ArrowRight:1};
+    let next;
+    if(event.key in offsets)next=(index+offsets[event.key]+tabNames.length)%tabNames.length;
+    else if(event.key==='Home')next=0;
+    else if(event.key==='End')next=tabNames.length-1;
+    else return;
+    event.preventDefault();selectTab(tabNames[next],true);
+  };
+}
+const fmt=(value,digits=3)=>Number(value).toFixed(digits);
+const big=value=>Number(value).toLocaleString('en-US',{maximumFractionDigits:0});
+const sci=value=>Number(value).toExponential(2);
+
+/* --- Part 1: truncated SVD explorer ------------------------------------ */
+const SVD=DATA.svd;
+function svdError(rank){
+  const curve=SVD.predictionCurve;
+  return curve[Math.min(curve.length-1,Math.max(0,rank-1))];
+}
+function drawSvd(){
+  const rank=Number(el('svd-rank').value);
+  const canvas=el('svd-canvas'),ctx=canvas.getContext('2d');
+  const width=canvas.width,height=canvas.height;
+  ctx.clearRect(0,0,width,height);
+  const left=56,right=width-18,top=26,bottom=height-38;
+  const total=SVD.side;
+  const x=r=>left+(right-left)*(r-1)/Math.max(1,total-1);
+  const decades=17;
+  const y=value=>top+(bottom-top)*Math.min(decades,Math.max(0,-Math.log10(Math.max(value,1e-17))))/decades;
+  // storage-saving region
+  ctx.fillStyle='rgba(74,222,128,.08)';
+  ctx.fillRect(left,top,x(SVD.storageCrossover)-left,bottom-top);
+  ctx.strokeStyle='#26344c';ctx.lineWidth=1;ctx.font='11px Segoe UI';
+  for(let d=0;d<=decades;d+=2){
+    const py=y(Math.pow(10,-d));
+    ctx.beginPath();ctx.moveTo(left,py);ctx.lineTo(right,py);ctx.stroke();
+    ctx.fillStyle='#9aaec5';ctx.fillText('1e-'+d,8,py+4);
+  }
+  ctx.fillStyle='#9aaec5';
+  ctx.textAlign='center';
+  for(const tick of [1,64,256,395,512]){
+    ctx.fillText(String(tick),x(tick),bottom+16);
+  }
+  ctx.textAlign='left';
+  // prediction curve
+  ctx.strokeStyle='#f6a45c';ctx.lineWidth=1.4;ctx.beginPath();
+  SVD.predictionCurve.forEach((value,index)=>{
+    const px=x(index+1),py=y(Math.max(value,1e-16));
+    index?ctx.lineTo(px,py):ctx.moveTo(px,py);
+  });
+  ctx.stroke();
+  // measured points
+  ctx.fillStyle='#38bdf8';
+  for(const point of SVD.measured){
+    ctx.beginPath();ctx.arc(x(point.rank),y(Math.max(point.error,1e-16)),3.4,0,7);ctx.fill();
+  }
+  // 10% line and crossing
+  ctx.strokeStyle='#e0af68';ctx.setLineDash([5,4]);ctx.beginPath();
+  ctx.moveTo(left,y(0.1));ctx.lineTo(right,y(0.1));ctx.stroke();ctx.setLineDash([]);
+  ctx.strokeStyle='#a78bfa';ctx.beginPath();ctx.moveTo(x(SVD.crossing),top);ctx.lineTo(x(SVD.crossing),bottom);ctx.stroke();
+  ctx.strokeStyle='#4ade80';ctx.beginPath();ctx.moveTo(x(SVD.storageCrossover),top);ctx.lineTo(x(SVD.storageCrossover),bottom);ctx.stroke();
+  // current rank
+  ctx.strokeStyle='#edf3fa';ctx.lineWidth=1.6;ctx.beginPath();
+  ctx.moveTo(x(rank),top);ctx.lineTo(x(rank),bottom);ctx.stroke();
+  ctx.lineWidth=1;
+  ctx.fillStyle='#f6a45c';ctx.fillText('discarded-spectrum prediction',left+10,bottom-30);
+  ctx.fillStyle='#38bdf8';ctx.fillText('measured',left+230,bottom-30);
+  ctx.fillStyle='#4ade80';ctx.fillText('storage crossover 256',x(256)+6,bottom-52);
+  ctx.fillStyle='#a78bfa';ctx.fillText('10% at 395',x(395)-64,top+26);
+  ctx.fillStyle='#9aaec5';ctx.fillText('retained rank χ',right-104,height-6);
+}
+function renderSvd(){
+  const rank=Number(el('svd-rank').value);
+  const discarded=svdError(rank);
+  const kept=Math.sqrt(Math.max(0,1-discarded*discarded));
+  const stored=SVD.side*rank+rank*SVD.side;
+  const ratio=stored/SVD.side/SVD.side;
+  const saved=ratio<1;
+  el('svd-rank-label').textContent=rank;
+  el('svd-stat').textContent=
+    `retained weight   ${(100*kept*kept).toFixed(2)}%\n`
+    +`discarded weight  ${sci(discarded)} (relative error)\n`
+    +`stored entries    ${big(stored)} of ${big(SVD.side*SVD.side)} (${ratio.toFixed(3)}×)\n`
+    +`storage saving    ${saved?'yes':'no'}   10% target ${discarded<=0.1?'met':'not met'}`;
+  drawSvd();
+}
+el('svd-rank').oninput=renderSvd;
+for(const button of document.querySelectorAll('.pills button')){
+  button.onclick=()=>{el('svd-rank').value=button.dataset.rank;renderSvd();};
+}
+
+/* --- Part 2: boundary row player --------------------------------------- */
+const BOUND=DATA.boundary;
+let rowIndex=0,rowTimer=null;
+function drawRows(){
+  const canvas=el('row-canvas'),ctx=canvas.getContext('2d');
+  const width=canvas.width,height=canvas.height;
+  ctx.clearRect(0,0,width,height);
+  const left=18,right=width-18,top=34,bottom=height-58;
+  const count=BOUND.l;
+  const widthPer=(right-left)/count;
+  const row=BOUND.rows[Math.max(0,rowIndex-1)]||null;
+  const dims=row?row.after:BOUND.rows[0].before;
+  const peak=dims.reduce((a,b)=>Math.max(a,b),1);
+  ctx.font='11px Segoe UI';
+  ctx.fillStyle='#9aaec5';
+  ctx.fillText('boundary MPS: one core per column, bar height = bond dimension',left,18);
+  for(let index=0;index<count;index+=1){
+    const dim=dims[index]||dims[dims.length-1];
+    const barHeight=(bottom-top)*dim/Math.max(2,peak);
+    const x0=left+index*widthPer;
+    ctx.fillStyle=index<rowIndex-1?'rgba(56,189,248,.55)':'rgba(56,189,248,.18)';
+    ctx.fillRect(x0+0.5,bottom-barHeight,Math.max(1.5,widthPer-1.4),barHeight);
+  }
+  // progress strip: rows absorbed
+  const stripTop=bottom+10,stripHeight=16;
+  const absorbed=rowIndex/Math.max(1,count);
+  ctx.fillStyle='rgba(246,164,92,.28)';
+  ctx.fillRect(left,stripTop,(right-left)*absorbed,stripHeight);
+  ctx.strokeStyle='#26344c';ctx.strokeRect(left,stripTop,right-left,stripHeight);
+  ctx.fillStyle='#9aaec5';
+  ctx.fillText(`rows absorbed ${rowIndex} / ${count}`,left,stripTop+stripHeight+14);
+  // axis labels
+  ctx.fillStyle='#9aaec5';ctx.fillText('0',left,bottom+7);ctx.fillText(String(count),right-10,bottom+7);
+  ctx.fillText('max bond',left,bottom-2+0);
+}
+function renderRow(){
+  const total=BOUND.l;
+  const row=rowIndex>0?BOUND.rows[rowIndex-1]:null;
+  el('row-progress').style.width=`${100*rowIndex/total}%`;
+  const peak=(row?row.after:BOUND.rows[0].before).reduce((a,b)=>Math.max(a,b),1);
+  let text;
+  if(!row){
+    text=`top edge: every core is b = (1/sqrt(cosh K), 0)\n`
+      +`L = ${BOUND.l}, K = ${BOUND.k}, χ = ${BOUND.chi}\n`
+      +`press Step to absorb row 1`;
+  }else{
+    text=`row ${rowIndex}/${total}\n`
+      +`scale c_y        ${sci(row.scale)}\n`
+      +`accumulated ℓ    ${row.ell.toFixed(6)}\n`
+      +`widest bond      ${peak} (cap ${BOUND.chi})\n`
+      +`discarded weight ${sci(row.relativeDiscarded)}`;
+  }
+  el('row-stat').textContent=text;
+  if(rowIndex>=total&&row){
+    el('row-stat').textContent+=`\nlog Z = ℓ + log v₁ = ${BOUND.logZ.toFixed(6)}\n`
+      +`g = log Z / L² = ${BOUND.g.toFixed(9)}`;
+    el('row-step').disabled=true;
+  }else{
+    el('row-step').disabled=false;
+  }
+  drawRows();
+}
+function stepRow(){
+  if(rowIndex>=BOUND.l)return;
+  rowIndex+=1;renderRow();
+}
+el('row-step').onclick=stepRow;
+el('row-reset').onclick=()=>{clearInterval(rowTimer);rowTimer=null;el('row-play').textContent='Play';rowIndex=0;renderRow();};
+el('row-play').onclick=()=>{
+  if(rowTimer){clearInterval(rowTimer);rowTimer=null;el('row-play').textContent='Play';return;}
+  if(rowIndex>=BOUND.l){rowIndex=0;renderRow();}
+  el('row-play').textContent='Pause';
+  rowTimer=setInterval(()=>{
+    stepRow();
+    if(rowIndex>=BOUND.l){clearInterval(rowTimer);rowTimer=null;el('row-play').textContent='Play';}
+  },110);
+};
+
+/* --- Part 3: TRG player ------------------------------------------------- */
+const TRG=DATA.trg;
+let trgIndex=0,trgTimer=null;
+function drawTrg(){
+  const canvas=el('trg-canvas'),ctx=canvas.getContext('2d');
+  const width=canvas.width,height=canvas.height;
+  ctx.clearRect(0,0,width,height);
+  const step=trgIndex>0?TRG.steps[trgIndex-1]:null;
+  const left=20,right=width-20,top=30;
+  const side=step?Math.max(1,Math.round(Math.sqrt(step.tensors))):TRG.l;
+  const capped=Math.min(12,side);
+  ctx.font='11px Segoe UI';
+  ctx.fillStyle='#9aaec5';
+  ctx.fillText(`lattice side ${side} (${big(step?step.tensors:TRG.l*TRG.l)} tensors)`,left,18);
+  const cell=Math.min(16,(width*0.42-20)/capped);
+  for(let y=0;y<capped;y+=1){
+    for(let x=0;x<capped;x+=1){
+      const px=left+x*cell*1.25,py=top+y*cell*1.25;
+      ctx.fillStyle=(x+y)%2?'rgba(56,189,248,.75)':'rgba(74,222,128,.7)';
+      ctx.fillRect(px,py,cell*0.85,cell*0.85);
+    }
+  }
+  // split spectrum bars on the right
+  const baseX=width*0.52,baseY=height-40;
+  const spectrum=step?step.spectrum:TRG.steps[0].spectrum;
+  const leading=Math.max(...spectrum,1e-12);
+  ctx.fillStyle='#9aaec5';
+  ctx.fillText('first split spectrum (log)',baseX,18);
+  const barWidth=Math.max(6,(width-baseX-30)/Math.max(1,spectrum.length)-3);
+  spectrum.forEach((value,index)=>{
+    const heightPx=(height-110)*Math.max(0,Math.log10(Math.max(value,1e-40))+40)/40;
+    const px=baseX+index*(barWidth+3);
+    ctx.fillStyle=index<TRG.chi?'#38bdf8':'#f7768e';
+    ctx.fillRect(px,baseY-heightPx,barWidth,heightPx);
+  });
+  // ell gauge
+  const gaugeY=baseY+8;
+  const progress=trgIndex/Math.max(1,TRG.steps.length);
+  ctx.fillStyle='rgba(246,164,92,.35)';
+  ctx.fillRect(baseX,gaugeY,(width-baseX-30)*progress,10);
+  ctx.strokeStyle='#26344c';ctx.strokeRect(baseX,gaugeY,width-baseX-30,10);
+  ctx.fillStyle='#9aaec5';ctx.fillText('ℓ progress',baseX,gaugeY+24);
+}
+function renderTrg(){
+  const step=trgIndex>0?TRG.steps[trgIndex-1]:null;
+  el('trg-progress').style.width=`${100*trgIndex/TRG.steps.length}%`;
+  if(!step){
+    el('trg-stat').textContent=`periodic ${TRG.l}×${TRG.l}, K = ${TRG.k}, χ = ${TRG.chi}\n`
+      +`${big(TRG.l*TRG.l)} identical site tensors, max |A| = ${sci(TRG.steps[0].maxAbs)}\n`
+      +`press Step for round 1`;
+  }else{
+    const dims=step.dims;
+    el('trg-stat').textContent=`round ${step.step}/${TRG.steps.length}\n`
+      +`tensors before   ${big(step.tensors)}\n`
+      +`max |A| = c_j    ${sci(step.maxAbs)}\n`
+      +`ℓ += N log c_j   ${step.logScale.toFixed(4)} → ℓ = ${step.ell.toFixed(4)}\n`
+      +`bond dims        [${dims.join(', ')}]  (cap ${TRG.chi})`;
+    if(trgIndex>=TRG.steps.length){
+      el('trg-stat').textContent+=`\nclosure z = ${TRG.closure.toFixed(6)}\n`
+        +`log Z = ℓ + log z = ${TRG.logZ.toFixed(6)}\n`
+        +`g = ${TRG.g.toFixed(9)}`;
+      el('trg-step').disabled=true;
+    }else{
+      el('trg-step').disabled=false;
+    }
+  }
+  drawTrg();
+}
+function stepTrg(){
+  if(trgIndex>=TRG.steps.length)return;
+  trgIndex+=1;renderTrg();
+}
+el('trg-step').onclick=stepTrg;
+el('trg-reset').onclick=()=>{clearInterval(trgTimer);trgTimer=null;el('trg-play').textContent='Play';trgIndex=0;renderTrg();};
+el('trg-play').onclick=()=>{
+  if(trgTimer){clearInterval(trgTimer);trgTimer=null;el('trg-play').textContent='Play';return;}
+  if(trgIndex>=TRG.steps.length){trgIndex=0;renderTrg();}
+  el('trg-play').textContent='Pause';
+  trgTimer=setInterval(()=>{
+    stepTrg();
+    if(trgIndex>=TRG.steps.length){clearInterval(trgTimer);trgTimer=null;el('trg-play').textContent='Play';}
+  },700);
+};
+
+/* --- Evidence tab ------------------------------------------------------- */
+el('metric-svd').textContent=SVD.measured[0].error.toFixed(4);
+el('metric-open').textContent=DATA.boundary.fitAll.toFixed(4);
+el('metric-periodic').textContent=DATA.trg.fitAll.toFixed(4);
+el('metric-checks').textContent=`${DATA.summary.passed}/${DATA.summary.checks}`;
+el('row-svd-prediction').textContent=`max ${SVD.worstPrediction.toExponential(1)} over 5 ranks`;
+el('row-svd-independent').textContent=`max ${SVD.worstIndependent.toExponential(1)}`;
+el('row-svd-full').textContent=`${SVD.fullRankError.toExponential(1)} (exact)`;
+el('row-open-enum').textContent=`max ${Math.max(...DATA.small.openEnum.map(entry=>entry.difference)).toExponential(1)} over K = 0, 0.44, 0.7`;
+el('row-open-cv').textContent=`${DATA.small.cvOpen4.cv_tool.toFixed(6)} vs ${DATA.small.cvOpen4Truth.toFixed(6)}`;
+el('row-periodic-enum').textContent=`${DATA.small.periodic2G.toFixed(12)} vs ${DATA.small.periodic2Enum.toFixed(12)}`;
+el('row-periodic-cv').textContent=`${DATA.small.cvPeriodic2.cv_tool.toFixed(6)} vs ${DATA.small.cvPeriodic2.cv_variance.toFixed(6)}`;
+el('row-periodic4').textContent=`|Δg| = ${DATA.small.periodic4Difference.toExponential(1)} (χ = 8 truncation)`;
+el('row-open-tc').textContent=`${DATA.boundary.fitAll.toFixed(5)} / ${DATA.boundary.fitLargestTwo.toFixed(5)}`;
+el('row-periodic-tc').textContent=`${DATA.trg.fitAll.toFixed(5)} / ${DATA.trg.fitLargestTwo.toFixed(5)}`;
+el('row-peak-stability').textContent=`rank ${(100*DATA.boundary.comparison.t_c_rank_shift).toFixed(3)}%, `
+  +`step ${(100*DATA.boundary.comparison.t_c_step_shift).toFixed(3)}%`;
+el('row-controls').textContent=`${DATA.controls.length} defects, all detected `
+  +`(${DATA.controls.map(entry=>entry.measured.toExponential(2)).join(', ')})`;
+el('sheet-hash').textContent=DATA.sheet.sha256.slice(0,16)+'…';
+el('sheet-pages').textContent=DATA.sheet.pages;
+el('sheet-checked').textContent=DATA.sheet.checked;
+el('ref-svd-errors').textContent=`${DATA.svd.measured[0].error.toFixed(4)} / `
+  +`${(DATA.svd.measured.find(entry=>entry.rank===256)||{error:0}).error.toFixed(4)}`;
+el('ref-crossing').textContent=`χ = ${SVD.crossing} (${SVD.crossingRatio.toFixed(2)}× storage)`;
+el('ref-open-peaks').textContent=DATA.boundary.peaks.map(entry=>entry.tPeak.toFixed(3)).join(' / ');
+el('ref-open-tc').textContent=`${DATA.boundary.fitAll.toFixed(5)} / ${DATA.boundary.fitLargestTwo.toFixed(5)}`;
+el('ref-open-cv').textContent=DATA.small.cvOpen4Truth.toFixed(6);
+el('ref-periodic-peaks').textContent=DATA.trg.peaks.map(entry=>entry.tPeak.toFixed(3)).join(' / ');
+el('ref-periodic-tc').textContent=`${DATA.trg.fitAll.toFixed(5)} / ${DATA.trg.fitLargestTwo.toFixed(5)}`;
+el('ref-periodic-cv').textContent=DATA.small.cvPeriodic2.cv_variance.toFixed(6);
+el('ref-onsager').textContent=DATA.reference.onsager.toFixed(6);
+let lightboxIndex=0;
+function openLightbox(index){
+  const [file,title,command,description]=DATA.gallery[index];
+  lightboxIndex=index;
+  el('lightbox-title').textContent=title;
+  el('lightbox-image').src='assets/week10/'+file;
+  el('lightbox-image').alt=title;
+  el('lightbox-desc').textContent=description;
+  el('lightbox-command').textContent='python scripts/'+command;
+  el('lightbox-counter').textContent=`${index+1} / ${DATA.gallery.length}`;
+  if(!el('lightbox').open)el('lightbox').showModal();
+}
+for(const [file,title,command] of DATA.gallery){
+  const card=document.createElement('article');
+  card.className='card';
+  const button=document.createElement('button'),image=document.createElement('img');
+  image.src='assets/week10/'+file;image.alt=title;image.loading='lazy';
+  button.append(image);
+  button.setAttribute('aria-label','Enlarge '+title);
+  button.onclick=()=>openLightbox(DATA.gallery.findIndex(entry=>entry[0]===file));
+  const heading=document.createElement('h3');heading.textContent=title;
+  const code=document.createElement('code');code.textContent='python scripts/'+command;
+  card.append(button,heading,code);el('gallery').append(card);
+}
+el('lightbox-prev').onclick=()=>openLightbox((lightboxIndex-1+DATA.gallery.length)%DATA.gallery.length);
+el('lightbox-next').onclick=()=>openLightbox((lightboxIndex+1)%DATA.gallery.length);
+el('close-lightbox').onclick=()=>el('lightbox').close();
+
+renderSvd();
+renderRow();
+renderTrg();
+window.addEventListener('resize',()=>{drawSvd();drawRows();drawTrg();});
+</script></body></html>

@@ -11,7 +11,8 @@ This repository stores weekly exercises for AMAT5315 (*Scientific Computing for 
   - [`week6/`](week6/README.md): Energy-Based Models (RBM, Classical Hopfield & Softmax Attention)
   - [`week7/`](week7/README.md): Diffusion Models & Flow Matching (DDPM, DDIM, pretrained CIFAR-10 U-Net, RePaint)
   - [`week8/`](week8/README.md): Language Models & the Transformer (embeddings, n-grams, memory, attention, Chinchilla scaling)
-  - [**`week9/` (Latest)**](week9/README.md): **Probabilistic Inference by Tensor Contraction (ASIA, contraction orders, loopy BP, Promedus_14)**
+  - [`week9/`](week9/README.md): Probabilistic Inference by Tensor Contraction (ASIA, contraction orders, loopy BP, Promedus_14)
+  - [**`week10/` (Latest)**](week10/README.md): **Approximate Tensor Contraction for the Ising Model (truncated SVD, boundary MPS, TRG, specific-heat peaks)**
 
 - **Interactive GitHub Pages Web Labs**:
   - [Week 1: AI Agents & Monte Carlo $\pi$ Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week1-pi-lab.html)
@@ -22,11 +23,41 @@ This repository stores weekly exercises for AMAT5315 (*Scientific Computing for 
   - [Week 6: Energy-Based Models & Softmax Attention Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week6-energy-lab.html)
   - [Week 7: Diffusion & Flow Matching Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week7-diffusion-lab.html)
   - [Week 8: Language Models & Transformer Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week8-language-lab.html)
-  - [**Week 9: Probabilistic Inference & Tensor Network Lab**](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html)
+  - [Week 9: Probabilistic Inference & Tensor Network Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html)
+  - [**Week 10: Approximate Tensor Contraction & Ising Lab**](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week10-tensor-lab.html)
 
 ---
 
-## Week 9: Probabilistic Inference by Tensor Contraction (Latest Exercise)
+## Week 10: Approximate Tensor Contraction for the Ising Model (Latest Exercise)
+
+The sheet's three builds: a truncated-SVD storage study of a seeded 512×512 Gaussian matrix, a boundary-MPS row contraction of open Ising squares up to 64×64, and tensor-renormalization-group coarse-graining of periodic squares up to 1024×1024. The specific-heat peaks of those contractions locate the Onsager transition without sampling a single spin configuration. One Rust tool, `thermo`, with its own Jacobi SVD, Krylov truncated SVD and `.npy` writer; Python only for figures, tests and the browser check.
+
+- **Guide and reproduction commands:** [week10/README.md](week10/README.md)
+- **Interactive Studio and 7 evidence figures:** [Week 10 Tensor RG Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week10-tensor-lab.html)
+- **Verification:** 41 independent tests, 46 acceptance checks and three recorded negative controls.
+
+| Result | Measured evidence |
+| :--- | :--- |
+| Gaussian 512×512, seed 2026 | e₁₆ = 0.94229, e₂₅₆ = 0.32613, full rank exact to 1.3 × 10⁻¹³ |
+| Measured error vs the discarded spectrum | worst gap **1.3 × 10⁻¹³**; 10% error only at χ = 395, 1.54× the storage |
+| Open 4×4 at χ = 8 vs 2¹⁶ enumeration | |Δg| = **2.2 × 10⁻¹⁶**, c_V 0.439393 vs 0.439397 |
+| Open peaks (L = 16 / 32 / 64) | **2.09310 / 2.17968 / 2.22422**; T_c = 2.26751 / 2.26877 (0.074% / 0.018%) |
+| Periodic peaks (L = 64 / 256 / 1024) | **2.28160 / 2.27226 / 2.27001**; T_c = 2.26920 / 2.26926 (0.001% / 0.003%) |
+| Peak stability | χ 16→32 and h halved move T_c by 0.001% (open) and 0.016% (periodic) |
+
+| What a truncated SVD keeps | Open squares: where the peak sits |
+| :---: | :---: |
+| ![Week 10 SVD](docs/assets/week10/svd.png) | ![Week 10 open peaks](docs/assets/week10/boundary-critical.png) |
+
+| Periodic squares: the same transition | Both geometries on one axis |
+| :---: | :---: |
+| ![Week 10 TRG peaks](docs/assets/week10/trg-critical.png) | ![Week 10 phase comparison](docs/assets/week10/phase-compare.png) |
+
+The guide lists the run settings, the peak-refinement table, the small-square checks and one command beside each figure.
+
+---
+
+## Week 9: Probabilistic Inference by Tensor Contraction
 
 The learning sheet's four builds: exact ASIA inference by one tensor contraction, contraction orders and their cost, loopy belief propagation, and the 414-variable Promedus_14 UAI benchmark. Rust 1.96.0 with tenferro-rs for tensors and omeco for order search; Python only for plots and tests.
 
