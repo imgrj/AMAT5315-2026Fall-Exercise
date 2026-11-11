@@ -1,0 +1,5 @@
+# Keep build output inside the crate so the documented commands and the tests
+# agree on where the `thermo` binary lives, regardless of a machine-wide
+# CARGO_TARGET_DIR (the tests also ask `cargo metadata`, which covers that case).
+[build]
+target-dir = "target"
