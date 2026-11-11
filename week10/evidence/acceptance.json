@@ -1,0 +1,1158 @@
+{
+  "generated": "2026-11-11T04:13:02",
+  "crate": "thermo 0.1.0",
+  "settings": {
+    "grid_k": "0.40 .. 0.50 step 0.0025",
+    "refinement": "9 points step 0.00125 around the nearest grid point",
+    "stencil_h": {
+      "coarse": 0.0025,
+      "refined_chi16": 0.0025,
+      "refined_chi32": 0.00125
+    },
+    "chi": [
+      1,
+      8,
+      16,
+      32
+    ],
+    "open_sizes": [
+      16,
+      32,
+      64
+    ],
+    "periodic_sizes": [
+      64,
+      256,
+      1024
+    ]
+  },
+  "tolerances": {
+    "svd_error_vs_prediction": 1e-08,
+    "svd_independent_error": 1e-08,
+    "svd_full_rank": 1e-08,
+    "boundary_enumeration_g": 1e-08,
+    "boundary_specific_heat": 0.001,
+    "boundary_zero_coupling": 1e-12,
+    "boundary_cores_recompute": 1e-12,
+    "boundary_numpy_reference": 1e-10,
+    "trg_enumeration_exact": 1e-08,
+    "trg_enumeration_truncated": 0.002,
+    "trg_specific_heat": 0.001,
+    "trg_zero_coupling": 1e-12,
+    "trg_numpy_reference": 1e-10,
+    "onsager": 0.01,
+    "peak_stability": 0.01
+  },
+  "checks": [
+    {
+      "name": "svd chi=16 measured vs prediction",
+      "requirement": "<= 1e-08",
+      "measured": "6.37e-14",
+      "passed": true
+    },
+    {
+      "name": "svd chi=16 independent recomputation",
+      "requirement": "<= 1e-08",
+      "measured": "3.89e-15",
+      "passed": true
+    },
+    {
+      "name": "svd chi=64 measured vs prediction",
+      "requirement": "<= 1e-08",
+      "measured": "4.42e-14",
+      "passed": true
+    },
+    {
+      "name": "svd chi=64 independent recomputation",
+      "requirement": "<= 1e-08",
+      "measured": "4.00e-15",
+      "passed": true
+    },
+    {
+      "name": "svd chi=128 measured vs prediction",
+      "requirement": "<= 1e-08",
+      "measured": "3.19e-14",
+      "passed": true
+    },
+    {
+      "name": "svd chi=128 independent recomputation",
+      "requirement": "<= 1e-08",
+      "measured": "5.44e-15",
+      "passed": true
+    },
+    {
+      "name": "svd chi=256 measured vs prediction",
+      "requirement": "<= 1e-08",
+      "measured": "1.89e-14",
+      "passed": true
+    },
+    {
+      "name": "svd chi=256 independent recomputation",
+      "requirement": "<= 1e-08",
+      "measured": "1.11e-16",
+      "passed": true
+    },
+    {
+      "name": "svd chi=512 measured vs prediction",
+      "requirement": "<= 1e-08",
+      "measured": "1.29e-13",
+      "passed": true
+    },
+    {
+      "name": "svd chi=512 independent recomputation",
+      "requirement": "<= 1e-08",
+      "measured": "1.51e-28",
+      "passed": true
+    },
+    {
+      "name": "svd full-rank reconstruction",
+      "requirement": "e_512 < 1e-08",
+      "measured": "1.29e-13",
+      "passed": true
+    },
+    {
+      "name": "svd storage crossover",
+      "requirement": "rank = mn/(m+n) = 256",
+      "measured": 256,
+      "passed": true
+    },
+    {
+      "name": "svd 10% crossing from the saved spectrum",
+      "requirement": "same rank as the tool reports",
+      "measured": "395 (tool 395)",
+      "passed": true
+    },
+    {
+      "name": "boundary 4x4 open K=0.0 vs enumeration",
+      "requirement": "|dg| <= 1e-08",
+      "measured": "0.00e+00",
+      "passed": true
+    },
+    {
+      "name": "boundary 4x4 open K=0.44 vs enumeration",
+      "requirement": "|dg| <= 1e-08",
+      "measured": "2.22e-16",
+      "passed": true
+    },
+    {
+      "name": "boundary 4x4 open K=0.7 vs enumeration",
+      "requirement": "|dg| <= 1e-08",
+      "measured": "2.22e-16",
+      "passed": true
+    },
+    {
+      "name": "boundary 4x4 c_V vs K^2 Var(H)/16",
+      "requirement": "<= 1e-03",
+      "measured": "3.84e-06",
+      "passed": true
+    },
+    {
+      "name": "boundary g(K=0) = log 2",
+      "requirement": "<= 1e-12",
+      "measured": "0.00e+00",
+      "passed": true
+    },
+    {
+      "name": "boundary stated case recomputed from cores.json",
+      "requirement": "<= 1e-12",
+      "measured": "3.33e-16",
+      "passed": true
+    },
+    {
+      "name": "boundary L=6 chi=8 vs NumPy reference",
+      "requirement": "<= 1e-10",
+      "measured": "2.22e-16",
+      "passed": true
+    },
+    {
+      "name": "boundary L=8 chi=8 vs NumPy reference",
+      "requirement": "<= 1e-10",
+      "measured": "1.11e-16",
+      "passed": true
+    },
+    {
+      "name": "boundary L=8 chi=16 vs NumPy reference",
+      "requirement": "<= 1e-10",
+      "measured": "2.22e-16",
+      "passed": true
+    },
+    {
+      "name": "open T_c from the all three sizes fit",
+      "requirement": "within 1% of Onsager 2.269185",
+      "measured": "2.26751 (0.074%)",
+      "passed": true
+    },
+    {
+      "name": "open T_c from the largest two fit",
+      "requirement": "within 1% of Onsager 2.269185",
+      "measured": "2.26877 (0.018%)",
+      "passed": true
+    },
+    {
+      "name": "open peak L=16 chi 16 vs 32",
+      "requirement": "within 1%",
+      "measured": "0.001%",
+      "passed": true
+    },
+    {
+      "name": "open peak L=32 chi 16 vs 32",
+      "requirement": "within 1%",
+      "measured": "0.001%",
+      "passed": true
+    },
+    {
+      "name": "open peak L=64 chi 16 vs 32",
+      "requirement": "within 1%",
+      "measured": "0.001%",
+      "passed": true
+    },
+    {
+      "name": "open peak L=16 h 0.0025 vs 0.00125",
+      "requirement": "within 1%",
+      "measured": "0.001%",
+      "passed": true
+    },
+    {
+      "name": "open peak L=32 h 0.0025 vs 0.00125",
+      "requirement": "within 1%",
+      "measured": "0.001%",
+      "passed": true
+    },
+    {
+      "name": "open peak L=64 h 0.0025 vs 0.00125",
+      "requirement": "within 1%",
+      "measured": "0.001%",
+      "passed": true
+    },
+    {
+      "name": "trg 2x2 periodic chi=16 vs enumeration",
+      "requirement": "|dg| <= 1e-08",
+      "measured": "0.00e+00",
+      "passed": true
+    },
+    {
+      "name": "trg 2x2 c_V vs K^2 Var(H)/4",
+      "requirement": "<= 1e-03",
+      "measured": "3.70e-06",
+      "passed": true
+    },
+    {
+      "name": "trg 4x4 periodic chi=8 vs enumeration",
+      "requirement": "|dg| <= 2e-03",
+      "measured": "1.06e-04",
+      "passed": true
+    },
+    {
+      "name": "trg g(K=0) = log 2",
+      "requirement": "<= 1e-12",
+      "measured": "0.00e+00",
+      "passed": true
+    },
+    {
+      "name": "trg L=4 chi=4 vs NumPy reference",
+      "requirement": "<= 1e-10",
+      "measured": "2.22e-16",
+      "passed": true
+    },
+    {
+      "name": "trg L=4 chi=8 vs NumPy reference",
+      "requirement": "<= 1e-10",
+      "measured": "2.22e-16",
+      "passed": true
+    },
+    {
+      "name": "trg L=8 chi=8 vs NumPy reference",
+      "requirement": "<= 1e-10",
+      "measured": "1.11e-16",
+      "passed": true
+    },
+    {
+      "name": "trg stated case halves the tensor count",
+      "requirement": "L=1024 needs 20 steps from 1048576 to 2 tensors",
+      "measured": "20 steps, first 1048576, last 2",
+      "passed": true
+    },
+    {
+      "name": "periodic T_c from the all three sizes fit",
+      "requirement": "within 1% of Onsager 2.269185",
+      "measured": "2.26920 (0.001%)",
+      "passed": true
+    },
+    {
+      "name": "periodic T_c from the largest two fit",
+      "requirement": "within 1% of Onsager 2.269185",
+      "measured": "2.26926 (0.003%)",
+      "passed": true
+    },
+    {
+      "name": "periodic peak L=64 chi 16 vs 32",
+      "requirement": "within 1%",
+      "measured": "0.018%",
+      "passed": true
+    },
+    {
+      "name": "periodic peak L=256 chi 16 vs 32",
+      "requirement": "within 1%",
+      "measured": "0.002%",
+      "passed": true
+    },
+    {
+      "name": "periodic peak L=1024 chi 16 vs 32",
+      "requirement": "within 1%",
+      "measured": "0.008%",
+      "passed": true
+    },
+    {
+      "name": "periodic peak L=64 h 0.0025 vs 0.00125",
+      "requirement": "within 1%",
+      "measured": "0.006%",
+      "passed": true
+    },
+    {
+      "name": "periodic peak L=256 h 0.0025 vs 0.00125",
+      "requirement": "within 1%",
+      "measured": "0.011%",
+      "passed": true
+    },
+    {
+      "name": "periodic peak L=1024 h 0.0025 vs 0.00125",
+      "requirement": "within 1%",
+      "measured": "0.017%",
+      "passed": true
+    }
+  ],
+  "svd": {
+    "generator": {
+      "distribution": "independent standard-normal entries",
+      "fill_order": "row-major",
+      "gaussian": "Box-Muller pairs, r = sqrt(-2 ln u1), (r cos 2 pi u2, r sin 2 pi u2)",
+      "seed": 2026,
+      "uniform": "SplitMix64, u = ((z >> 11) + 0.5) * 2^-53 in (0,1)"
+    },
+    "sample_mean": 0.0006897690138234131,
+    "sample_standard_deviation": 1.0008011727159167,
+    "ranks": [
+      {
+        "rank": 16,
+        "tool_error": 0.9422868460523698,
+        "independent_error": 0.9422868460523737,
+        "prediction": 0.9422868460524335,
+        "tool_minus_independent": 3.885780586188048e-15,
+        "tool_minus_prediction": 6.372680161348399e-14,
+        "storage_entries": 16384,
+        "storage_ratio": 0.0625
+      },
+      {
+        "rank": 64,
+        "tool_error": 0.7910339406168276,
+        "independent_error": 0.7910339406168236,
+        "prediction": 0.7910339406168718,
+        "tool_minus_independent": 3.9968028886505635e-15,
+        "tool_minus_prediction": 4.418687638008123e-14,
+        "storage_entries": 65536,
+        "storage_ratio": 0.25
+      },
+      {
+        "rank": 128,
+        "tool_error": 0.6143396278208895,
+        "independent_error": 0.614339627820884,
+        "prediction": 0.6143396278209213,
+        "tool_minus_independent": 5.440092820663267e-15,
+        "tool_minus_prediction": 3.186340080674199e-14,
+        "storage_entries": 131072,
+        "storage_ratio": 0.5
+      },
+      {
+        "rank": 256,
+        "tool_error": 0.32613062476915644,
+        "independent_error": 0.32613062476915655,
+        "prediction": 0.32613062476917537,
+        "tool_minus_independent": 1.1102230246251565e-16,
+        "tool_minus_prediction": 1.892930256985892e-14,
+        "storage_entries": 262144,
+        "storage_ratio": 1.0
+      },
+      {
+        "rank": 512,
+        "tool_error": 1.290774488446276e-13,
+        "independent_error": 1.2907744884462776e-13,
+        "prediction": 0.0,
+        "tool_minus_independent": 1.5146129380243427e-28,
+        "tool_minus_prediction": 1.290774488446276e-13,
+        "storage_entries": 524288,
+        "storage_ratio": 2.0
+      }
+    ],
+    "worst_tool_minus_prediction": 1.290774488446276e-13,
+    "worst_tool_minus_independent": 5.440092820663267e-15,
+    "full_rank_error": 1.2907744884462776e-13,
+    "storage_crossover_rank": 256,
+    "ten_percent_crossing_rank": 395,
+    "ten_percent_storage_ratio": 1.54296875,
+    "tool_ten_percent_crossing_rank": 395,
+    "solver_time_s": 5.2897067,
+    "answer": "The 10% error is first reached at chi = 395, which needs 1.54 times the original storage; the two factors only start saving storage at chi = 256. So this matrix does not admit a storage-saving approximation at 10% error."
+  },
+  "boundary": {
+    "boundary_condition": "open",
+    "scan": {
+      "16": {
+        "grid_k": 0.4775,
+        "grid_cv": 1.115338853230891,
+        "k_peak": 0.47776604343944523,
+        "t_peak": 2.0930746622363205,
+        "curvature": -141.6919436382724,
+        "window": [
+          [
+            0.475,
+            1.1142647975230124
+          ],
+          [
+            0.4775,
+            1.115338853230891
+          ],
+          [
+            0.48,
+            1.1146417596432912
+          ]
+        ]
+      },
+      "32": {
+        "grid_k": 0.46,
+        "grid_cv": 1.386318239156914,
+        "k_peak": 0.4587881838713492,
+        "t_peak": 2.1796550895487194,
+        "curvature": -539.4884093416055,
+        "window": [
+          [
+            0.4575,
+            1.3862152403768462
+          ],
+          [
+            0.46,
+            1.386318239156914
+          ],
+          [
+            0.4625,
+            1.3796776328202116
+          ]
+        ]
+      },
+      "64": {
+        "grid_k": 0.45,
+        "grid_cv": 1.6814164942325238,
+        "k_peak": 0.4496011981183308,
+        "t_peak": 2.224193361105789,
+        "curvature": -2068.2996076320183,
+        "window": [
+          [
+            0.4475,
+            1.6726138305617486
+          ],
+          [
+            0.45,
+            1.6814164942325238
+          ],
+          [
+            0.4525,
+            1.6643654128078986
+          ]
+        ]
+      }
+    },
+    "refined": {
+      "16": {
+        "grid_k": 0.4775,
+        "grid_cv": 1.1154384936836217,
+        "k_peak": 0.47775914248400553,
+        "t_peak": 2.0931048954933984,
+        "curvature": -141.90713148678998,
+        "window": [
+          [
+            0.47625,
+            1.1151248283742956
+          ],
+          [
+            0.4775,
+            1.1154384936836217
+          ],
+          [
+            0.47875,
+            1.1153086992070516
+          ]
+        ]
+      },
+      "32": {
+        "grid_k": 0.45875,
+        "grid_cv": 1.387531224312281,
+        "k_peak": 0.4587839334326587,
+        "t_peak": 2.1796752831292907,
+        "curvature": -547.3349735956991,
+        "window": [
+          [
+            0.4575,
+            1.386629581029869
+          ],
+          [
+            0.45875,
+            1.387531224312281
+          ],
+          [
+            0.46,
+            1.3867224458022065
+          ]
+        ]
+      },
+      "64": {
+        "grid_k": 0.45,
+        "grid_cv": 1.6830472333854374,
+        "k_peak": 0.44959572907373674,
+        "t_peak": 2.224220416995984,
+        "curvature": -2119.0329403193373,
+        "window": [
+          [
+            0.44875,
+            1.6818779029400022
+          ],
+          [
+            0.45,
+            1.6830472333854374
+          ],
+          [
+            0.45125,
+            1.6775945858923749
+          ]
+        ]
+      }
+    },
+    "fit": {
+      "method": "boundary",
+      "chi": 32,
+      "variant": "chi32_h0.00125",
+      "geometry": "open",
+      "t_peaks": {
+        "16": 2.0931048954933984,
+        "32": 2.1796752831292907,
+        "64": 2.224220416995984
+      },
+      "all_sizes": {
+        "sizes": [
+          16,
+          32,
+          64
+        ],
+        "t_peaks": [
+          2.0931048954933984,
+          2.1796752831292907,
+          2.224220416995984
+        ],
+        "t_c": 2.26750561081393,
+        "slope": -2.7932913080970696,
+        "residuals": [
+          0.00017999143553515395,
+          -0.000539974306605906,
+          0.000359982871070752
+        ]
+      },
+      "largest_two": {
+        "sizes": [
+          32,
+          64
+        ],
+        "t_peaks": [
+          2.1796752831292907,
+          2.224220416995984
+        ],
+        "t_c": 2.268765550862677,
+        "slope": -2.8508885674683597,
+        "residuals": [
+          0.0,
+          0.0
+        ]
+      },
+      "onsager_t": 2.269185314213022,
+      "onsager_relative_error_all": 0.0007402231049933481,
+      "onsager_relative_error_largest_two": 0.00018498416489650258
+    },
+    "comparison": {
+      "rank_shift": {
+        "16": 9.272827444110576e-06,
+        "32": 8.349340590781024e-06,
+        "64": 5.825274621907808e-06
+      },
+      "step_shift": {
+        "16": 9.283590105843368e-06,
+        "32": 8.489973596834325e-06,
+        "64": 5.368270763687708e-06
+      },
+      "t_c_rank_shift": 5.4472280415360496e-06,
+      "t_c_step_shift": 5.0615734903463485e-06,
+      "onsager_relative_error": 0.0007402231049933481,
+      "onsager_relative_error_largest_two": 0.00018498416489650258
+    },
+    "small_square": {
+      "k": 0.44,
+      "g_tool": 0.8542220240137678,
+      "g_enumeration": 0.8542220240137676,
+      "cv_tool": 0.43939307256414395,
+      "cv_variance": 0.4393969121598782,
+      "cv_difference": 3.839595734245194e-06,
+      "bonds": 24,
+      "configurations": 65536,
+      "comparisons": [
+        {
+          "k": 0.0,
+          "tool_g": 0.6931471805599453,
+          "enumeration_g": 0.6931471805599453,
+          "difference": 0.0
+        },
+        {
+          "k": 0.44,
+          "tool_g": 0.8542220240137678,
+          "enumeration_g": 0.8542220240137676,
+          "difference": 2.220446049250313e-16
+        },
+        {
+          "k": 0.7,
+          "tool_g": 1.1317230403126313,
+          "enumeration_g": 1.131723040312631,
+          "difference": 2.220446049250313e-16
+        }
+      ]
+    },
+    "zero_coupling": {
+      "entries": [
+        {
+          "l": 8,
+          "chi": 8,
+          "k": 0.0,
+          "g": 0.6931471805599453,
+          "log_z": 44.3614195558365,
+          "solver_seconds": 0.0004888,
+          "boundary_condition": "open",
+          "out": "runs\\checks\\boundary-l8-chi8-k0.000000"
+        },
+        {
+          "l": 16,
+          "chi": 8,
+          "k": 0.0,
+          "g": 0.6931471805599453,
+          "log_z": 177.445678223346,
+          "solver_seconds": 0.0021411,
+          "boundary_condition": "open",
+          "out": "runs\\checks\\boundary-l16-chi8-k0.000000"
+        }
+      ],
+      "worst_difference": 0.0
+    },
+    "stated_case": {
+      "g": 0.936885160474512,
+      "log_z": 3837.481617303601,
+      "ell": 3843.795086568073,
+      "bottom": 0.0018117369291817283,
+      "tool_g": 0.9368851604745123,
+      "tool_log_z": 3837.4816173036024
+    },
+    "numpy_reference": [
+      {
+        "l": 6,
+        "chi": 8,
+        "tool_g": 0.8767818322078351,
+        "numpy_g": 0.8767818322078349,
+        "difference": 2.220446049250313e-16
+      },
+      {
+        "l": 8,
+        "chi": 8,
+        "tool_g": 0.8887427599850536,
+        "numpy_g": 0.8887427599850537,
+        "difference": 1.1102230246251565e-16
+      },
+      {
+        "l": 8,
+        "chi": 16,
+        "tool_g": 0.8887427599855017,
+        "numpy_g": 0.8887427599855015,
+        "difference": 2.220446049250313e-16
+      }
+    ]
+  },
+  "trg": {
+    "boundary_condition": "periodic",
+    "scan": {
+      "64": {
+        "grid_k": 0.4375,
+        "grid_cv": 2.251705862241077,
+        "k_peak": 0.438232845344825,
+        "t_peak": 2.2818919453952535,
+        "curvature": -12660.760125923509,
+        "window": [
+          [
+            0.435,
+            2.126184215852687
+          ],
+          [
+            0.4375,
+            2.251705862241077
+          ],
+          [
+            0.44,
+            2.218968007055423
+          ]
+        ]
+      },
+      "256": {
+        "grid_k": 0.44,
+        "grid_cv": 2.824851558151124,
+        "k_peak": 0.4401271354969422,
+        "t_peak": 2.272070770803332,
+        "curvature": -72040.5852648012,
+        "window": [
+          [
+            0.4375,
+            2.328803322208042
+          ],
+          [
+            0.44,
+            2.824851558151124
+          ],
+          [
+            0.4425,
+            2.42039247828419
+          ]
+        ]
+      },
+      "1024": {
+        "grid_k": 0.44,
+        "grid_cv": 2.9480880412290276,
+        "k_peak": 0.4403356489680968,
+        "t_peak": 2.270994870261917,
+        "curvature": -99012.702462774,
+        "window": [
+          [
+            0.4375,
+            2.163091093786984
+          ],
+          [
+            0.44,
+            2.9480880412290276
+          ],
+          [
+            0.4425,
+            2.495426207886389
+          ]
+        ]
+      }
+    },
+    "refined": {
+      "64": {
+        "grid_k": 0.43875,
+        "grid_cv": 2.2489918031027782,
+        "k_peak": 0.4382885636986274,
+        "t_peak": 2.2816018550910955,
+        "curvature": -11273.057770309482,
+        "window": [
+          [
+            0.4375,
+            2.2443821455434
+          ],
+          [
+            0.43875,
+            2.2489918031027782
+          ],
+          [
+            0.44,
+            2.218373155129939
+          ]
+        ]
+      },
+      "256": {
+        "grid_k": 0.44,
+        "grid_cv": 2.902792350949426,
+        "k_peak": 0.44009044589458696,
+        "t_peak": 2.2722601895327803,
+        "curvature": -125461.50267015543,
+        "window": [
+          [
+            0.43875,
+            2.6783900584105815
+          ],
+          [
+            0.44,
+            2.902792350949426
+          ],
+          [
+            0.44125,
+            2.7351274476440426
+          ]
+        ]
+      },
+      "1024": {
+        "grid_k": 0.44,
+        "grid_cv": 3.096011072446572,
+        "k_peak": 0.4405262252648779,
+        "t_peak": 2.270012413900498,
+        "curvature": -238615.46421811776,
+        "window": [
+          [
+            0.43875,
+            2.4092606949563713
+          ],
+          [
+            0.44,
+            3.096011072446572
+          ],
+          [
+            0.44125,
+            3.037088124255132
+          ]
+        ]
+      }
+    },
+    "fit": {
+      "method": "trg",
+      "chi": 32,
+      "variant": "chi32_h0.00125",
+      "geometry": "periodic",
+      "t_peaks": {
+        "64": 2.2816018550910955,
+        "256": 2.2722601895327803,
+        "1024": 2.270012413900498
+      },
+      "all_sizes": {
+        "sizes": [
+          64,
+          256,
+          1024
+        ],
+        "t_peaks": [
+          2.2816018550910955,
+          2.2722601895327803,
+          2.270012413900498
+        ],
+        "t_c": 2.269204728184873,
+        "slope": 0.7928819307156855,
+        "residuals": [
+          8.346738789910546e-06,
+          -4.1733693950885e-05,
+          3.3386955160086274e-05
+        ]
+      },
+      "largest_two": {
+        "sizes": [
+          256,
+          1024
+        ],
+        "t_peaks": [
+          2.2722601895327803,
+          2.270012413900498
+        ],
+        "t_c": 2.2692631553564038,
+        "slope": 0.7672407491524306,
+        "residuals": [
+          0.0,
+          0.0
+        ]
+      },
+      "onsager_t": 2.269185314213022,
+      "onsager_relative_error_all": 8.555407808682553e-06,
+      "onsager_relative_error_largest_two": 3.430238718589375e-05
+    },
+    "comparison": {
+      "rank_shift": {
+        "64": 0.00017668241684167465,
+        "256": 1.863308234672808e-05,
+        "1024": 8.151653805513775e-05
+      },
+      "step_shift": {
+        "64": 6.062893445727886e-05,
+        "256": 0.0001053270298318801,
+        "1024": 0.00017392907893742373
+      },
+      "t_c_rank_shift": 3.408305458754613e-05,
+      "t_c_step_shift": 0.00015856838943529284,
+      "onsager_relative_error": 8.555407808682553e-06,
+      "onsager_relative_error_largest_two": 3.430238718589375e-05
+    },
+    "two_by_two": {
+      "g_tool": 1.0943416226313225,
+      "g_enumeration": 1.0943416226313225,
+      "difference": 0.0,
+      "cv_tool": 0.40428193751489516,
+      "cv_variance": 0.4042782328079006,
+      "cv_difference": 3.704706994567264e-06,
+      "bonds": 8,
+      "configurations": 16
+    },
+    "four_by_four": {
+      "g_tool": 0.9689397693774938,
+      "g_enumeration": 0.9690454086698851,
+      "difference": 0.00010563929239126857,
+      "bonds": 32
+    },
+    "zero_coupling": {
+      "entries": [
+        {
+          "l": 8,
+          "chi": 8,
+          "k": 0.0,
+          "g": 0.6931471805599453,
+          "log_z": 44.3614195558365,
+          "solver_seconds": 0.007284,
+          "boundary_condition": "periodic",
+          "out": "runs\\checks\\trg-l8-chi8-k0.000000"
+        },
+        {
+          "l": 16,
+          "chi": 8,
+          "k": 0.0,
+          "g": 0.6931471805599453,
+          "log_z": 177.445678223346,
+          "solver_seconds": 0.0053799,
+          "boundary_condition": "periodic",
+          "out": "runs\\checks\\trg-l16-chi8-k0.000000"
+        }
+      ],
+      "worst_difference": 0.0
+    },
+    "numpy_reference": [
+      {
+        "l": 4,
+        "chi": 4,
+        "tool_g": 0.9682152737129394,
+        "numpy_g": 0.9682152737129391,
+        "difference": 2.220446049250313e-16
+      },
+      {
+        "l": 4,
+        "chi": 8,
+        "tool_g": 0.9689397693774938,
+        "numpy_g": 0.9689397693774936,
+        "difference": 2.220446049250313e-16
+      },
+      {
+        "l": 8,
+        "chi": 8,
+        "tool_g": 0.9386579191222625,
+        "numpy_g": 0.9386579191222626,
+        "difference": 1.1102230246251565e-16
+      }
+    ],
+    "stated_case": {
+      "l": 1024,
+      "k": 0.44,
+      "chi": 16,
+      "g": 0.9287239625770709,
+      "log_z": 973837.6577832147,
+      "steps": 20,
+      "solver_time_s": 0.2158817,
+      "tensors_per_step": [
+        1048576,
+        524288,
+        262144,
+        131072,
+        65536,
+        32768,
+        16384,
+        8192,
+        4096,
+        2048,
+        1024,
+        512,
+        256,
+        128,
+        64,
+        32,
+        16,
+        8,
+        4,
+        2
+      ],
+      "bond_dims": [
+        [
+          4,
+          4,
+          4,
+          4
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          4,
+          4,
+          4,
+          4
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ],
+        [
+          16,
+          16,
+          16,
+          16
+        ]
+      ],
+      "final_shape": [
+        16,
+        16,
+        16,
+        16
+      ]
+    }
+  },
+  "negative_controls": {
+    "purpose": "each deliberate defect must make the acceptance check fail",
+    "reference": "scripts/verify_results.py and the pytest suite measure the same numbers",
+    "controls": [
+      {
+        "defect": "the accumulated normalisation scales are never advanced, while the last core is still divided by its Frobenius norm",
+        "case": "thermo --method boundary --l 4 --k 0.44 --chi 8",
+        "quantity": "|g - g_enumeration|",
+        "measured": 0.8706292570368811,
+        "requirement": 1e-08,
+        "detected": true,
+        "values": {
+          "tool_g": -0.016407233023113574,
+          "enumeration_g": 0.8542220240137676
+        }
+      },
+      {
+        "defect": "the closing contraction uses sum_i A[i,i,i,i] instead of sum_{i,j} A[i,j,i,j], setting all four indices equal",
+        "case": "thermo --method trg --l 2 --k 0.44 --chi 16",
+        "quantity": "|g - g_enumeration|",
+        "measured": 0.1206358675128445,
+        "requirement": 1e-08,
+        "detected": true,
+        "values": {
+          "tool_g": 0.973705755118478,
+          "enumeration_g": 1.0943416226313225
+        }
+      },
+      {
+        "defect": "the reported prediction uses the retained spectrum weight instead of the discarded singular values",
+        "case": "thermo --method svd --l 64 --seed 2026 --ranks 8,32",
+        "quantity": "max |reported prediction - prediction from the saved singular values|",
+        "measured": 0.6270113523035765,
+        "requirement": 1e-08,
+        "detected": true,
+        "values": [
+          {
+            "rank": 8,
+            "reported_prediction": 0.6124749211138897,
+            "discarded_spectrum_prediction": 0.7904900195489725,
+            "difference": 0.17801509843508279
+          },
+          {
+            "rank": 32,
+            "reported_prediction": 0.9473149463747869,
+            "discarded_spectrum_prediction": 0.32030359407121034,
+            "difference": 0.6270113523035765
+          }
+        ]
+      }
+    ]
+  },
+  "summary": {
+    "checks": 46,
+    "passed": 46,
+    "failed": []
+  }
+}
