@@ -45,6 +45,7 @@ pub struct RowReport {
     pub bond_dims_after: Vec<usize>,
     pub discarded: Vec<f64>,
     pub max_discarded: f64,
+    pub discarded_norm: f64,
     pub relative_discarded: f64,
     pub retained_singular_values: Vec<f64>,
     pub contraction_entries: u64,
@@ -173,10 +174,12 @@ pub fn run(model: &Ising, length: usize, chi: usize) -> BoundaryResult {
         // Left-to-right truncation (Algorithm 3, lines 7-12).
         let mut discarded = Vec::new();
         let mut retained = Vec::new();
+        let mut absorbed_weight = 0.0f64;
         for i in 0..(length - 1) {
             let row_count = cores[i].l * cores[i].p;
             let col_count = cores[i].r;
             let total: f64 = cores[i].data.iter().map(|x| x * x).sum();
+            absorbed_weight += total;
             let (svd, _) = linalg::truncated_svd(&cores[i].data, row_count, col_count, chi);
             let k = svd.k;
             let kept: f64 = svd.s.iter().map(|s| s * s).sum();
@@ -224,6 +227,12 @@ pub fn run(model: &Ising, length: usize, chi: usize) -> BoundaryResult {
         ell += scale.ln();
         let after: Vec<usize> = cores.iter().map(|core| core.l).collect();
         let max_discarded = discarded.iter().cloned().fold(0.0f64, f64::max);
+        let discarded_norm = discarded.iter().sum::<f64>().sqrt();
+        let relative = if absorbed_weight > 0.0 {
+            (discarded.iter().sum::<f64>() / absorbed_weight).sqrt()
+        } else {
+            0.0
+        };
         rows.push(RowReport {
             row: y,
             scale,
@@ -233,7 +242,8 @@ pub fn run(model: &Ising, length: usize, chi: usize) -> BoundaryResult {
             bond_dims_after: after,
             discarded: discarded.clone(),
             max_discarded,
-            relative_discarded: discarded.iter().sum::<f64>().sqrt(),
+            discarded_norm,
+            relative_discarded: relative,
             retained_singular_values: retained,
             contraction_entries,
             approximation: "left-to-right truncated SVD to chi",
