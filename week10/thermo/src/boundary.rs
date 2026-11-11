@@ -221,7 +221,7 @@ pub fn run(model: &Ising, length: usize, chi: usize) -> BoundaryResult {
         let keep = cores.len() - 1;
         let (l, p, r) = (cores[keep].l, cores[keep].p, cores[keep].r);
         cores[keep] = Core::new(l, p, r, scaled);
-        ell += 0.0 * scale.ln();
+        ell += scale.ln();
         let after: Vec<usize> = cores.iter().map(|core| core.l).collect();
         let max_discarded = discarded.iter().cloned().fold(0.0f64, f64::max);
         rows.push(RowReport {

@@ -322,7 +322,7 @@ fn run_svd(arguments: &Arguments, out: &Path) -> Result<(), String> {
         let difference: Vec<f64> =
             matrix.iter().zip(rebuilt.iter()).map(|(x, y)| x - y).collect();
         let measured = linalg::frobenius(&difference) / norm;
-        let prediction = ((total_weight - svd.discarded_weight(rank)) / total_weight).sqrt();
+        let prediction = (svd.discarded_weight(rank) / total_weight).sqrt();
         let file = format!("recon-{rank}.npy");
         linalg::write_npy(&out.join(&file), &rebuilt, &[side, side])
             .map_err(|error| format!("{}: {error}", out.join(&file).display()))?;

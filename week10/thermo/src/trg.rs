@@ -268,8 +268,9 @@ pub fn run(model: &Ising, length: usize, chi: usize, split_dir: Option<&std::pat
     assert_eq!(du, dd, "opposite legs must match for the closure");
     let mut z = 0.0;
     for i in 0..dr {
-        let j = i;
-        z += a[((i * du + j) * dl + i) * dd + j];
+        for j in 0..du {
+            z += a[((i * du + j) * dl + i) * dd + j];
+        }
     }
     assert!(z.is_finite() && z != 0.0, "closure is degenerate: {z}");
     let log_z = ell + z.abs().ln();
