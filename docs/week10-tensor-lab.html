@@ -295,7 +295,7 @@ function drawRows(){
   const peak=dims.reduce((a,b)=>Math.max(a,b),1);
   ctx.font='11px Segoe UI';
   ctx.fillStyle='#9aaec5';
-  ctx.fillText('boundary MPS: one core per column, bar height = bond dimension',left,18);
+  ctx.fillText(`boundary MPS: one core per column, bar height = bond dimension (widest ${peak})`,left,18);
   for(let index=0;index<count;index+=1){
     const dim=dims[index]||dims[dims.length-1];
     const barHeight=(bottom-top)*dim/Math.max(2,peak);
@@ -313,7 +313,6 @@ function drawRows(){
   ctx.fillText(`rows absorbed ${rowIndex} / ${count}`,left,stripTop+stripHeight+14);
   // axis labels
   ctx.fillStyle='#9aaec5';ctx.fillText('0',left,bottom+7);ctx.fillText(String(count),right-10,bottom+7);
-  ctx.fillText('max bond',left,bottom-2+0);
 }
 function renderRow(){
   const total=BOUND.l;
@@ -367,11 +366,12 @@ function drawTrg(){
   ctx.clearRect(0,0,width,height);
   const step=trgIndex>0?TRG.steps[trgIndex-1]:null;
   const left=20,right=width-20,top=30;
-  const side=step?Math.max(1,Math.round(Math.sqrt(step.tensors))):TRG.l;
-  const capped=Math.min(12,side);
+  const tensors=step?step.tensors:TRG.l*TRG.l;
+  const side=Math.sqrt(tensors);
+  const capped=Math.min(12,Math.max(1,Math.round(side)));
   ctx.font='11px Segoe UI';
   ctx.fillStyle='#9aaec5';
-  ctx.fillText(`lattice side ${side} (${big(step?step.tensors:TRG.l*TRG.l)} tensors)`,left,18);
+  ctx.fillText(`lattice: ${big(tensors)} tensors, side ≈ ${side < 10 ? side.toFixed(2) : Math.round(side)}`,left,18);
   const cell=Math.min(16,(width*0.42-20)/capped);
   for(let y=0;y<capped;y+=1){
     for(let x=0;x<capped;x+=1){
@@ -380,15 +380,16 @@ function drawTrg(){
       ctx.fillRect(px,py,cell*0.85,cell*0.85);
     }
   }
-  // split spectrum bars on the right
+  // split spectrum bars on the right, four decades below the leading value
   const baseX=width*0.52,baseY=height-40;
   const spectrum=step?step.spectrum:TRG.steps[0].spectrum;
   const leading=Math.max(...spectrum,1e-12);
   ctx.fillStyle='#9aaec5';
-  ctx.fillText('first split spectrum (log)',baseX,18);
+  ctx.fillText('first split spectrum (log scale to the leading value)',baseX,18);
   const barWidth=Math.max(6,(width-baseX-30)/Math.max(1,spectrum.length)-3);
   spectrum.forEach((value,index)=>{
-    const heightPx=(height-110)*Math.max(0,Math.log10(Math.max(value,1e-40))+40)/40;
+    const fraction=Math.max(0,1+Math.log10(Math.max(value,1e-300)/leading)/4);
+    const heightPx=(height-110)*Math.min(1,fraction);
     const px=baseX+index*(barWidth+3);
     ctx.fillStyle=index<TRG.chi?'#38bdf8':'#f7768e';
     ctx.fillRect(px,baseY-heightPx,barWidth,heightPx);
