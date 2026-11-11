@@ -1,0 +1,13 @@
+[project]
+name = "amat5315-week10"
+version = "0.1.0"
+description = "Approximate tensor contraction for the Ising model: SVD, boundary MPS and TRG"
+requires-python = ">=3.12"
+dependencies = ["numpy>=2", "matplotlib>=3.10", "pypdf>=6"]
+
+[dependency-groups]
+dev = ["pytest>=8", "playwright>=1.50"]
+
+[tool.pytest.ini_options]
+pythonpath = ["scripts"]
+testpaths = ["tests"]
