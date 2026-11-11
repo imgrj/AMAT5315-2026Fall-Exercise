@@ -1,4 +1,4 @@
-﻿//! Square-lattice tensor renormalization group (TRG) on a periodic square (sheet Algorithm 5).
+//! Square-lattice tensor renormalization group (TRG) on a periodic square (sheet Algorithm 5).
 //!
 //! One round normalises the representative tensor by its largest absolute entry,
 //! splits it along the two diagonal cuts, and regroups four half-tensors into one
@@ -268,9 +268,8 @@ pub fn run(model: &Ising, length: usize, chi: usize, split_dir: Option<&std::pat
     assert_eq!(du, dd, "opposite legs must match for the closure");
     let mut z = 0.0;
     for i in 0..dr {
-        for j in 0..du {
-            z += a[((i * du + j) * dl + i) * dd + j];
-        }
+        let j = i;
+        z += a[((i * du + j) * dl + i) * dd + j];
     }
     assert!(z.is_finite() && z != 0.0, "closure is degenerate: {z}");
     let log_z = ell + z.abs().ln();

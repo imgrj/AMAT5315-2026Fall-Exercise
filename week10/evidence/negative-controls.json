@@ -1,0 +1,52 @@
+{
+  "purpose": "each deliberate defect must make the acceptance check fail",
+  "reference": "scripts/verify_results.py and the pytest suite measure the same numbers",
+  "controls": [
+    {
+      "defect": "the accumulated normalisation scales are never advanced, while the last core is still divided by its Frobenius norm",
+      "case": "thermo --method boundary --l 4 --k 0.44 --chi 8",
+      "quantity": "|g - g_enumeration|",
+      "measured": 0.8706292570368811,
+      "requirement": 1e-08,
+      "detected": true,
+      "values": {
+        "tool_g": -0.016407233023113574,
+        "enumeration_g": 0.8542220240137676
+      }
+    },
+    {
+      "defect": "the closing contraction uses sum_i A[i,i,i,i] instead of sum_{i,j} A[i,j,i,j], setting all four indices equal",
+      "case": "thermo --method trg --l 2 --k 0.44 --chi 16",
+      "quantity": "|g - g_enumeration|",
+      "measured": 0.1206358675128445,
+      "requirement": 1e-08,
+      "detected": true,
+      "values": {
+        "tool_g": 0.973705755118478,
+        "enumeration_g": 1.0943416226313225
+      }
+    },
+    {
+      "defect": "the reported prediction uses the retained spectrum weight instead of the discarded singular values",
+      "case": "thermo --method svd --l 64 --seed 2026 --ranks 8,32",
+      "quantity": "max |reported prediction - prediction from the saved singular values|",
+      "measured": 0.6270113523035765,
+      "requirement": 1e-08,
+      "detected": true,
+      "values": [
+        {
+          "rank": 8,
+          "reported_prediction": 0.6124749211138897,
+          "discarded_spectrum_prediction": 0.7904900195489725,
+          "difference": 0.17801509843508279
+        },
+        {
+          "rank": 32,
+          "reported_prediction": 0.9473149463747869,
+          "discarded_spectrum_prediction": 0.32030359407121034,
+          "difference": 0.6270113523035765
+        }
+      ]
+    }
+  ]
+}
