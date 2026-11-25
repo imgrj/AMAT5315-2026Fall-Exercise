@@ -1,0 +1,16 @@
+[project]
+name = "amat5315-week11"
+version = "0.1.0"
+description = "Hard problems, reductions and tensor-network sampling: gadgets, tropical contraction and N-queens"
+requires-python = ">=3.12"
+dependencies = ["numpy>=2", "matplotlib>=3.10", "pypdf>=6"]
+
+[dependency-groups]
+dev = ["pytest>=8", "playwright>=1.50"]
+
+[tool.pytest.ini_options]
+pythonpath = ["scripts"]
+testpaths = ["tests"]
+markers = [
+  "slow: the sheet's full stated runs (the k = 2..8 planning loop, N = 10 counting)",
+]
