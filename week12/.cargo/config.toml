@@ -1,0 +1,5 @@
+# Keep build output inside the crate so the documented commands and the tests
+# agree on where the `branchopt` binary lives, regardless of a machine-wide
+# CARGO_TARGET_DIR.
+[build]
+target-dir = "target"
