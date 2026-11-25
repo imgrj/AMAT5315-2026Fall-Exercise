@@ -332,6 +332,8 @@ fn tropical_contract(a: &TTensor, b: &TTensor, out: &[usize], dims: &[usize]) ->
         if e < energy[io] {
             energy[io] = e;
             count[io] = g;
+        } else if e == energy[io] {
+            count[io] = count[io].saturating_add(g);
         }
     });
     TTensor {
@@ -889,7 +891,7 @@ impl Magnet {
 // Carry-tensor rules: a carry tensor is 1 at (0,0,0), (0,1,1), (1,0,1) and 0 elsewhere.
 const FULL_ROWS: [[usize; 3]; 3] = [[0, 0, 0], [0, 1, 1], [1, 0, 1]];
 const START_ROWS: [[usize; 2]; 2] = [[0, 0], [1, 1]];
-const END_ROWS: [[usize; 2]; 2] = [[0, 0], [1, 1]];
+const END_ROWS: [[usize; 2]; 2] = [[0, 1], [1, 0]];
 
 /// Build one 0/1 rule tensor: `order` gives the variable of every column of the
 /// row set, so the tensor is 1 exactly on the rows listed and 0 elsewhere. Entries

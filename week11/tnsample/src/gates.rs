@@ -43,7 +43,7 @@ pub fn set1(z: f64) -> f64 {
 }
 
 pub fn xor(a: f64, b: f64, z: f64, w: f64) -> f64 {
-    a * b - a * z - 2.0 * a * w - b * z - 2.0 * b * w + 2.0 * z * w - a - b + z
+    a * b - a * z - 2.0 * a * w - b * z - 2.0 * b * w + 2.0 * z * w - a - b + z + 2.0 * w
 }
 
 /// One named gadget: its bit names, and the bits it may use a helper for.

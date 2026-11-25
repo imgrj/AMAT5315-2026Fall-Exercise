@@ -1,0 +1,57 @@
+{
+  "purpose": "A deliberate sabotage of three rules, and the checks that caught it. The next commit restores them and keeps this record.",
+  "command": "python -m pytest -q   (from week11/)",
+  "result": "14 failed, 25 passed, 1 error in 24.88s",
+  "defects": [
+    {
+      "id": "xor-helper-field",
+      "file": "tnsample/src/gates.rs",
+      "change": "dropped the + 2 s_w term of H_XOR, so the helper stops paying its penalty",
+      "observed": "the XOR floor fell from -4 to -6 and its allowed rows left the floor",
+      "caught_by": [
+        "test_every_gate_row_matches_the_sheet_expression",
+        "test_allowed_rows_sit_on_their_floor_and_forbidden_rows_do_not",
+        "test_xor_needs_its_helper_and_obeys_the_penalty_formula"
+      ]
+    },
+    {
+      "id": "tie-counts-dropped",
+      "file": "tnsample/src/net.rs",
+      "change": "the min-plus sum no longer adds the counts of tied states",
+      "observed": "the 10x10 ferromagnet reported g_0 = 1 instead of 2, and (E_min, g_0) missed the exact enumeration on every small lattice",
+      "caught_by": [
+        "test_ten_by_ten_ferromagnet_is_fully_satisfied",
+        "test_exact_enumeration_agrees_on_small_lattices"
+      ]
+    },
+    {
+      "id": "carry-end-copies",
+      "file": "tnsample/src/net.rs",
+      "change": "END_ROWS became [[0,0],[1,1]], so a row or column ends at carry = x instead of exactly one queen",
+      "observed": "N = 4 counted 7 boards instead of 2, and every N-queens count left OEIS A000170",
+      "caught_by": [
+        "test_every_count_matches_oeis_a000170",
+        "test_the_contraction_order_does_not_change_the_count",
+        "test_fifty_boards_of_eight_queens",
+        "test_sampling_repeats_its_statistics"
+      ]
+    }
+  ],
+  "failures": [
+    "FAILED tests/test_gadgets.py::test_every_gate_row_matches_the_sheet_expression",
+    "FAILED tests/test_gadgets.py::test_allowed_rows_sit_on_their_floor_and_forbidden_rows_do_not",
+    "FAILED tests/test_gadgets.py::test_xor_needs_its_helper_and_obeys_the_penalty_formula",
+    "FAILED tests/test_magnet.py::test_exact_enumeration_agrees_on_small_lattices[0.0-3]",
+    "FAILED tests/test_magnet.py::test_exact_enumeration_agrees_on_small_lattices[0.0-4]",
+    "FAILED tests/test_magnet.py::test_exact_enumeration_agrees_on_small_lattices[0.5-3]",
+    "FAILED tests/test_magnet.py::test_exact_enumeration_agrees_on_small_lattices[0.5-4]",
+    "FAILED tests/test_magnet.py::test_exact_enumeration_agrees_on_small_lattices[1.0-3]",
+    "FAILED tests/test_magnet.py::test_exact_enumeration_agrees_on_small_lattices[1.0-4]",
+    "FAILED tests/test_magnet.py::test_ten_by_ten_ferromagnet_is_fully_satisfied",
+    "FAILED tests/test_nqueens.py::test_every_count_matches_oeis_a000170",
+    "FAILED tests/test_nqueens.py::test_the_contraction_order_does_not_change_the_count",
+    "FAILED tests/test_nqueens.py::test_fifty_boards_of_eight_queens",
+    "FAILED tests/test_nqueens.py::test_sampling_repeats_its_statistics",
+    "ERROR tests/test_nqueens.py::test_two_hundred_six_queens_boards_obey_the_rules_and_are_uniform"
+  ]
+}
