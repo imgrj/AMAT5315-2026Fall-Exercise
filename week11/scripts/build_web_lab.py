@@ -268,7 +268,7 @@ EVIDENCE_HTML = """
   <section class="card table-card">
     <h2>Acceptance against the learning sheet</h2>
     <table id="acceptanceTable">
-      <thead><tr><th>Check</th><th>This run</th><th>The sheet</th><th>Verdict</th></tr></thead>
+      <thead><tr><th>Check</th><th>This run</th><th>Reference</th><th>Verdict</th></tr></thead>
       <tbody></tbody>
     </table>
   </section>
