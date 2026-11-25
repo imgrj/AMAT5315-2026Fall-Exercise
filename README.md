@@ -12,7 +12,8 @@ This repository stores weekly exercises for AMAT5315 (*Scientific Computing for 
   - [`week7/`](week7/README.md): Diffusion Models & Flow Matching (DDPM, DDIM, pretrained CIFAR-10 U-Net, RePaint)
   - [`week8/`](week8/README.md): Language Models & the Transformer (embeddings, n-grams, memory, attention, Chinchilla scaling)
   - [`week9/`](week9/README.md): Probabilistic Inference by Tensor Contraction (ASIA, contraction orders, loopy BP, Promedus_14)
-  - [**`week10/` (Latest)**](week10/README.md): **Approximate Tensor Contraction for the Ising Model (truncated SVD, boundary MPS, TRG, specific-heat peaks)**
+  - [**`week10/`**](week10/README.md): Approximate Tensor Contraction for the Ising Model (truncated SVD, boundary MPS, TRG, specific-heat peaks)
+  - [**`week12/` (Latest)**](week12/README.md): **Integer Programming and Learned Branching (spin-glass MILP, exact Branch-and-Bound, Strong Branching, imitation learning)**
 
 - **Interactive GitHub Pages Web Labs**:
   - [Week 1: AI Agents & Monte Carlo $\pi$ Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week1-pi-lab.html)
@@ -24,11 +25,52 @@ This repository stores weekly exercises for AMAT5315 (*Scientific Computing for 
   - [Week 7: Diffusion & Flow Matching Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week7-diffusion-lab.html)
   - [Week 8: Language Models & Transformer Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week8-language-lab.html)
   - [Week 9: Probabilistic Inference & Tensor Network Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html)
-  - [**Week 10: Approximate Tensor Contraction & Ising Lab**](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week10-tensor-lab.html)
+  - [Week 10: Approximate Tensor Contraction & Ising Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week10-tensor-lab.html)
+  - [**Week 12: Integer Programming & Learned Branching Lab**](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week12-branching-lab.html)
 
 ---
 
-## Week 10: Approximate Tensor Contraction for the Ising Model (Latest Exercise)
+## Week 12: Integer Programming and Learned Branching (Latest Exercise)
+
+The sheet's four builds: a spin glass written as a mixed-integer linear program for HiGHS, with its LP relaxation, integrality gap and rounding excess; exact Branch-and-Bound comparing a cheap branching rule with Strong Branching; a small network trained by imitation learning to copy Strong Branching inside the same exact search; and a measurement of whether the smaller trees are actually faster on a laptop, including transfer to larger spin glasses. One Rust tool, `branchopt`, with HiGHS compiled from source; Python only for the figures, the JAX trainer, tests and the browser check.
+
+- **Guide and reproduction commands:** [week12/README.md](week12/README.md)
+- **Interactive Studio and 4 evidence figures:** [Week 12 Branching Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week12-branching-lab.html)
+- **Verification:** 69 independent tests, 42 acceptance checks and seven recorded negative controls.
+
+| Result | Measured evidence |
+| :--- | :--- |
+| Opening four-spin square | LP bound **−4.000000**, exact **−2.000000** (matches `pred`), nearest rounding **+2.000000** |
+| Two-food diet LP | **23.071429** = 323/14 at (89/28, 8/7) |
+| 16 × 22-spin, 52-bond, seed 2026 | every LP bound **−52.00**; mean exact **−38.25**; mean gap **13.75** (36.4 %); rounding suboptimal on **16/16**, mean excess 34.25, up to 60 on instance 11 |
+| Frustrated tetrahedron | **5 nodes** instead of 7, LP bounds −6, −4, −3, −3, −2 |
+| 48 spin glasses, most-frac / Strong Branching | **52.79 → 16.96** mean nodes (3.11× smaller) at **1.00 → 18.11** LP solves per node; both exact to **6.5 × 10⁻¹³** |
+| Imitation learning | 290 training / 93 validation nodes, **zero instance overlap**; validation cross-entropy **1.833**; JAX↔Rust probe agreement **6.7 × 10⁻¹⁶** |
+| 16 unseen 22-spin graphs | mean nodes **50.63 → 14.50** (neural, 5.60 ms) against **15.50** for Strong Branching (91.30 ms); largest error **2.0 × 10⁻¹²** |
+| 8 larger 30-spin, 72-bond graphs | **175.25 → 44.25** nodes without retraining; neural **55.66 ms** against Strong Branching's **861.68 ms** |
+
+| The relaxation hides frustration | A smaller tree at a higher price per node |
+| :---: | :---: |
+| ![Week 12 gap](docs/assets/week12/gap.png) | ![Week 12 Branch-and-Bound](docs/assets/week12/bnb.png) |
+
+| A network that copies the strong rule for free | Laptop time and size transfer to 30 spins |
+| :---: | :---: |
+| ![Week 12 neural branching](docs/assets/week12/neural_bnb.png) | ![Week 12 evaluation](docs/assets/week12/eval.png) |
+
+```bash
+cd week12
+cargo install --path . --force          # builds HiGHS from source (needs cmake and a C++ compiler)
+python scripts/run_all.py               # every run of Parts 1-4 and the four figures
+python -m pytest tests -q               # 69 verification tests
+python scripts/check_acceptance.py      # 42 checks against the sheet's numbers
+python scripts/check_negative_controls.py   # 7 deliberate defects must be caught
+```
+
+The guide lists the run settings, the peak-refinement tables and one command beside each figure.
+
+---
+
+## Week 10: Approximate Tensor Contraction for the Ising Model
 
 The sheet's three builds: a truncated-SVD storage study of a seeded 512×512 Gaussian matrix, a boundary-MPS row contraction of open Ising squares up to 64×64, and tensor-renormalization-group coarse-graining of periodic squares up to 1024×1024. The specific-heat peaks of those contractions locate the Onsager transition without sampling a single spin configuration. One Rust tool, `thermo`, with its own Jacobi SVD, Krylov truncated SVD and `.npy` writer; Python only for figures, tests and the browser check.
 

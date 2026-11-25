@@ -1,0 +1,919 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 12 — Integer Programming &amp; Learned Branching Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #090d16;
+    --panel: #111726;
+    --panel-border: #1e293b;
+    --card: #161f33;
+    --card-hover: #1e293b;
+    --ink: #f1f5f9;
+    --ink-muted: #94a3b8;
+    --ink-faint: #64748b;
+    --accent: #38bdf8;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --danger: #f87171;
+    --purple: #c084fc;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+  .nav-banner {
+    background: #0d121f;
+    border-bottom: 1px solid var(--panel-border);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    flex-wrap: wrap;
+  }
+  .nav-banner a {
+    color: var(--ink-muted);
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+  }
+  .nav-banner a:hover { color: var(--ink); background: rgba(255,255,255,0.06); }
+  .nav-banner a.active {
+    color: var(--accent);
+    background: rgba(56, 189, 248, 0.12);
+    font-weight: 600;
+  }
+  .nav-banner .repo-link {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  header {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-left h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+  }
+  .header-left .sub { color: var(--ink-muted); font-size: 12px; margin-top: 3px; }
+  .tab-buttons {
+    display: flex;
+    gap: 6px;
+    background: rgba(0,0,0,0.3);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--panel-border);
+  }
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--ink-muted);
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+  .tab-btn.active { background: var(--card); color: var(--accent); }
+
+  .workspace {
+    display: grid;
+    grid-template-columns: 1fr 372px;
+    min-height: calc(100vh - 108px);
+  }
+  @media (max-width: 1080px) { .workspace { grid-template-columns: 1fr; } }
+
+  .viewport-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 12px;
+    background: #090d16;
+  }
+  .canvas-container {
+    position: relative;
+    background: #05070c;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 430px;
+    overflow: hidden;
+  }
+  .canvas-container.short { min-height: 210px; }
+  canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+
+  .viewport-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .btn {
+    background: var(--card);
+    border: 1px solid var(--panel-border);
+    color: var(--ink);
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: var(--accent); color: #040814; border-color: var(--accent); font-weight: 600; }
+  .btn.primary:hover { background: #7dd3fc; }
+  .btn.tiny { padding: 4px 10px; font-size: 11.5px; }
+
+  .readout-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  @media (max-width: 768px) { .readout-grid { grid-template-columns: repeat(2, 1fr); } }
+  .readout-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+  }
+  .readout-k { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-muted); }
+  .readout-v { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; margin-top: 2px; }
+
+  .control-sidebar {
+    background: var(--panel);
+    border-left: 1px solid var(--panel-border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+  .sidebar-section-title {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-muted);
+    font-weight: 600;
+  }
+  .rule-list { display: flex; flex-direction: column; gap: 8px; }
+  .rule-card {
+    background: var(--card);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 9px 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .rule-card:hover { border-color: var(--ink-faint); }
+  .rule-card.selected { border-color: var(--accent); background: rgba(56,189,248,0.09); }
+  .rule-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .rule-name { font-weight: 600; font-size: 12.5px; }
+  .rule-nodes { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+  .rule-meta { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+  .note {
+    background: rgba(0,0,0,0.28);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 11px 12px;
+    font-size: 11.5px;
+    color: var(--ink-muted);
+    line-height: 1.55;
+  }
+  .note strong { color: var(--ink); }
+  .kv { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; font-size: 11.5px; }
+  .kv span:nth-child(2) { font-family: 'JetBrains Mono', monospace; color: var(--ink); }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--ink-muted); }
+  .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+
+  /* Evidence gallery */
+  .gallery-view { display: none; padding: 24px; }
+  .gallery-view.active { display: block; }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(430px, 1fr));
+    gap: 18px;
+  }
+  .gallery-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .gallery-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .gallery-card img { width: 100%; display: block; background: #05070c; }
+  .gallery-body { padding: 12px 14px; }
+  .gallery-title { font-weight: 600; font-size: 13px; }
+  .gallery-desc { color: var(--ink-muted); font-size: 11.5px; margin-top: 4px; }
+  .gallery-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); margin-top: 6px; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--panel-border); border-radius: var(--radius-sm); }
+  table { border-collapse: collapse; width: 100%; font-size: 11.5px; }
+  th, td { padding: 6px 10px; text-align: left; border-bottom: 1px solid #1b2436; }
+  th { color: var(--ink-muted); font-weight: 600; background: rgba(255,255,255,0.02); }
+  td.mono { font-family: 'JetBrains Mono', monospace; }
+  .pill { font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 999px; }
+  .pill.ok { background: rgba(52,211,153,0.15); color: var(--good); }
+
+  .lightbox-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 6, 12, 0.82);
+    z-index: 100;
+    padding: 24px;
+    align-items: center;
+    justify-content: center;
+  }
+  .lightbox-backdrop.active { display: flex; }
+  .lightbox-modal {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    max-width: 1180px;
+    width: 100%;
+    max-height: 92vh;
+    overflow: auto;
+  }
+  .lightbox-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--panel-border);
+    gap: 10px;
+  }
+  .lightbox-title { font-size: 15px; font-weight: 700; }
+  .lightbox-close {
+    background: transparent;
+    border: none;
+    color: var(--ink-muted);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+  }
+  .lightbox-close:hover { color: var(--ink); background: rgba(255,255,255,0.08); }
+  .lightbox-body { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; padding: 16px; }
+  @media (max-width: 900px) { .lightbox-body { grid-template-columns: 1fr; } }
+  .lightbox-img-pane img { width: 100%; border-radius: var(--radius-sm); background: #05070c; }
+  .lightbox-info-pane { display: flex; flex-direction: column; gap: 12px; }
+  .lightbox-sec-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); font-weight: 600; }
+  .lightbox-desc, .lightbox-theory { font-size: 12px; line-height: 1.6; }
+  .lightbox-theory { color: var(--ink-muted); }
+  .lightbox-cmd {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: #05070c;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #7dd3fc;
+  }
+  details { border: 1px solid var(--panel-border); border-radius: var(--radius-sm); padding: 10px 14px; background: var(--panel); }
+  summary { cursor: pointer; font-size: 12px; font-weight: 600; color: var(--ink-muted); }
+  details[open] summary { margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<nav class="nav-banner">
+  <span><strong style="color: var(--ink);">AMAT5315:</strong> Scientific Computing</span>
+  <a href="week1-pi-lab.html">Week 1: AI Agents &amp; Pi</a>
+  <a href="index.html">Week 2: Molecular Dynamics</a>
+  <a href="week3-ising-lab.html">Week 3: Ising Lattice Lab</a>
+  <a href="week4-fluid-lab.html">Week 4: Fluid Dynamics Lab</a>
+  <a href="week5-seismic-lab.html">Week 5: Seismic &amp; AD Lab</a>
+  <a href="week6-energy-lab.html">Week 6: Energy-Based Models</a>
+  <a href="week7-diffusion-lab.html">Week 7: Diffusion &amp; Flow Matching</a>
+  <a href="week8-language-lab.html">Week 8: Language &amp; Transformer</a>
+  <a href="week9-inference-lab.html">Week 9: Inference &amp; Tensor Nets</a>
+  <a href="week10-tensor-lab.html">Week 10: Tensor RG &amp; Ising</a>
+  <a href="week12-branching-lab.html" class="active">Week 12: IP &amp; Learned Branching</a>
+  <a class="repo-link" href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise" target="_blank" rel="noopener">GitHub Repo ↗</a>
+</nav>
+
+<header>
+  <div class="header-left">
+    <h1>
+      Integer Programming &amp; Learned Branching Lab
+      <span class="badge">Week 12 Interactive</span>
+    </h1>
+    <div class="sub">Spin glasses as mixed-integer programs, exact Branch-and-Bound, Strong Branching &amp; imitation learning</div>
+  </div>
+  <div class="tab-buttons">
+    <button class="tab-btn active" id="tabSimBtn" onclick="switchTab('sim')">Interactive Studio</button>
+    <button class="tab-btn" id="tabGalleryBtn" onclick="switchTab('gallery')">Evidence &amp; Verification (4)</button>
+  </div>
+</header>
+
+<!-- View 1: Interactive Studio -->
+<div class="workspace" id="simView">
+  <div class="viewport-panel">
+    <div class="readout-grid">
+      <div class="readout-card">
+        <div class="readout-k">Nodes visited</div>
+        <div class="readout-v" id="statNodes">0 / 5</div>
+      </div>
+      <div class="readout-card">
+        <div class="readout-k">LP solves</div>
+        <div class="readout-v" id="statLp">0</div>
+      </div>
+      <div class="readout-card">
+        <div class="readout-k">Incumbent (best energy)</div>
+        <div class="readout-v" id="statInc" style="color: var(--good);">−∞</div>
+      </div>
+      <div class="readout-card">
+        <div class="readout-k">Root LP bound</div>
+        <div class="readout-v" id="statRoot">−6.000</div>
+      </div>
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="treeCanvas" width="980" height="500"></canvas>
+    </div>
+
+    <div class="viewport-controls">
+      <div class="btn-group">
+        <button class="btn primary" id="btnPlay" onclick="togglePlay()">▶ Play search</button>
+        <button class="btn" onclick="stepSearch(1)">Step +1</button>
+        <button class="btn" onclick="resetSearch()">↺ Reset</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn tiny" id="btnSquareLp" onclick="setSquareMode('lp')">LP relaxation</button>
+        <button class="btn tiny" id="btnSquareGs" onclick="setSquareMode('gs')">Ground state</button>
+      </div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent);">
+        Action: <span id="actIndex">0</span> / <span id="actTotal">5</span> (<span id="actType">READY</span>)
+      </div>
+    </div>
+
+    <div class="canvas-container short">
+      <canvas id="squareCanvas" width="980" height="240"></canvas>
+    </div>
+  </div>
+
+  <div class="control-sidebar">
+    <div class="sidebar-section-title">⚙️ Branching rules (16 unseen graphs)</div>
+    <div class="rule-list" id="ruleList"></div>
+
+    <div class="sidebar-section-title">🔍 Search configuration</div>
+    <div class="kv" id="searchKv"></div>
+
+    <div class="sidebar-section-title">📐 The four-spin square</div>
+    <div class="kv" id="squareKv"></div>
+
+    <div class="legend">
+      <span><span class="swatch" style="background:#34d399;"></span>incumbent</span>
+      <span><span class="swatch" style="background:#f87171;"></span>pruned</span>
+      <span><span class="swatch" style="background:#38bdf8;"></span>split</span>
+      <span><span class="swatch" style="background:#475569;"></span>skipped</span>
+    </div>
+
+    <div class="note">
+      📐 <strong>Exactness by separation.</strong> The HiGHS LPs alone decide whether a node
+      is infeasible, pruned by bound, or integral; the rule only chooses which fractional spin
+      to split. Any rule, even an adversarial one, leaves the search exact, and only the tree
+      grows. On this tetrahedron, exploring <span style="font-family:'JetBrains Mono',monospace;">x0 = 1</span>
+      then <span style="font-family:'JetBrains Mono',monospace;">x1 = 1</span> finds the incumbent −3,
+      and <span style="font-family:'JetBrains Mono',monospace;">x0 = 0</span> is then pruned at −2 &gt; −3:
+      five nodes instead of seven.
+    </div>
+  </div>
+</div>
+
+<!-- View 2: Evidence & Verification -->
+<div class="gallery-view" id="galleryView">
+  <div style="max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+    <div>
+      <h2 style="margin: 0; font-size: 20px; font-weight: 700;">Week 12 Verification Suite &amp; Evidence Gallery</h2>
+      <p style="margin: 4px 0 0; color: var(--ink-muted); font-size: 13px;">
+        The four figures of the learning sheet, every one drawn by a Python script from the saved
+        <span style="font-family:'JetBrains Mono',monospace;">run.json</span> evidence, beside the
+        acceptance record of <span id="accHead"></span>.
+      </p>
+    </div>
+
+    <div class="gallery-grid" id="galleryCardsGrid"></div>
+
+    <details>
+      <summary>Acceptance record: <span id="accSummary"></span></summary>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Check</th><th>Sheet</th><th>Measured</th><th></th></tr></thead>
+          <tbody id="accTable"></tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox-backdrop" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-modal" onclick="event.stopPropagation()">
+    <div class="lightbox-header">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="badge" id="modalPartBadge">Part 1</span>
+        <span class="lightbox-title" id="modalTitle">Title</span>
+      </div>
+      <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    </div>
+    <div class="lightbox-body">
+      <div class="lightbox-img-pane"><img id="modalImg" src="" alt="Evidence"></div>
+      <div class="lightbox-info-pane">
+        <div>
+          <div class="lightbox-sec-title">Description</div>
+          <div class="lightbox-desc" id="modalDesc"></div>
+        </div>
+        <div>
+          <div class="lightbox-sec-title">Mathematical theory</div>
+          <div class="lightbox-theory" id="modalTheory"></div>
+        </div>
+        <div>
+          <div class="lightbox-sec-title">Recorded metrics</div>
+          <div class="kv" id="modalMetrics"></div>
+        </div>
+        <div>
+          <div class="lightbox-sec-title">Reproducing command</div>
+          <div class="lightbox-cmd" id="modalCmd"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = {"square":{"couplings":[1.0,-1.0,1.0,1.0],"edges":[[0,1],[0,3],[1,2],[2,3]],"exact_energy":-2.0,"exact_spins":[1.0,-0.0,-0.0,1.0],"lp_bound":-4.0,"lp_spins":[0.5,0.5,0.5,0.5],"rounded_energy":2.0,"rounded_excess":4.0,"rounded_spins":[1.0,1.0,1.0,1.0]},"diet":{"cost":23.071428571428573,"x1":3.178571428571429,"x2":1.1428571428571428},"gap":{"ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],"lp":[-52.0,-52.0,-52.0,-52.0,-52.0,-52.0,-52.0,-52.0,-52.0,-52.0,-52.0,-52.0,-52.0,-52.0,-52.0,-52.0],"exact":[-37.000000000000064,-39.00000000000031,-40.0,-37.0,-42.0,-38.00000000000065,-36.00000000000005,-35.0,-37.0,-37.00000000000011,-36.0,-44.00000000000001,-38.000000000000064,-41.0,-39.0,-36.00000000000009],"gap":[14.999999999999936,12.999999999999687,12.0,15.0,10.0,13.999999999999353,15.99999999999995,17.0,15.0,14.999999999999893,16.0,7.999999999999993,13.999999999999936,11.0,13.0,15.999999999999908],"excess":[28.000000000000064,34.00000000000031,22.0,44.0,36.0,40.00000000000065,32.00000000000005,26.0,32.0,40.00000000000011,30.0,60.00000000000001,30.000000000000064,46.0,18.0,30.000000000000092],"summary":{"largest_rounding_excess":60.00000000000001,"largest_rounding_excess_instance":11,"mean_exact_energy":-38.250000000000085,"mean_fractional_spins":22.0,"mean_integrality_gap":13.749999999999917,"mean_lp_bound":-52.0,"mean_relative_gap":0.36452400721495415,"mean_rounded_energy":-4.0,"mean_rounding_excess":34.250000000000085,"runtime_ms":701.5515,"suboptimal_roundings":16}},"tetrahedron":{"energy":-3.0,"lp_solves":5,"nodes":5,"trace":[{"bound":-6.0,"branch":"root","depth":0,"free":4,"node":1,"spin":0,"status":"split x0"},{"bound":-4.0,"branch":"x0=1","depth":1,"free":3,"node":2,"spin":1,"status":"split x1"},{"bound":-3.0,"branch":"x0=1,x1=1","depth":2,"free":0,"node":3,"spin":null,"status":"incumbent"},{"bound":-3.0,"branch":"x0=1,x1=0","depth":2,"free":0,"node":4,"spin":null,"status":"pruned-by-bound"},{"bound":-2.0,"branch":"x0=0","depth":1,"free":3,"node":5,"spin":null,"status":"pruned-by-bound"}]},"bnb":{"most":{"nodes":[7.0,7.0,13.0,15.0,19.0,21.0,21.0,23.0,25.0,25.0,27.0,27.0,29.0,31.0,31.0,39.0,39.0,41.0,41.0,43.0,43.0,43.0,45.0,47.0,47.0,49.0,49.0,51.0,51.0,55.0,59.0,59.0,59.0,59.0,63.0,63.0,63.0,71.0,77.0,79.0,79.0,83.0,83.0,89.0,97.0,105.0,113.0,229.0],"lp":[7,7,13,15,19,21,21,23,25,25,27,27,29,31,31,39,39,41,41,43,43,43,45,47,47,49,49,51,51,55,59,59,59,59,63,63,63,71,77,79,79,83,83,89,97,105,113,229],"summary":{"largest_error":6.465938895416912e-13,"max_energy":-31.0,"mean_elapsed_ms":44.117068749999994,"mean_lp_solves":52.791666666666664,"mean_nodes":52.791666666666664,"min_energy":-44.0}},"strong":{"nodes":[7.0,7.0,7.0,7.0,7.0,9.0,9.0,9.0,9.0,11.0,11.0,13.0,13.0,13.0,13.0,13.0,13.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,17.0,17.0,17.0,17.0,17.0,17.0,19.0,19.0,21.0,21.0,21.0,21.0,21.0,23.0,23.0,25.0,25.0,27.0,29.0,29.0,29.0,33.0,35.0],"lp":[127,133,135,135,135,155,163,171,175,217,219,225,231,249,255,259,259,265,265,267,275,275,277,279,283,285,291,291,299,301,315,329,345,347,375,383,387,409,415,453,457,459,481,487,489,505,603,607],"summary":{"largest_error":6.465938895416912e-13,"max_energy":-31.0,"mean_elapsed_ms":205.89766249999994,"mean_lp_solves":307.125,"mean_nodes":16.958333333333332,"min_energy":-44.0}}},"model":{"epoch":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120],"train_ce":[2.7957168291335033,2.4845952812615413,2.2786975472603,2.159620179608359,2.0985882941422878,2.072117814290785,2.0568114209918513,2.0457029902782002,2.0359948847710228,2.0283131328948945,2.0201891126032825,2.012418658545535,2.0053071764047767,1.9984868247267271,1.9922300059480391,1.9862848115305023,1.9801026187414263,1.9744575364232302,1.9686709703923246,1.963305600287761,1.9584188227670556,1.953414993618125,1.9480172905879385,1.9434503879547398,1.9381506314786552,1.9334797243626312,1.929022513496003,1.9246423940672206,1.9200866707115485,1.9155578995563551,1.9114124010823201,1.9072623506352795,1.9032441917634115,1.8993448393715944,1.8955622745540257,1.8917333911426653,1.8880945483705796,1.884709447092615,1.881508367147571,1.877972176101995,1.874540738195048,1.8714040184442677,1.8684580635580386,1.8654083741803373,1.8625712077634637,1.8597863969198085,1.8570939463799454,1.8544607708741936,1.8519559765854174,1.8494320104575066,1.8473410003030768,1.844660933773,1.8422499197265199,1.8401841388695621,1.8381754332891072,1.8359898497824894,1.8340322457972642,1.831991468909762,1.8299159949829988,1.8282545607343204,1.8264387627168939,1.8245980426994595,1.822761528509488,1.82108162980684,1.819505907510653,1.8180164462578294,1.8164565909002892,1.8149881516247444,1.8136354348965833,1.8120317431787452,1.81074882409316,1.8096693924732083,1.8079752212515845,1.8066405365870921,1.8052661268236714,1.803908561711873,1.802852401037547,1.8017645867664864,1.8006885321778465,1.7995229820200096,1.798284449057464,1.7971576611551658,1.7961058405357229,1.7951352008287684,1.7941941467236129,1.793229543471846,1.7924772352320042,1.7913868673107702,1.7903967642514027,1.7892322949886807,1.7883856353464984,1.7877097097110792,1.7869814690629482,1.7860542754913715,1.7850488792369388,1.784054172270115,1.7832819801875754,1.782593334275279,1.7817247943054357,1.7809678891758487,1.780219471457286,1.7795554872237478,1.7789124940949845,1.7783060999184754,1.7774620681005002,1.7767870870763134,1.7759976607161414,1.7756848202524265,1.775014458525337,1.7741090747851362,1.773502971228704,1.7728512262465976,1.7721678503429539,1.7716601099204303,1.770904501943976,1.7703872802523526,1.769701574444043,1.7692887264448158,1.7686752563708286,1.7681977513221196],"val_ce":[2.7886555176713954,2.50384315237719,2.313955101941161,2.1922749479019585,2.1148032023157675,2.0719313465705067,2.046879174599031,2.0341344778957438,2.0266799726600486,2.021778575346146,2.0147498065834433,2.006365610981911,2.0007910134830844,1.9952777816252059,1.9922134187304712,1.9879081140428938,1.9832736878509536,1.978569958901484,1.9736847987116797,1.9688505471209523,1.9647661184929694,1.9619884592617312,1.9564888242297491,1.9554282751906082,1.9504987206607642,1.9458331311574502,1.9444297187053363,1.9416779465290726,1.9383281819445428,1.9336903352827788,1.9299719073195276,1.9272711274270882,1.9227901881367926,1.9214966584912347,1.9191836545512413,1.9150658185222442,1.9119239947832845,1.909634881861465,1.9077003805736283,1.905185758069671,1.9029637011356224,1.900817213008653,1.8995234370786378,1.8966178571319972,1.8951380678353977,1.8926479820720936,1.8908736363205225,1.8884377651417772,1.885316783381093,1.8826867614239866,1.880267775294891,1.8792505763116616,1.878289298491605,1.876612933873152,1.8761851505999434,1.875906067552465,1.8743894408167487,1.8725692553663198,1.8692601560360778,1.8672146057124472,1.8655239379920903,1.8652748900706242,1.8654348225231607,1.864579604400863,1.8632425799167929,1.8611831430882222,1.8592650285962493,1.8586132796274202,1.8587392571496806,1.858540382215825,1.8580409486905802,1.8559249873646306,1.8551573861751847,1.8549207581526177,1.8541755162257079,1.854691243545919,1.853033120803325,1.851510268569791,1.8499416862941618,1.8490927222714462,1.8485456529180624,1.8477314757495291,1.8480527251156178,1.8477109904420812,1.847256327551242,1.8477762170006236,1.8474713018400888,1.8453588092226498,1.844955411744899,1.844418418166277,1.843433173547569,1.8433113179944556,1.8426733182646815,1.842638735134038,1.841592099970841,1.841266481910179,1.8412307902677802,1.8415081333634782,1.840771928646513,1.8405596093814176,1.8400824857648856,1.841422510472649,1.8415883653445153,1.8410133477438388,1.839965277187653,1.8397743268471172,1.8392133111600244,1.8380649272721548,1.837247138493687,1.8368467453092991,1.836279094677019,1.8373697753839087,1.8371517667853168,1.8371973745278434,1.8369459594479516,1.837189506131206,1.8364922100393712,1.835566016544739,1.834337139878075,1.8329738457437188],"best_epoch":120,"best_val_ce":1.8329738457437188,"train":{"nodes":290,"instances":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35]},"validation":{"nodes":93,"instances":[36,37,38,39,40,41,42,43,44,45,46,47]},"overlap":0},"test":{"summary":{"largest_highs_error":2.0179413695586845e-12,"largest_neural_saving_instance":4,"lp_solves_equal_nodes_for_non_strong":true,"policies":{"most-frac":{"mean_infer_ms":0.0,"mean_lp_ms":15.735662499999998,"mean_lp_solves":50.625,"mean_nodes":50.625,"mean_total_ms":16.035925},"neural":{"mean_infer_ms":0.1437875,"mean_lp_ms":5.282887499999998,"mean_lp_solves":14.5,"mean_nodes":14.5,"mean_total_ms":5.595087499999999},"root-neural":{"mean_infer_ms":0.048481250000000004,"mean_lp_ms":13.4548,"mean_lp_solves":16.5,"mean_nodes":16.5,"mean_total_ms":13.948556250000001},"strong":{"mean_infer_ms":0.0,"mean_lp_ms":90.39396875000001,"mean_lp_solves":287.625,"mean_nodes":15.5,"mean_total_ms":91.30278125000001}}},"ids":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],"highs":[-42.0,-39.0,-34.00000000000004,-37.0,-38.00000000000007,-34.000000000000014,-35.00000000000202,-39.00000000000011,-42.00000000000001,-39.00000000000007,-34.00000000000001,-38.000000000000036,-41.00000000000007,-43.0,-34.00000000000031,-38.000000000000014],"policies":{"most-frac":{"nodes":[11.0,19.0,91.0,33.0,153.0,85.0,105.0,43.0,31.0,27.0,33.0,19.0,79.0,25.0,33.0,23.0],"lp_solves":[11.0,19.0,91.0,33.0,153.0,85.0,105.0,43.0,31.0,27.0,33.0,19.0,79.0,25.0,33.0,23.0],"total_ms":[4.9403,7.635000000000001,30.186899999999998,10.6612,48.362700000000004,23.825300000000002,29.2044,11.154300000000001,9.3322,8.5159,10.0156,6.649699999999999,28.2919,8.9321,11.1551,7.7122],"infer_ms":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"first_splits":[[0,1,2,1,2],[0,1,2,2,4,1,2,2,4],[0,1,2,3,4,5,4,5,5,3,4,5,5,4,5,6,7,5,6,2,3,3,4,5,1,2,3,5,5,3,4,5,5,4,5,5,2,3,5,3,4,5,5,4,5],[0,1,2,5,6,7,8,9,11,9,6,5,2,1,2,5],[0,1,2,3,4,5,6,7,8,10,9,7,6,7,10,5,6,7,6,4,5,6,6,5,6,7,8,6,7,10,3,4,6,7,4,5,6,6,6,7,8,9,8,9,2,3,4,5,6,6,4,5,6,6,3,4,4,5,6,1,2,3,4,5,6,4,3,4,5,6,4,2,3,4,3,4],[0,1,2,3,4,5,3,6,8,2,3,4,3,4,6,8,4,1,2,3,5,3,5,6,8,2,3,4,4,5,5,3,4,6,8,5,6,4,5,6,8,5],[0,1,2,3,4,5,7,8,9,11,8,5,4,5,7,8,8,5,6,7,6,8,9,3,4,7,4,2,3,4,5,7,8,8,5,7,4,4,1,2,3,4,4,3,4,4,2,3,4,5,4,4],[0,1,2,3,5,6,7,7,8,8,6,7,8,3,5,6,3,5,1,2,3],[0,1,2,3,4,5,3,4,4,2,3,1,2,2,3],[1,2,3,6,3,5,6,2,3,5,6,3,5],[0,1,2,3,4,4,3,2,3,4,4,1,2,4,2,4],[0,1,2,4,2,1,2,2,3],[0,1,2,3,4,6,7,8,5,6,6,4,6,3,4,6,4,2,3,4,4,3,4,4,1,2,3,4,5,6,8,4,3,4,4,2,3,4,3],[0,1,2,3,4,6,4,3,2,3,1,2],[0,1,2,3,4,4,3,2,3,3,1,2,3,3,2,3],[0,1,2,3,4,3,2,3,1,2,2]]},"strong":{"nodes":[9.0,15.0,17.0,11.0,17.0,21.0,19.0,11.0,7.0,13.0,25.0,9.0,17.0,13.0,15.0,29.0],"lp_solves":[173.0,291.0,311.0,219.0,337.0,405.0,337.0,217.0,135.0,197.0,449.0,171.0,323.0,251.0,291.0,495.0],"total_ms":[58.8308,98.08709999999999,97.1827,72.4227,104.8112,130.0306,108.7882,82.599,40.3446,60.146699999999996,138.8666,53.7369,103.35560000000001,84.8915,88.49940000000001,138.2509],"infer_ms":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"first_splits":[[18,2,1,0],[15,14,0,5,1,0,1],[17,20,21,5,3,20,21,1],[5,9,0,0,0],[4,11,21,1,3,8,12,1],[14,3,5,1,19,5,0,1,2,11],[12,4,20,16,0,1,0,4,0],[1,11,16,11,0],[2,4,0],[6,17,10,1,17,1],[0,10,2,16,16,2,16,8,2,1,1,5],[21,0,0,2],[3,9,4,8,8,21,9,4],[7,10,20,0,0,1],[4,0,1,1,0,1,1],[4,1,9,21,6,15,13,17,2,5,16,0,1,0]]},"neural":{"nodes":[9.0,11.0,15.0,13.0,17.0,23.0,19.0,11.0,7.0,11.0,25.0,9.0,15.0,15.0,19.0,13.0],"lp_solves":[9.0,11.0,15.0,13.0,17.0,23.0,19.0,11.0,7.0,11.0,25.0,9.0,15.0,15.0,19.0,13.0],"total_ms":[4.0913,4.5702,5.4729,4.6574,6.8004,9.4907,7.085400000000001,4.3339,2.7392,4.1411,9.9338,3.997,5.521,5.4168,6.2649,5.0054],"infer_ms":[0.0903,0.1141,0.1474,0.1191,0.184,0.2354,0.1985,0.1117,0.0691,0.1019,0.2452,0.0921,0.1565,0.1439,0.161,0.1304],"first_splits":[[18,4,2,6],[15,14,6,6,6],[17,20,21,21,20,21,19],[5,9,0,0,11,0],[4,11,21,15,12,21,21,11],[14,3,6,19,5,5,19,1,11,5,11],[12,16,2,4,20,4,16,2,2],[8,3,16,3,16],[2,11,11],[6,15,17,15,17],[0,10,2,16,1,16,2,17,16,9,1,9],[21,0,0,11],[3,21,9,9,8,9,21],[7,6,1,11,0,1,6],[4,0,1,8,12,1,0,1,1],[4,1,21,9,1,9]]},"root-neural":{"nodes":[9.0,9.0,21.0,13.0,21.0,29.0,19.0,19.0,7.0,11.0,23.0,13.0,21.0,11.0,19.0,19.0],"lp_solves":[9.0,9.0,21.0,13.0,21.0,29.0,19.0,19.0,7.0,11.0,23.0,13.0,21.0,11.0,19.0,19.0],"total_ms":[4.160699999999999,3.9508,12.8039,10.4134,20.593899999999998,26.3332,15.8266,16.5606,8.4273,10.3564,17.9361,12.8947,18.6799,8.4046,14.215200000000001,21.6196],"infer_ms":[0.025,0.0253,0.0272,0.0541,0.0544,0.0581,0.0544,0.0542,0.056,0.0548,0.0539,0.0509,0.0399,0.0545,0.0556,0.0574],"first_splits":[[18,2,4,2],[15,19,14,19],[17,20,3,3,20,3,18,18,21,3],[5,9,0,0,9,0],[4,21,11,15,15,11,15,12,21,11],[14,3,5,13,1,1,13,1,5,13,3,5,1,5],[12,16,4,2,20,4,16,4,4],[8,3,1,6,11,11,3,1,6],[2,11,11],[6,19,13,19,13],[0,2,10,16,1,16,10,2,10,10,16],[21,0,0,15,4,11],[3,13,15,9,9,15,9,13,15,9],[7,10,20,20,10],[4,0,1,8,12,1,0,1,1],[4,1,11,9,21,8,11,1,11]]}}},"transfer":{"summary":{"largest_highs_error":3.481659405224491e-13,"largest_neural_saving_instance":5,"lp_solves_equal_nodes_for_non_strong":true,"policies":{"most-frac":{"mean_infer_ms":0.0,"mean_lp_ms":70.68055,"mean_lp_solves":175.25,"mean_nodes":175.25,"mean_total_ms":71.573275},"neural":{"mean_infer_ms":2.49115,"mean_lp_ms":52.409937500000005,"mean_lp_solves":44.25,"mean_nodes":44.25,"mean_total_ms":55.65905},"root-neural":{"mean_infer_ms":0.0706875,"mean_lp_ms":62.4939875,"mean_lp_solves":50.5,"mean_nodes":50.5,"mean_total_ms":63.3576875},"strong":{"mean_infer_ms":0.0,"mean_lp_ms":850.1964250000001,"mean_lp_solves":911.0,"mean_nodes":37.75,"mean_total_ms":861.6845249999999}}},"ids":[0,1,2,3,4,5,6,7],"highs":[-54.00000000000004,-50.000000000000014,-59.0,-47.0000000000001,-53.00000000000001,-47.00000000000035,-54.000000000000014,-56.0],"policies":{"most-frac":{"nodes":[53.0,125.0,71.0,287.0,109.0,605.0,73.0,79.0],"lp_solves":[53.0,125.0,71.0,287.0,109.0,605.0,73.0,79.0],"total_ms":[43.5062,71.8198,25.5811,112.63539999999999,57.443599999999996,203.9488,27.973499999999998,29.6778],"infer_ms":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"first_splits":[[0,1,2,3,4,5,5,4,5,6,5,6,6,3,4,5,4,5,2,3,4,3,1,2,2,3],[0,1,2,3,4,5,6,7,9,7,6,13,5,7,9,7,13,9,13,4,5,5,7,7,3,4,5,6,5,4,5,2,3,4,5,6,5,4,6,3,4,4,1,2,3,4,5,4,5,3,4,5,4,5,2,3,4,5,4,3,4,4],[0,1,2,3,4,5,6,7,7,8,7,10,11,10,4,5,3,4,4,2,3,4,4,3,1,2,3,4,5,3,4,2,3,4,3],[0,1,2,3,4,5,6,7,9,10,11,10,11,15,7,6,5,6,7,7,8,8,9,6,7,8,4,5,6,7,6,5,6,7,8,6,7,8,3,4,5,6,7,8,9,7,6,5,6,7,7,8,8,6,7,4,5,6,7,6,5,6,7,8,6,7,2,4,5,6,7,15,7,5,6,7,8,3,4,5,6,7,8,9,7,5,6,7,8,9,4,5,6,7,8,9,7,5,6,7,7,8,9,6,1,2,3,4,5,5,4,5,6,5,6,8,6,3,4,5,5,6,6,4,5,5,2,4,5,6,7,5,6,7,3,4,5,5,6,4,5,5,6],[0,1,2,3,4,5,5,4,5,6,6,5,3,4,5,4,5,6,7,2,3,4,4,5,3,4,5,4,5,6,1,2,3,4,5,4,5,6,7,5,3,4,5,5,4,5,6,7,2,3,4,3,4,4],[0,1,2,4,5,6,7,8,9,10,11,12,14,15,12,13,11,12,10,11,12,13,14,12,9,10,11,12,11,10,11,13,12,13,14,11,12,8,9,10,11,12,11,10,13,14,9,10,11,10,11,13,13,14,11,7,8,9,9,10,8,9,9,10,6,7,8,9,10,11,9,10,11,8,9,9,8,9,10,11,9,10,10,11,5,6,7,8,9,10,11,12,14,12,11,10,11,12,13,12,13,14,14,11,12,9,10,11,8,9,10,11,10,11,13,13,14,14,11,13,14,9,10,11,13,11,7,8,9,10,9,8,9,10,9,6,8,9,10,10,11,12,9,10,8,9,10,10,11,12,9,10,11,4,5,6,7,8,9,11,9,11,8,9,11,9,11,7,8,9,8,9,6,7,8,8,9,5,6,7,8,9,11,12,12,11,13,12,13,14,14,11,8,9,11,11,13,14,9,11,7,8,9,8,9,6,8,9,7,8,9,2,3,4,5,5,6,4,5,5,4,5,6,8,6,5,6,8,9,10,11,13,8,6,1,2,3,4,5,6,7,8,8,6,5,6,7,8,9,8,9,7,6,8,8,4,5,6,7,6,5,6,7,8,8,6,3,4,5,6,7,6,5,6,7,8,9,8,9,6,4,5,6,5,6,7,6,2,4,5,5,6,4,5,6,8,6,5,6,8,9,6],[0,1,2,3,5,6,7,5,6,3,4,4,5,5,2,3,3,1,2,3,5,6,5,6,6,3,4,2,3,5,6,5,6,6,3,4],[0,1,2,3,4,5,6,7,6,5,6,7,8,4,5,6,6,5,3,4,5,5,4,2,3,4,3,4,1,2,3,4,4,5,3,4,2,3,3]]},"strong":{"nodes":[21.0,37.0,49.0,63.0,15.0,61.0,37.0,19.0],"lp_solves":[541.0,961.0,1155.0,1359.0,383.0,1509.0,921.0,459.0],"total_ms":[204.52100000000002,372.9347,422.49399999999997,658.0726999999999,603.6091,2537.5692,1435.5624,658.7131],"infer_ms":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"first_splits":[[6,0,19,29,5,1,8,0,3,1],[14,2,4,19,18,0,4,3,0,2,4,1,10,8,0,4,1,1],[13,22,19,20,28,2,10,4,10,8,2,20,10,11,0,2,8,10,10,2,19,22,0,25],[9,7,5,26,14,15,2,0,0,15,2,6,8,26,0,26,5,23,6,25,8,0,25,1,6,1,5,6,1,6,1],[7,25,0,4,3,3,25],[21,20,1,11,9,6,0,5,4,12,0,9,0,5,1,11,5,22,9,9,0,5,20,11,5,2,1,9,0,1],[7,15,17,9,10,8,0,0,20,8,0,1,8,1,20,14,2,0],[4,25,5,3,14,1,7,25,0]]},"neural":{"nodes":[29.0,39.0,55.0,73.0,19.0,79.0,39.0,21.0],"lp_solves":[29.0,39.0,55.0,73.0,19.0,79.0,39.0,21.0],"total_ms":[27.5958,39.7559,117.99900000000001,109.2449,17.9056,67.50290000000001,40.879,24.3893],"infer_ms":[0.7849,1.1407,6.7575,7.3225,0.4224,1.8725,1.0329,0.5958],"first_splits":[[6,0,29,2,19,19,5,22,2,0,22,3,3,22],[14,2,7,25,6,6,6,7,6,6,7,25,6,29,2,8,25,2,2],[13,22,19,10,26,14,25,25,11,14,14,20,14,11,0,24,7,28,25,23,19,4,10,4,22,19,26],[9,7,26,21,5,15,4,29,0,6,25,21,5,6,25,25,4,5,2,25,23,5,15,23,21,4,7,26,5,5,7,5,0,0,5,2],[7,25,0,10,2,8,20,5,25],[21,9,20,1,11,23,19,5,12,5,0,6,10,1,11,10,19,5,20,1,19,5,11,6,19,6,5,1,19,5,5,22,11,20,1,1,20,1,1],[7,15,20,14,0,9,11,9,17,23,17,20,17,10,14,0,17,0,9],[4,25,5,23,3,21,23,14,25,23]]},"root-neural":{"nodes":[41.0,83.0,37.0,75.0,15.0,97.0,39.0,17.0],"lp_solves":[41.0,83.0,37.0,75.0,15.0,97.0,39.0,17.0],"total_ms":[37.0768,197.29070000000002,34.4446,64.3538,15.871300000000002,103.7475,33.615199999999994,20.4616],"infer_ms":[0.0412,0.0841,0.0771,0.0824,0.0692,0.0826,0.0565,0.0724],"first_splits":[[6,29,2,0,8,22,22,3,3,8,0,22,2,0,29,2,0,0,2,0],[14,26,18,1,2,7,7,5,2,4,1,2,7,2,18,1,2,7,2,1,26,18,1,2,2,4,25,1,2,7,2,4,25,7,18,1,25,1,2,4,25],[13,22,26,11,19,14,12,19,11,19,14,14,19,26,19,19,22,26],[9,7,25,5,26,21,21,26,5,26,21,21,4,26,25,5,26,21,21,4,26,5,26,7,25,5,26,5,26,21,26,25,5,26,26,5,26],[7,25,14,14,0,4,25],[21,9,1,11,20,12,14,14,19,20,12,19,11,20,20,19,1,11,20,20,19,12,14,2,19,12,12,2,11,20,20,19,12,12,12,0,9,1,11,20,20,11,1,11,20,20,11,20],[7,20,15,14,0,6,17,9,23,6,0,6,14,0,15,20,15,14,15],[4,8,5,25,5,8,5,5]]}}},"acceptance":{"checks":42,"passed":42,"rows":[{"check":"square LP bound","sheet":"-4.000000","measured":-4.0,"pass":true},{"check":"square LP spins","sheet":"(1/2,1/2,1/2,1/2)","measured":[0.5,0.5,0.5,0.5],"pass":true},{"check":"square exact energy","sheet":"-2.000000","measured":-2.0,"pass":true},{"check":"square nearest-rounded energy","sheet":"+2.000000","measured":2.0,"pass":true},{"check":"square rounding excess","sheet":"4","measured":4.0,"pass":true},{"check":"diet LP optimum","sheet":"23.071429 (323/14)","measured":23.071429,"pass":true},{"check":"16 x LP bound","sheet":"every bound -52.00","measured":-52.0,"pass":true},{"check":"16 x exact energy","sheet":"mean -38.25","measured":-38.25,"pass":true},{"check":"16 x integrality gap","sheet":"mean 13.75","measured":13.75,"pass":true},{"check":"16 x relative gap","sheet":"36.5% of |H*|","measured":"36.45%","pass":true},{"check":"16 x fractional spins","sheet":"all 22 spins at 1/2","measured":22.0,"pass":true},{"check":"16 x suboptimal roundings","sheet":"16 of 16","measured":16,"pass":true},{"check":"16 x mean rounding excess","sheet":"34.25","measured":34.25,"pass":true},{"check":"16 x largest rounding excess","sheet":"60 on instance 11","measured":"60 on instance 11","pass":true},{"check":"worst single integrality gap","sheet":"every gap is 52 + H* > 0","measured":17.0,"pass":true},{"check":"tetrahedron nodes","sheet":"5","measured":5,"pass":true},{"check":"tetrahedron LP bounds","sheet":"-6, -4, -3, -3, -2","measured":[-6.0,-4.0,-3.0,-3.0,-2.0],"pass":true},{"check":"48 x 2 exactness","sheet":"all match HiGHS (ours < 1e-12)","measured":"6.47e-13","pass":true},{"check":"most-frac mean nodes","sheet":"50.88","measured":52.7917,"pass":true},{"check":"strong mean nodes","sheet":"16.00","measured":16.9583,"pass":true},{"check":"tree shrink","sheet":"3.18x smaller","measured":3.113,"pass":true},{"check":"strong LP solves per node","sheet":"18.0","measured":18.111,"pass":true},{"check":"most-frac LP solves per node","sheet":"1.0 (one LP per node)","measured":1.0,"pass":true},{"check":"training instances","sheet":"36","measured":36,"pass":true},{"check":"validation instances","sheet":"12","measured":12,"pass":true},{"check":"instance overlap","sheet":"0","measured":0,"pass":true},{"check":"training/validation nodes","sheet":"276 / 84","measured":"290 / 93","pass":true},{"check":"best validation cross-entropy","sheet":"1.759","measured":1.833,"pass":true},{"check":"JAX/Rust probe difference","sheet":"< 1e-4","measured":"6.66e-16","pass":true},{"check":"largest HiGHS error (eval)","sheet":"< 1e-6 (ours < 3e-13)","measured":"2.02e-12","pass":true},{"check":"LP solves equal nodes (non-Strong)","sheet":"yes","measured":"every instance","pass":true},{"check":"16 unseen: most-frac mean nodes","sheet":"50.9","measured":50.625,"pass":true},{"check":"16 unseen: neural mean nodes","sheet":"15.4","measured":14.5,"pass":true},{"check":"16 unseen: strong mean nodes","sheet":"15.6","measured":15.5,"pass":true},{"check":"16 unseen: neural beats most-frac","sheet":"fewer nodes","measured":"14.50 < 50.62","pass":true},{"check":"16 unseen: neural faster than Strong","sheet":"7.15 ms against 122.85 ms","measured":"5.60 ms against 91.30 ms","pass":true},{"check":"30 spins: most-frac mean nodes","sheet":"177.8","measured":175.25,"pass":true},{"check":"30 spins: strong mean nodes","sheet":"38.0","measured":37.75,"pass":true},{"check":"30 spins: neural mean nodes","sheet":"39.5","measured":44.25,"pass":true},{"check":"30 spins: root-neural mean nodes","sheet":"50.8","measured":50.5,"pass":true},{"check":"30 spins: both neural rules beat most-frac","sheet":"fewer nodes","measured":"neural 44.2, root-neural 50.5 against 175.2","pass":true},{"check":"30 spins: Strong Branching is the slow one","sheet":"558.31 ms against 106.62 ms","measured":"861.68 ms against 71.57 ms","pass":true}]},"controls":{"defects":7,"caught":7}};
+
+/* ---------------------------------------------------------------- helpers */
+const $ = (id) => document.getElementById(id);
+const fmt = (v, d = 3) => (v === null || v === undefined || Number.isNaN(v)) ? "—" : Number(v).toFixed(d);
+const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
+const COLORS = { "most-frac": "#7aa2f7", strong: "#e06c75", neural: "#4ade80", "root-neural": "#f6a45c" };
+const RULES = ["most-frac", "strong", "neural", "root-neural"];
+
+/* ------------------------------------------------------------ tab switching */
+function switchTab(which) {
+  const sim = $("simView"), gallery = $("galleryView");
+  $("tabSimBtn").classList.toggle("active", which === "sim");
+  $("tabGalleryBtn").classList.toggle("active", which === "gallery");
+  sim.style.display = which === "sim" ? "grid" : "none";
+  gallery.classList.toggle("active", which === "gallery");
+  if (which === "gallery") buildGallery();
+}
+
+/* -------------------------------------------------------------- the search */
+// The five explored nodes of the frustrated tetrahedron (most-frac), plus the
+// two children that pruning skips.
+const NODES = [
+  { id: 1, label: "root", bound: -6, status: "split x0", x: 0.50, y: 0.11, parent: null },
+  { id: 2, label: "x0=1", bound: -4, status: "split x1", x: 0.30, y: 0.40, parent: 1, edge: "x0=1" },
+  { id: 3, label: "x0=1,x1=1", bound: -3, status: "incumbent", x: 0.16, y: 0.70, parent: 2, edge: "x1=1" },
+  { id: 4, label: "x0=1,x1=0", bound: -3, status: "pruned-by-bound", x: 0.42, y: 0.70, parent: 2, edge: "x1=0" },
+  { id: 5, label: "x0=0", bound: -2, status: "pruned-by-bound", x: 0.80, y: 0.40, parent: 1, edge: "x0=0" },
+  { id: 6, label: "skipped", bound: -1, status: "skipped", x: 0.70, y: 0.70, parent: 5, edge: "x1=1" },
+  { id: 7, label: "skipped", bound: -1, status: "skipped", x: 0.92, y: 0.70, parent: 5, edge: "x1=0" },
+];
+const ORDER = [1, 2, 3, 4, 5];
+let step = 0, timer = null, incumbent = -Infinity;
+let squareMode = "lp";
+let selectedRule = "most-frac";
+
+function statusColor(status) {
+  if (status === "incumbent") return "#34d399";
+  if (status === "pruned-by-bound" || status === "infeasible") return "#f87171";
+  if (status === "skipped") return "#475569";
+  return "#38bdf8";
+}
+
+function drawTree() {
+  const canvas = $("treeCanvas");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const px = (x) => 90 + x * (W - 180);
+  const py = (y) => 40 + y * (H - 110);
+
+  // edges
+  for (const n of NODES) {
+    if (n.parent === null) continue;
+    const p = NODES.find((m) => m.id === n.parent);
+    const visited = ORDER.indexOf(n.id) < step && ORDER.indexOf(n.id) >= 0;
+    ctx.strokeStyle = n.status === "skipped" ? "#334155" : (visited ? "#3b4a63" : "#243044");
+    ctx.setLineDash(n.status === "skipped" ? [5, 5] : []);
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(px(p.x), py(p.y) + 20);
+    ctx.lineTo(px(n.x), py(n.y) - 20);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // branch label
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "11px 'JetBrains Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(n.edge, (px(p.x) + px(n.x)) / 2 + (n.x > p.x ? 16 : -16), (py(p.y) + py(n.y)) / 2);
+  }
+
+  // nodes
+  for (const n of NODES) {
+    const idx = ORDER.indexOf(n.id);
+    const visited = idx >= 0 && idx < step;
+    const active = idx === step - 1;
+    const color = n.status === "skipped" ? "#475569" : (visited ? statusColor(n.status) : "#334155");
+    ctx.beginPath();
+    ctx.arc(px(n.x), py(n.y), active ? 25 : 20, 0, Math.PI * 2);
+    ctx.fillStyle = visited ? color + "33" : "rgba(15,23,42,0.9)";
+    ctx.fill();
+    ctx.lineWidth = active ? 3 : 1.6;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+
+    ctx.fillStyle = visited ? "#f1f5f9" : "#64748b";
+    ctx.font = "600 13px 'JetBrains Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(n.id, px(n.x), py(n.y));
+
+    ctx.fillStyle = visited ? "#94a3b8" : "#475569";
+    ctx.font = "11px 'JetBrains Mono', monospace";
+    ctx.textBaseline = "top";
+    ctx.fillText(n.label, px(n.x), py(n.y) + 26);
+    ctx.fillText(n.bound.toFixed(0), px(n.x), py(n.y) + 40);
+  }
+
+  // caption
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "12px 'Inter', sans-serif";
+  ctx.fillText("Frustrated tetrahedron K4: all six couplings +1, field h₀ = +1, ground state −3", 20, 14);
+  if (step >= ORDER.length) {
+    ctx.fillStyle = "#34d399";
+    ctx.fillText("5 nodes explored, 2 subtrees skipped: pruning by bound is what makes the search small", 20, H - 26);
+  }
+}
+
+function drawSquare() {
+  const canvas = $("squareCanvas");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const cx = W / 2, cy = H / 2 + 8, r = Math.min(H, W) / 3.4;
+  const corners = [
+    { x: cx - r, y: cy - r }, { x: cx + r, y: cy - r },
+    { x: cx + r, y: cy + r }, { x: cx - r, y: cy + r },
+  ];
+  const edges = DATA.square.edges.map((e) => [e[0], e[1]]);
+  const couplings = DATA.square.couplings;
+  const half = squareMode === "lp";
+  const spins = half ? [0.5, 0.5, 0.5, 0.5] : DATA.square.exact_spins.map((x) => 1 - 2 * x);
+
+  edges.forEach(([u, v], k) => {
+    const j = couplings[k];
+    const product = spins[u] * spins[v];
+    // At x = 1/2 the LP sets every bond variable to its preferred value, so all
+    // four bonds look satisfied there; the ground state really satisfies three.
+    const satisfied = half ? true : (j > 0 ? product < 0 : product > 0);
+    ctx.strokeStyle = satisfied ? "#34d399" : "#f87171";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(corners[u].x, corners[u].y);
+    ctx.lineTo(corners[v].x, corners[v].y);
+    ctx.stroke();
+
+    const mx = (corners[u].x + corners[v].x) / 2, my = (corners[u].y + corners[v].y) / 2;
+    ctx.fillStyle = satisfied ? "#34d399" : "#f87171";
+    ctx.font = "600 12px 'JetBrains Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText((j > 0 ? "+1" : "−1") + (satisfied ? "" : " ✗"), mx, my);
+  });
+
+  corners.forEach((c, i) => {
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, 22, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(15,23,42,0.95)";
+    ctx.fill();
+    ctx.strokeStyle = "#38bdf8";
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+    ctx.fillStyle = "#f1f5f9";
+    ctx.font = "600 12px 'JetBrains Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const s = spins[i];
+    const text = half ? (s === 0.5 ? "1/2" : fmt(s, 1)) : (s > 0 ? "+1" : "−1");
+    ctx.fillText(text, c.x, c.y);
+    ctx.fillStyle = "#64748b";
+    ctx.font = "10px 'JetBrains Mono', monospace";
+    ctx.textBaseline = "top";
+    ctx.fillText("x" + i, c.x, c.y + 26);
+  });
+
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "12px 'Inter', sans-serif";
+  if (half) {
+    ctx.fillText("LP relaxation: every spin at 1/2, every bond takes its preferred value, zLP = −4", 20, 14);
+    ctx.fillStyle = "#fbbf24";
+    ctx.fillText("Rounding 1/2 to 0/1 leaves three of the four +1 bonds unsatisfied: H = +2", 20, 32);
+  } else {
+    const spinText = DATA.square.exact_spins.map((x) => (1 - 2 * x > 0 ? "+1" : "\u22121")).join(",");
+    ctx.fillText("Exact ground state: spins (" + spinText + "), three bonds satisfied, H* = \u22122", 20, 14);
+    ctx.fillStyle = "#94a3b8";
+    ctx.fillText("No state reaches −4: going round the square the four couplings cannot all be satisfied", 20, 32);
+  }
+}
+
+function refreshReadouts() {
+  $("statNodes").textContent = Math.min(step, ORDER.length) + " / 5";
+  $("statLp").textContent = String(Math.min(step, ORDER.length));
+  $("statInc").textContent = incumbent === -Infinity ? "−∞" : incumbent.toFixed(3);
+  $("actIndex").textContent = String(step);
+  const current = step > 0 ? NODES.find((n) => n.id === ORDER[Math.min(step, ORDER.length) - 1]) : null;
+  $("actType").textContent = current
+    ? (current.status === "incumbent" ? "INCUMBENT" : current.status === "split x0" || current.status === "split x1"
+        ? "SPLIT " + current.status.split(" ")[1] : "PRUNED")
+    : "READY";
+}
+
+function stepSearch(n) {
+  step = Math.max(0, Math.min(ORDER.length, step + n));
+  incumbent = -Infinity;
+  for (let k = 0; k < step; k++) {
+    const node = NODES.find((m) => m.id === ORDER[k]);
+    if (node.status === "incumbent") incumbent = node.bound;
+  }
+  drawTree();
+  refreshReadouts();
+}
+
+function resetSearch() {
+  if (timer) { clearInterval(timer); timer = null; }
+  $("btnPlay").textContent = "▶ Play search";
+  step = 0;
+  incumbent = -Infinity;
+  drawTree();
+  refreshReadouts();
+}
+
+function togglePlay() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+    $("btnPlay").textContent = "▶ Play search";
+    return;
+  }
+  if (step >= ORDER.length) resetSearch();
+  $("btnPlay").textContent = "⏸ Pause";
+  timer = setInterval(() => {
+    if (step >= ORDER.length) {
+      clearInterval(timer);
+      timer = null;
+      $("btnPlay").textContent = "▶ Play search";
+      return;
+    }
+    stepSearch(1);
+  }, 850);
+}
+
+function setSquareMode(mode) {
+  squareMode = mode;
+  $("btnSquareLp").classList.toggle("primary", mode === "lp");
+  $("btnSquareGs").classList.toggle("primary", mode === "gs");
+  drawSquare();
+}
+
+/* ---------------------------------------------------------------- sidebar */
+function buildRules() {
+  const host = $("ruleList");
+  host.innerHTML = "";
+  const pol = DATA.test.summary.policies;
+  for (const rule of RULES) {
+    const stats = pol[rule];
+    const card = document.createElement("div");
+    card.className = "rule-card" + (rule === selectedRule ? " selected" : "");
+    const extra = rule === "strong"
+      ? `${fmt(stats.mean_lp_solves, 1)} LP solves, ${fmt(stats.mean_total_ms, 1)} ms`
+      : `${fmt(stats.mean_nodes, 1)} LP solves, ${fmt(stats.mean_total_ms, 1)} ms`;
+    card.innerHTML = `<div class="rule-head"><span class="rule-name">${rule}</span>
+      <span class="rule-nodes">${fmt(stats.mean_nodes, 2)} nodes</span></div>
+      <div class="rule-meta">${extra}${stats.mean_infer_ms > 0 ? `, ${fmt(stats.mean_infer_ms, 2)} ms inference` : ""}</div>`;
+    card.onclick = () => { selectedRule = rule; buildRules(); buildKv(); };
+    host.appendChild(card);
+  }
+}
+
+function buildKv() {
+  const pol = DATA.test.summary.policies[selectedRule];
+  const tra = DATA.transfer.summary.policies[selectedRule];
+  const rows = [
+    ["rule", selectedRule],
+    ["16 unseen graphs, mean nodes", fmt(pol.mean_nodes, 2)],
+    ["8 larger graphs, mean nodes", fmt(tra.mean_nodes, 2)],
+    ["LP solves per node", fmt(pol.mean_lp_solves / pol.mean_nodes, 2)],
+    ["mean total time (22 spins)", fmt(pol.mean_total_ms, 2) + " ms"],
+    ["mean total time (30 spins)", fmt(tra.mean_total_ms, 2) + " ms"],
+    ["pruning tolerance", "1e-6"],
+    ["solver", "HiGHS, presolve off, 1 thread"],
+  ];
+  $("searchKv").innerHTML = rows.map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join("");
+  $("squareKv").innerHTML = [
+    ["edges", "4 (cycle 0-1-2-3-0)"],
+    ["couplings", "+1, +1, +1, −1"],
+    ["LP bound", fmt(DATA.square.lp_bound, 3)],
+    ["exact optimum", fmt(DATA.square.exact_energy, 3)],
+    ["nearest rounding", fmt(DATA.square.rounded_energy, 3)],
+    ["rounding excess", fmt(DATA.square.rounded_excess, 3)],
+    ["diet LP optimum", fmt(DATA.diet.cost, 6)],
+  ].map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join("");
+}
+
+/* ---------------------------------------------------------------- gallery */
+const CARDS = [
+  {
+    part: "Part 1",
+    file: "gap.png",
+    title: "The relaxation hides frustration",
+    desc: "The LP lower bound and the exact ground-state energy of the 16 seeded 22-spin, 52-bond spin glasses, beside the integrality gap and the energy that naive rounding costs.",
+    theory: "At x = 1/2 every bond disagreement z_e is free in [0,1], so the relaxation can satisfy every coupling at once and returns z_LP = −m. The exact optimum is 13.75 higher on average; rounding x_i ≥ 1/2 to 1 turns every spin to −1 and lands 34.25 above the optimum on average.",
+    metrics: () => [
+      ["mean LP bound", fmt(DATA.gap.summary.mean_lp_bound, 2)],
+      ["mean exact energy", fmt(DATA.gap.summary.mean_exact_energy, 2)],
+      ["mean integrality gap", fmt(DATA.gap.summary.mean_integrality_gap, 2)],
+      ["mean rounding excess", fmt(DATA.gap.summary.mean_rounding_excess, 2)],
+      ["suboptimal roundings", `${DATA.gap.summary.suboptimal_roundings} / 16`],
+      ["diet LP optimum", fmt(DATA.diet.cost, 6)],
+    ],
+    cmd: "python scripts/plot_gap.py",
+  },
+  {
+    part: "Part 2",
+    file: "bnb.png",
+    title: "A smaller tree at a higher price per node",
+    desc: "Explored nodes and LP solves per instance for the cheap rule and Strong Branching, each curve sorted independently, on the 48 Part 2 spin glasses.",
+    theory: "Every split on a 0/1 spin doubles the open subproblems, and pruning keeps the tree small only when the bounds tighten early. Strong Branching probes both child LPs of every candidate and scores them by max(Δ0,1e−6)·max(Δ1,1e−6), buying a smaller tree with many more LP solves.",
+    metrics: () => [
+      ["most-frac mean nodes", fmt(DATA.bnb.most.summary.mean_nodes, 2)],
+      ["Strong Branching mean nodes", fmt(DATA.bnb.strong.summary.mean_nodes, 2)],
+      ["tree shrink", fmt(DATA.bnb.most.summary.mean_nodes / DATA.bnb.strong.summary.mean_nodes, 2) + "×"],
+      ["Strong LP solves per node", fmt(DATA.bnb.strong.summary.mean_lp_solves / DATA.bnb.strong.summary.mean_nodes, 2)],
+      ["mean time most-frac", fmt(DATA.bnb.most.summary.mean_elapsed_ms, 2) + " ms"],
+      ["mean time strong", fmt(DATA.bnb.strong.summary.mean_elapsed_ms, 2) + " ms"],
+      ["largest error vs HiGHS", DATA.bnb.strong.summary.largest_error.toExponential(2)],
+    ],
+    cmd: "python scripts/plot_bnb.py",
+  },
+  {
+    part: "Part 3",
+    file: "neural_bnb.png",
+    title: "A network that copies the strong rule for free",
+    desc: "Training and validation cross-entropy against epoch, and the explored nodes of most-frac, the learned rule and Strong Branching on the 16 unseen 22-spin, 52-bond graphs (seed 3026).",
+    theory: "One shared MLP turns each candidate spin's 12 spin-graph features into a score, a masked softmax compares the candidates of a node, and cross-entropy against Strong Branching's choice is smooth enough to differentiate through. The network only chooses the split, so every optimum stays exact.",
+    metrics: () => [
+      ["training nodes / graphs", `${DATA.model.train.nodes} / ${DATA.model.train.instances.length}`],
+      ["validation nodes / graphs", `${DATA.model.validation.nodes} / ${DATA.model.validation.instances.length}`],
+      ["instance overlap", String(DATA.model.overlap)],
+      ["best validation cross-entropy", fmt(DATA.model.best_val_ce, 3) + " (epoch " + DATA.model.best_epoch + ")"],
+      ["neural mean nodes", fmt(DATA.test.summary.policies.neural.mean_nodes, 2)],
+      ["most-frac mean nodes", fmt(DATA.test.summary.policies["most-frac"].mean_nodes, 2)],
+      ["neural mean time", fmt(DATA.test.summary.policies.neural.mean_total_ms, 2) + " ms"],
+      ["Strong Branching mean time", fmt(DATA.test.summary.policies.strong.mean_total_ms, 2) + " ms"],
+    ],
+    cmd: "python scripts/plot_neural_bnb.py",
+  },
+  {
+    part: "Part 4",
+    file: "eval.png",
+    title: "Laptop time and size transfer to 30 spins",
+    desc: "Mean explored nodes of all four rules on both evaluation runs, and the wall-clock split between LP solves and inference on the larger 30-spin, 72-bond graphs (seed 4026).",
+    theory: "Total search time is the LP solves plus tree management plus the time spent extracting features and running the network. Per-node scoring pays that overhead at every node, root-cached scoring pays it once and then follows r_i + 3·2min(x_i,1−x_i); size-independent features let the 22-spin network score 30-spin graphs unchanged.",
+    metrics: () => [
+      ["30 spins, most-frac nodes", fmt(DATA.transfer.summary.policies["most-frac"].mean_nodes, 2)],
+      ["30 spins, neural nodes", fmt(DATA.transfer.summary.policies.neural.mean_nodes, 2)],
+      ["30 spins, root-neural nodes", fmt(DATA.transfer.summary.policies["root-neural"].mean_nodes, 2)],
+      ["30 spins, strong nodes", fmt(DATA.transfer.summary.policies.strong.mean_nodes, 2)],
+      ["neural inference, 30 spins", fmt(DATA.transfer.summary.policies.neural.mean_infer_ms, 2) + " ms"],
+      ["root-neural inference, 30 spins", fmt(DATA.transfer.summary.policies["root-neural"].mean_infer_ms, 2) + " ms"],
+      ["largest error vs HiGHS", DATA.transfer.summary.largest_highs_error.toExponential(2)],
+    ],
+    cmd: "python scripts/plot_eval.py",
+  },
+];
+
+let galleryBuilt = false;
+function buildGallery() {
+  if (galleryBuilt) return;
+  galleryBuilt = true;
+  const grid = $("galleryCardsGrid");
+  CARDS.forEach((card, index) => {
+    const el = document.createElement("div");
+    el.className = "gallery-card";
+    const m = card.metrics()[0];
+    el.innerHTML = `<img src="assets/week12/${card.file}" alt="${card.title}" loading="lazy">
+      <div class="gallery-body">
+        <div class="gallery-title">${card.title}</div>
+        <div class="gallery-desc">${card.desc}</div>
+        <div class="gallery-meta">${card.part} · ${m[0]}: ${m[1]}</div>
+      </div>`;
+    el.onclick = () => openLightbox(index);
+    grid.appendChild(el);
+  });
+
+  const acc = DATA.acceptance;
+  $("accSummary").textContent = `${acc.passed}/${acc.checks} checks pass, ` +
+    `${DATA.controls.caught}/${DATA.controls.defects} deliberate defects caught`;
+  $("accHead").textContent = `${acc.passed}/${acc.checks} automatic checks`;
+  $("accTable").innerHTML = acc.rows.map((row) =>
+    `<tr><td>${row.check}</td><td class="mono" style="color:var(--ink-muted);">${row.sheet}</td>
+     <td class="mono">${row.measured}</td>
+     <td>${row.pass ? '<span class="pill ok">PASS</span>' : '<span class="pill" style="background:rgba(248,113,113,0.15);color:#f87171;">FAIL</span>'}</td></tr>`
+  ).join("");
+}
+
+let current = 0;
+function openLightbox(index) {
+  current = index;
+  const card = CARDS[index];
+  $("modalPartBadge").textContent = card.part;
+  $("modalTitle").textContent = card.title;
+  $("modalImg").src = `assets/week12/${card.file}`;
+  $("modalDesc").textContent = card.desc;
+  $("modalTheory").textContent = card.theory;
+  $("modalMetrics").innerHTML = card.metrics().map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join("");
+  $("modalCmd").textContent = card.cmd;
+  $("lightbox").classList.add("active");
+}
+function closeLightbox() { $("lightbox").classList.remove("active"); }
+
+/* ------------------------------------------------------------------- boot */
+buildRules();
+buildKv();
+setSquareMode("lp");
+drawTree();
+refreshReadouts();
+buildGallery();
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeLightbox();
+  if (e.key === "ArrowRight" && $("simView").style.display !== "none") stepSearch(1);
+  if (e.key === "ArrowLeft" && $("simView").style.display !== "none") stepSearch(-1);
+});
+</script>
+</body>
+</html>
