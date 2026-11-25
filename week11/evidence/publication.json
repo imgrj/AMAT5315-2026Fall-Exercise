@@ -1,15 +1,15 @@
 {
   "url": "https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week11-tnsample-lab.html",
-  "commit": "daad938924e0c788154f90e1254c02381619f0ac",
-  "commit_subject": "Publish the Week 11 lab with Interactive Studio and Evidence & Verification tabs",
-  "checked_at": "2026-11-25T11:42:25+00:00",
+  "commit": "d1065345716367dc53a247f1d75af71f20c34e11",
+  "commit_subject": "Name the acceptance table's reference column for what it holds",
+  "checked_at": "2026-11-25T11:46:13+00:00",
   "files": [
     {
       "path": "week11-tnsample-lab.html",
       "status": 200,
       "bytes": 68835,
-      "sha256_local": "2b594bf1c559a06b1847139239b044d00d4623ddd3c115a455b0ef03f912d666",
-      "sha256_live": "1f129121e7ea0b3ba7aca1d3168e725b5aab57412e8587363cd517fc31cca2a2",
+      "sha256_local": "ab01ec03bb43486073e2cf024b3be0ad4465e5e6b48c0cf8c48f4140a1d4aa1c",
+      "sha256_live": "2b1295624d63f6a12ba087a35eb951680166026b2d9e29b69bb999ee5cac02b7",
       "match": true
     },
     {
