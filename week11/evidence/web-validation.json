@@ -1,0 +1,28 @@
+{
+  "url": "file:///D:/Desktop/AMAT5315-2026Fall-Exercise/docs/week11-tnsample-lab.html",
+  "browser": "Microsoft Edge, Playwright headless",
+  "desktop": [
+    1440,
+    1000
+  ],
+  "responsive_widths": [
+    390,
+    700,
+    1024
+  ],
+  "figures_loaded": 3,
+  "page_errors": [],
+  "checks": [
+    "upper-right segmented switch reaches the header edge",
+    "mutually exclusive studio and evidence panels",
+    "gate chips, player and reset drive the ladder",
+    "contraction player reaches E_min = -299 with g_0 = 1",
+    "draw player streams 2000 samples and quotes the prediction",
+    "N-queens player counts boards and steps draws for N = 6 and 8",
+    "acceptance, pred and scaling tables are filled",
+    "3 evidence images loaded",
+    "lightbox shows captions, commands, next/prev and Escape",
+    "no horizontal overflow at 390/700/1024 px",
+    "no page errors"
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "pred_version": "pred 0.6.0",
+  "path_line": "Path (2 steps): Factoring \u2192 CircuitSAT \u2192 SpinGlass/SimpleGraph/i32",
+  "path": [
+    "Factoring",
+    "CircuitSAT",
+    "SpinGlass"
+  ],
+  "factoring": {
+    "15": {
+      "bits": [
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "factors": [
+        3,
+        5
+      ],
+      "product": 15,
+      "error": 0,
+      "evaluation": "Min(0)",
+      "spin_glass_evaluation": "Min(-299)",
+      "spin_glass_spins": 104,
+      "solver": "ilp"
+    },
+    "6": {
+      "bits": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "factors": [
+        2,
+        3
+      ],
+      "product": 6,
+      "error": 0,
+      "evaluation": "Min(0)",
+      "spin_glass_evaluation": "Min(-204)",
+      "spin_glass_spins": 72,
+      "solver": "ilp"
+    },
+    "7": {
+      "bits": [
+        1,
+        1,
+        0,
+        1
+      ],
+      "factors": [
+        3,
+        2
+      ],
+      "product": 6,
+      "error": 1,
+      "evaluation": "Min(1)",
+      "spin_glass_evaluation": "Min(-202)",
+      "spin_glass_spins": 72,
+      "solver": "ilp"
+    }
+  },
+  "evaluate_15": {
+    "config": [
+      1,
+      1,
+      1,
+      0,
+      1
+    ],
+    "result": "Min(0)"
+  }
+}

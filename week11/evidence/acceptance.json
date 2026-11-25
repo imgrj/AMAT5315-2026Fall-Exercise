@@ -1,0 +1,610 @@
+{
+  "accepted": true,
+  "checks": 52,
+  "failed": [],
+  "gates": {
+    "AND": {
+      "ours": -3.0,
+      "sheet": -3
+    },
+    "COPY": {
+      "ours": -1.0,
+      "sheet": -1
+    },
+    "NOT": {
+      "ours": -1.0,
+      "sheet": -1
+    },
+    "OR": {
+      "ours": -3.0,
+      "sheet": -3
+    },
+    "SET0": {
+      "ours": -1.0,
+      "sheet": -1
+    },
+    "SET1": {
+      "ours": -1.0,
+      "sheet": -1
+    },
+    "XOR": {
+      "ours": -4.0,
+      "sheet": -4
+    }
+  },
+  "circuit": {
+    "floor_ours": -5.0,
+    "floor_sheet": -5,
+    "states_at_floor": 3
+  },
+  "count_p0": {
+    "e_min": -180,
+    "g0": 2,
+    "log_z": 360.6947469015361,
+    "log_excess_above_ground": 0.0015997209761735576
+  },
+  "count_f15": {
+    "e_min": -299,
+    "g0": 1,
+    "log_z": 598.3179452170026,
+    "sc": 5.0,
+    "tc": 11.45,
+    "max_entries": 32
+  },
+  "sample_f15": {
+    "samples": 2000,
+    "p0": 0.7276426497682773,
+    "predicted": 1455.2852995365547,
+    "ground_draws": 1466,
+    "binomial_spread": 19.908732958502277,
+    "sheet_reference_draws": 1460,
+    "histogram": [
+      {
+        "count": 1466,
+        "energy": -299.0
+      },
+      {
+        "count": 261,
+        "energy": -297.0
+      },
+      {
+        "count": 223,
+        "energy": -295.0
+      },
+      {
+        "count": 44,
+        "energy": -293.0
+      },
+      {
+        "count": 6,
+        "energy": -291.0
+      }
+    ],
+    "extract": [
+      1,
+      1,
+      1,
+      0,
+      1
+    ]
+  },
+  "scaling": {
+    "2": {
+      "spins": 72,
+      "sheet_spins": 72,
+      "greedy_sc": 4.0,
+      "sheet_greedy_sc": 5,
+      "treesa_sc": 4.0,
+      "sheet_treesa_sc": 4,
+      "treesa_tc": 10.62,
+      "sheet_treesa_tc": 10.7,
+      "plan_hash": "603f36b5ecebb3aa"
+    },
+    "3": {
+      "spins": 150,
+      "sheet_spins": 150,
+      "greedy_sc": 10.0,
+      "sheet_greedy_sc": 9,
+      "treesa_sc": 7.0,
+      "sheet_treesa_sc": 7,
+      "treesa_tc": 12.54,
+      "sheet_treesa_tc": 12.6,
+      "plan_hash": "12d17da4f7d102a4"
+    },
+    "4": {
+      "spins": 256,
+      "sheet_spins": 256,
+      "greedy_sc": 14.0,
+      "sheet_greedy_sc": 14,
+      "treesa_sc": 9.0,
+      "sheet_treesa_sc": 9,
+      "treesa_tc": 14.47,
+      "sheet_treesa_tc": 14.5,
+      "plan_hash": "a6fd2667c4a43b70"
+    },
+    "5": {
+      "spins": 390,
+      "sheet_spins": 390,
+      "greedy_sc": 22.0,
+      "sheet_greedy_sc": 23,
+      "treesa_sc": 11.0,
+      "sheet_treesa_sc": 11,
+      "treesa_tc": 16.57,
+      "sheet_treesa_tc": 16.6,
+      "plan_hash": "a69de4a48704c152"
+    },
+    "6": {
+      "spins": 552,
+      "sheet_spins": 552,
+      "greedy_sc": 33.0,
+      "sheet_greedy_sc": 27,
+      "treesa_sc": 13.0,
+      "sheet_treesa_sc": 13,
+      "treesa_tc": 19.0,
+      "sheet_treesa_tc": 19.0,
+      "plan_hash": "b847df377d6d593c"
+    },
+    "7": {
+      "spins": 742,
+      "sheet_spins": 742,
+      "greedy_sc": 39.0,
+      "sheet_greedy_sc": 37,
+      "treesa_sc": 15.0,
+      "sheet_treesa_sc": 15,
+      "treesa_tc": 21.59,
+      "sheet_treesa_tc": 21.5,
+      "plan_hash": "f3c88abbce961e7c"
+    },
+    "8": {
+      "spins": 960,
+      "sheet_spins": 960,
+      "greedy_sc": 55.0,
+      "sheet_greedy_sc": 58,
+      "treesa_sc": 17.0,
+      "sheet_treesa_sc": 17,
+      "treesa_tc": 24.08,
+      "sheet_treesa_tc": 24.0,
+      "plan_hash": "2dc34c21da2b639c"
+    }
+  },
+  "queens": {
+    "4": {
+      "boards": 2,
+      "sheet": 2,
+      "sc": 11.0,
+      "tc": 13.76,
+      "runtime_ms": 55.7
+    },
+    "5": {
+      "boards": 10,
+      "sheet": 10,
+      "sc": 15.0,
+      "tc": 19.03,
+      "runtime_ms": 86.5
+    },
+    "6": {
+      "boards": 4,
+      "sheet": 4,
+      "sc": 18.0,
+      "tc": 23.13,
+      "runtime_ms": 116.3
+    },
+    "7": {
+      "boards": 40,
+      "sheet": 40,
+      "sc": 20.0,
+      "tc": 29.21,
+      "runtime_ms": 186.4
+    },
+    "8": {
+      "boards": 92,
+      "sheet": 92,
+      "sc": 22.0,
+      "tc": 33.01,
+      "runtime_ms": 304.9
+    },
+    "9": {
+      "boards": 352,
+      "sheet": 352,
+      "sc": 27.0,
+      "tc": 39.01,
+      "runtime_ms": 805.9
+    },
+    "10": {
+      "boards": 724,
+      "sheet": 724,
+      "sc": 30.0,
+      "tc": 42.19,
+      "runtime_ms": 15697.0
+    }
+  },
+  "queens_samples": {
+    "n6_frequencies": [
+      52,
+      49,
+      47,
+      52
+    ],
+    "n6_chi2": 0.36,
+    "n8_distinct": 85,
+    "n8_expected_distinct": 81.66
+  },
+  "detail": [
+    {
+      "check": "gate floor AND",
+      "ok": true,
+      "ours": -3.0,
+      "sheet": -3,
+      "note": ""
+    },
+    {
+      "check": "gate floor OR",
+      "ok": true,
+      "ours": -3.0,
+      "sheet": -3,
+      "note": ""
+    },
+    {
+      "check": "gate floor NOT",
+      "ok": true,
+      "ours": -1.0,
+      "sheet": -1,
+      "note": ""
+    },
+    {
+      "check": "gate floor COPY",
+      "ok": true,
+      "ours": -1.0,
+      "sheet": -1,
+      "note": ""
+    },
+    {
+      "check": "gate floor SET0",
+      "ok": true,
+      "ours": -1.0,
+      "sheet": -1,
+      "note": ""
+    },
+    {
+      "check": "gate floor SET1",
+      "ok": true,
+      "ours": -1.0,
+      "sheet": -1,
+      "note": ""
+    },
+    {
+      "check": "gate floor XOR",
+      "ok": true,
+      "ours": -4.0,
+      "sheet": -4,
+      "note": ""
+    },
+    {
+      "check": "circuit floor",
+      "ok": true,
+      "ours": -5.0,
+      "sheet": -5,
+      "note": ""
+    },
+    {
+      "check": "circuit states on the floor",
+      "ok": true,
+      "ours": 3,
+      "sheet": 3,
+      "note": ""
+    },
+    {
+      "check": "10x10 ferromagnet E_min",
+      "ok": true,
+      "ours": -180,
+      "sheet": -180.0,
+      "note": ""
+    },
+    {
+      "check": "10x10 ferromagnet g_0",
+      "ok": true,
+      "ours": 2,
+      "sheet": 2,
+      "note": ""
+    },
+    {
+      "check": "factor_15 E_min",
+      "ok": true,
+      "ours": -299,
+      "sheet": -299.0,
+      "note": ""
+    },
+    {
+      "check": "factor_15 g_0",
+      "ok": true,
+      "ours": 1,
+      "sheet": 1,
+      "note": ""
+    },
+    {
+      "check": "factor_15 log Z",
+      "ok": true,
+      "ours": 598.3179452170026,
+      "sheet": 598.3179,
+      "note": "beta = 2"
+    },
+    {
+      "check": "factor_15 sc",
+      "ok": true,
+      "ours": 5.0,
+      "sheet": 5,
+      "note": ""
+    },
+    {
+      "check": "factor_15 largest tensor",
+      "ok": true,
+      "ours": 32,
+      "sheet": 32,
+      "note": ""
+    },
+    {
+      "check": "ground-state draws against 2000 p_0",
+      "ok": true,
+      "ours": 1466,
+      "sheet": 1455.2852995365547,
+      "note": "within 4 binomial sigma = 79.6; the sheet draws 1460"
+    },
+    {
+      "check": "histogram totals 2000",
+      "ok": true,
+      "ours": 2000,
+      "sheet": 2000,
+      "note": ""
+    },
+    {
+      "check": "lowest sampled energy",
+      "ok": true,
+      "ours": -299,
+      "sheet": -299.0,
+      "note": ""
+    },
+    {
+      "check": "pred extract of the sampled ground state",
+      "ok": true,
+      "ours": [
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "sheet": [
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "note": ""
+    },
+    {
+      "check": "pred extract check on 15",
+      "ok": true,
+      "ours": "Min(0)",
+      "sheet": "Min(0)",
+      "note": ""
+    },
+    {
+      "check": "spins at k=2",
+      "ok": true,
+      "ours": 72,
+      "sheet": 72,
+      "note": ""
+    },
+    {
+      "check": "treesa sc at k=2",
+      "ok": true,
+      "ours": 4.0,
+      "sheet": 4,
+      "note": "omeco anneals, so its plan varies between runs; the sheet states sc ~ 2k + 1 for k >= 3"
+    },
+    {
+      "check": "treesa tc at k=2",
+      "ok": true,
+      "ours": 10.62,
+      "sheet": 10.7,
+      "note": ""
+    },
+    {
+      "check": "spins at k=3",
+      "ok": true,
+      "ours": 150,
+      "sheet": 150,
+      "note": ""
+    },
+    {
+      "check": "treesa sc at k=3",
+      "ok": true,
+      "ours": 7.0,
+      "sheet": 7,
+      "note": "omeco anneals, so its plan varies between runs; the sheet states sc ~ 2k + 1 for k >= 3"
+    },
+    {
+      "check": "treesa tc at k=3",
+      "ok": true,
+      "ours": 12.54,
+      "sheet": 12.6,
+      "note": ""
+    },
+    {
+      "check": "spins at k=4",
+      "ok": true,
+      "ours": 256,
+      "sheet": 256,
+      "note": ""
+    },
+    {
+      "check": "treesa sc at k=4",
+      "ok": true,
+      "ours": 9.0,
+      "sheet": 9,
+      "note": "omeco anneals, so its plan varies between runs; the sheet states sc ~ 2k + 1 for k >= 3"
+    },
+    {
+      "check": "treesa tc at k=4",
+      "ok": true,
+      "ours": 14.47,
+      "sheet": 14.5,
+      "note": ""
+    },
+    {
+      "check": "spins at k=5",
+      "ok": true,
+      "ours": 390,
+      "sheet": 390,
+      "note": ""
+    },
+    {
+      "check": "treesa sc at k=5",
+      "ok": true,
+      "ours": 11.0,
+      "sheet": 11,
+      "note": "omeco anneals, so its plan varies between runs; the sheet states sc ~ 2k + 1 for k >= 3"
+    },
+    {
+      "check": "treesa tc at k=5",
+      "ok": true,
+      "ours": 16.57,
+      "sheet": 16.6,
+      "note": ""
+    },
+    {
+      "check": "spins at k=6",
+      "ok": true,
+      "ours": 552,
+      "sheet": 552,
+      "note": ""
+    },
+    {
+      "check": "treesa sc at k=6",
+      "ok": true,
+      "ours": 13.0,
+      "sheet": 13,
+      "note": "omeco anneals, so its plan varies between runs; the sheet states sc ~ 2k + 1 for k >= 3"
+    },
+    {
+      "check": "treesa tc at k=6",
+      "ok": true,
+      "ours": 19.0,
+      "sheet": 19.0,
+      "note": ""
+    },
+    {
+      "check": "spins at k=7",
+      "ok": true,
+      "ours": 742,
+      "sheet": 742,
+      "note": ""
+    },
+    {
+      "check": "treesa sc at k=7",
+      "ok": true,
+      "ours": 15.0,
+      "sheet": 15,
+      "note": "omeco anneals, so its plan varies between runs; the sheet states sc ~ 2k + 1 for k >= 3"
+    },
+    {
+      "check": "treesa tc at k=7",
+      "ok": true,
+      "ours": 21.59,
+      "sheet": 21.5,
+      "note": ""
+    },
+    {
+      "check": "spins at k=8",
+      "ok": true,
+      "ours": 960,
+      "sheet": 960,
+      "note": ""
+    },
+    {
+      "check": "treesa sc at k=8",
+      "ok": true,
+      "ours": 17.0,
+      "sheet": 17,
+      "note": "omeco anneals, so its plan varies between runs; the sheet states sc ~ 2k + 1 for k >= 3"
+    },
+    {
+      "check": "treesa tc at k=8",
+      "ok": true,
+      "ours": 24.08,
+      "sheet": 24.0,
+      "note": ""
+    },
+    {
+      "check": "N-queens count N=4",
+      "ok": true,
+      "ours": 2,
+      "sheet": 2,
+      "note": ""
+    },
+    {
+      "check": "N-queens count N=5",
+      "ok": true,
+      "ours": 10,
+      "sheet": 10,
+      "note": ""
+    },
+    {
+      "check": "N-queens count N=6",
+      "ok": true,
+      "ours": 4,
+      "sheet": 4,
+      "note": ""
+    },
+    {
+      "check": "N-queens count N=7",
+      "ok": true,
+      "ours": 40,
+      "sheet": 40,
+      "note": ""
+    },
+    {
+      "check": "N-queens count N=8",
+      "ok": true,
+      "ours": 92,
+      "sheet": 92,
+      "note": ""
+    },
+    {
+      "check": "N-queens count N=9",
+      "ok": true,
+      "ours": 352,
+      "sheet": 352,
+      "note": ""
+    },
+    {
+      "check": "N-queens count N=10",
+      "ok": true,
+      "ours": 724,
+      "sheet": 724,
+      "note": ""
+    },
+    {
+      "check": "200 draws of 6-queens visit all 4 boards",
+      "ok": true,
+      "ours": 4,
+      "sheet": 4,
+      "note": ""
+    },
+    {
+      "check": "6-queens frequencies uniform (chi2 < 16.27, 3 dof)",
+      "ok": true,
+      "ours": 0.36,
+      "sheet": "sheet reference: 56, 43, 52, 49",
+      "note": ""
+    },
+    {
+      "check": "distinct 8-queens boards in 200 draws",
+      "ok": true,
+      "ours": 85,
+      "sheet": 81.7,
+      "note": "sheet reference 80"
+    }
+  ]
+}

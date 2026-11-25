@@ -13,6 +13,7 @@ This repository stores weekly exercises for AMAT5315 (*Scientific Computing for 
   - [`week8/`](week8/README.md): Language Models & the Transformer (embeddings, n-grams, memory, attention, Chinchilla scaling)
   - [`week9/`](week9/README.md): Probabilistic Inference by Tensor Contraction (ASIA, contraction orders, loopy BP, Promedus_14)
   - [**`week10/`**](week10/README.md): Approximate Tensor Contraction for the Ising Model (truncated SVD, boundary MPS, TRG, specific-heat peaks)
+  - [**`week11/`**](week11/README.md): Hard Problems, Reductions & Tensor-Network Sampling (gate gadgets, tropical contraction, Boltzmann sampling, N-queens as a tensor network)
   - [**`week12/` (Latest)**](week12/README.md): **Integer Programming and Learned Branching (spin-glass MILP, exact Branch-and-Bound, Strong Branching, imitation learning)**
 
 - **Interactive GitHub Pages Web Labs**:
@@ -26,6 +27,7 @@ This repository stores weekly exercises for AMAT5315 (*Scientific Computing for 
   - [Week 8: Language Models & Transformer Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week8-language-lab.html)
   - [Week 9: Probabilistic Inference & Tensor Network Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week9-inference-lab.html)
   - [Week 10: Approximate Tensor Contraction & Ising Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week10-tensor-lab.html)
+  - [Week 11: Hard Problems & Tensor-Network Sampling Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week11-tnsample-lab.html)
   - [**Week 12: Integer Programming & Learned Branching Lab**](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week12-branching-lab.html)
 
 ---
@@ -67,6 +69,47 @@ python scripts/check_negative_controls.py   # 7 deliberate defects must be caugh
 ```
 
 The guide lists the run settings, the peak-refinement tables and one command beside each figure.
+
+---
+
+## Week 11: Hard Problems, Reductions & Tensor-Network Sampling
+
+The sheet's four builds: factoring 15 sent around a reduction with `pred` (Factoring → CircuitSAT → SpinGlass → 3 × 5), every logic gate turned into a small magnet whose floor is its truth table, a tropical (min-plus) contraction that returns the exact ground-state energy and degeneracy of a 104-spin magnet together with rescaled `log Z` and 2000 Boltzmann draws from one stored tree, and the N-queens puzzle encoded directly as a carry tensor network and sampled uniformly. One Rust tool, `tnsample`, planned by `omeco` 0.2.6; Python only for the independent references, the figures and the browser check.
+
+- **Guide and reproduction commands:** [week11/README.md](week11/README.md)
+- **Interactive Studio and 3 evidence figures:** [Week 11 Sampling Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week11-tnsample-lab.html)
+- **Verification:** 40 independent tests, 4 Rust checks, 52 acceptance checks and three recorded negative controls.
+
+| Result | Measured evidence |
+| :--- | :--- |
+| Factoring round trip (`pred` 0.6.0) | 15 → **104 spins**, ground state `Min(-299)`, decoded `[1,1,1,0,1]` = **3 × 5**, `Min(0)`; 6 → 2 × 3 `Min(0)`; 7 → 3 × 2 = 6 `Min(1)` (no pair exists) |
+| Gate gadgets | AND/OR floor **−3**, NOT/COPY/SET floor **−1**, XOR (with helper) **−4**; the joined AND-NOT-SET1 circuit reaches `E₀ = −5` on exactly **3 of 16** states |
+| 10×10 ferromagnet, β = 2 | `E_min = −180 = −2L(L−1)`, `g₀ = 2`, `log Z = 360.694747` |
+| factor_15 magnet, β = 2 | `E_min = −299`, `g₀ = 1`, `log Z = 598.317945`, `sc = 5` (**32** entries instead of 2¹⁰⁴ states) |
+| 2000 Boltzmann draws | `p₀ = 0.727643`; predicted **1455.29 ± 19.91**, observed **1466**; `pred extract` decodes the ground state to 3 × 5 |
+| Planning `k`-bit factors | spins **72…960**; `treesa sc = 4,7,9,11,13,15,17` (the 2k+1 seam), `tc = 10.62…24.08`; `greedy` runs to **55** |
+| N-queens counts, N = 4…10 | **2, 10, 4, 40, 92, 352, 724**, every one matching OEIS A000170 |
+| 200 uniform boards | all valid; 6-queens frequencies **52, 49, 47, 52** (χ² = 0.36); 8-queens visits **85** of 92 boards (expected 81.7) |
+
+| Every logic rule on its floor | Memory grows, the ground state dominates |
+| :---: | :---: |
+| ![Week 11 gates](docs/assets/week11/gates.png) | ![Week 11 factoring](docs/assets/week11/factoring.png) |
+
+| A chess puzzle as a tensor network |
+| :---: |
+| ![Week 11 N-queens](docs/assets/week11/nqueens.png) |
+
+```bash
+cd week11
+cd tnsample && cargo install --path . --force && cd ..   # the tnsample tool
+python scripts/run_pred.py               # Part 1: the pred round trip
+python scripts/run_all.py                # every stated run and the three figures
+python -m pytest -q                      # 40 verification tests
+python scripts/check_sheet.py            # 52 checks against the sheet
+python scripts/check_web.py              # 11 browser checks (needs Edge + Playwright)
+```
+
+The guide lists the run settings, the seeds, the scaling table and one command beside each figure.
 
 ---
 
