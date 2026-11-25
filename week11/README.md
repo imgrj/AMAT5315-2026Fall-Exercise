@@ -120,7 +120,7 @@ decode to different wrong products", and this run decodes `3 x 2`.
 
 ## Part 2: the gadgets (`--mode gadgets`)
 
-Seeded by nothing — every number is an enumeration, so it must agree with the sheet:
+Seeded by nothing 鈥?every number is an enumeration, so it must agree with the sheet:
 
 | Gate | Floor | Forbidden rows |
 | :--- | :--- | :--- |
@@ -128,8 +128,8 @@ Seeded by nothing — every number is an enumeration, so it must agree with the 
 | NOT, COPY, SET0, SET1 | -1 | +1 |
 | XOR (with helper `w`) | -4 | -2 |
 
-The AND-NOT-SET1 circuit reaches `E_0 = -5` on exactly three of its 16 states — the inputs
-`(a,b) = 00, 01, 10`, for which `NOT(AND(a,b)) = 1` — and the inconsistent wire
+The AND-NOT-SET1 circuit reaches `E_0 = -5` on exactly three of its 16 states 鈥?the inputs
+`(a,b) = 00, 01, 10`, for which `NOT(AND(a,b)) = 1` 鈥?and the inconsistent wire
 `(a,b,t,out) = (1,0,1,1)` sits at +1. `H_XOR + 4 = 2(x + y - z - 2r)^2` is checked row by row.
 
 `artifacts/gates.png` (a) every truth-table row of every gadget, allowed rows marked, one
@@ -163,7 +163,7 @@ Planning the multiplier for `k`-bit factors (`14k^2 + 8k` spins):
 
 `treesa` finds the multiplier's diagonal seam, `sc = 2k + 1` for `k >= 3`; `greedy` pays for
 its speed with memory and is far past 8 GB by `k = 8`. `greedy` breaks ties at random, so its
-column differs from the sheet's between runs — the sheet says so itself.
+column differs from the sheet's between runs 鈥?the sheet says so itself.
 
 `artifacts/factoring.png`: (a) `sc(k)` for both orders with the 8 GB line and the `2k+1`
 guide; (b) the sampled energy histogram beside `2000 g_0 exp(-beta E_min)/Z`.
@@ -209,4 +209,8 @@ runs 52 comparisons against the sheet's printed numbers and writes
 `evidence/acceptance.json`. `tnsample/tests/network.rs` adds 4 Rust checks. The negative
 control in `evidence/negative-controls.json` records a deliberate sabotage of three rules
 (a wrong XOR field, a min-plus sign flip and a diagonal end constraint) and the tests that
-caught it.
+caught it. `python scripts/check_web.py` runs 11 browser checks (the local file unless
+`--url` names the published page) and `python scripts/check_publication.py` compares every
+deployed file with `docs/` byte for byte; `evidence/web-validation.json` and
+`evidence/publication.json` keep both records.
+

@@ -1,0 +1,42 @@
+{
+  "url": "https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week11-tnsample-lab.html",
+  "commit": "daad938924e0c788154f90e1254c02381619f0ac",
+  "commit_subject": "Publish the Week 11 lab with Interactive Studio and Evidence & Verification tabs",
+  "checked_at": "2026-11-25T11:42:25+00:00",
+  "files": [
+    {
+      "path": "week11-tnsample-lab.html",
+      "status": 200,
+      "bytes": 68835,
+      "sha256_local": "2b594bf1c559a06b1847139239b044d00d4623ddd3c115a455b0ef03f912d666",
+      "sha256_live": "1f129121e7ea0b3ba7aca1d3168e725b5aab57412e8587363cd517fc31cca2a2",
+      "match": true
+    },
+    {
+      "path": "assets/week11/gates.png",
+      "status": 200,
+      "bytes": 121590,
+      "sha256_local": "5f1815a37ac1814e14211002df5757e97e752538d9bad1adaa3ffe20679e42b3",
+      "sha256_live": "5f1815a37ac1814e14211002df5757e97e752538d9bad1adaa3ffe20679e42b3",
+      "match": true
+    },
+    {
+      "path": "assets/week11/factoring.png",
+      "status": 200,
+      "bytes": 149369,
+      "sha256_local": "96e43889c21b845c4202c6df6db14aa2123a66fa63ba083db3cb46150c76c617",
+      "sha256_live": "96e43889c21b845c4202c6df6db14aa2123a66fa63ba083db3cb46150c76c617",
+      "match": true
+    },
+    {
+      "path": "assets/week11/nqueens.png",
+      "status": 200,
+      "bytes": 103451,
+      "sha256_local": "a14c4d4d44fb18288b3f2f1bd79189d25188a600f54e10dd141ee725a6cb4424",
+      "sha256_live": "a14c4d4d44fb18288b3f2f1bd79189d25188a600f54e10dd141ee725a6cb4424",
+      "match": true
+    }
+  ],
+  "all_match": true,
+  "browser_checks": "scripts/check_web.py against the live URL: 11 checks passed"
+}
