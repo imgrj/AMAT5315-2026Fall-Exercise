@@ -1,0 +1,919 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 12 — Integer Programming &amp; Learned Branching Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #090d16;
+    --panel: #111726;
+    --panel-border: #1e293b;
+    --card: #161f33;
+    --card-hover: #1e293b;
+    --ink: #f1f5f9;
+    --ink-muted: #94a3b8;
+    --ink-faint: #64748b;
+    --accent: #38bdf8;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --danger: #f87171;
+    --purple: #c084fc;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+  .nav-banner {
+    background: #0d121f;
+    border-bottom: 1px solid var(--panel-border);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    flex-wrap: wrap;
+  }
+  .nav-banner a {
+    color: var(--ink-muted);
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+  }
+  .nav-banner a:hover { color: var(--ink); background: rgba(255,255,255,0.06); }
+  .nav-banner a.active {
+    color: var(--accent);
+    background: rgba(56, 189, 248, 0.12);
+    font-weight: 600;
+  }
+  .nav-banner .repo-link {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  header {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-left h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+  }
+  .header-left .sub { color: var(--ink-muted); font-size: 12px; margin-top: 3px; }
+  .tab-buttons {
+    display: flex;
+    gap: 6px;
+    background: rgba(0,0,0,0.3);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--panel-border);
+  }
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--ink-muted);
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+  .tab-btn.active { background: var(--card); color: var(--accent); }
+
+  .workspace {
+    display: grid;
+    grid-template-columns: 1fr 372px;
+    min-height: calc(100vh - 108px);
+  }
+  @media (max-width: 1080px) { .workspace { grid-template-columns: 1fr; } }
+
+  .viewport-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 12px;
+    background: #090d16;
+  }
+  .canvas-container {
+    position: relative;
+    background: #05070c;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 430px;
+    overflow: hidden;
+  }
+  .canvas-container.short { min-height: 210px; }
+  canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+
+  .viewport-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .btn {
+    background: var(--card);
+    border: 1px solid var(--panel-border);
+    color: var(--ink);
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: var(--accent); color: #040814; border-color: var(--accent); font-weight: 600; }
+  .btn.primary:hover { background: #7dd3fc; }
+  .btn.tiny { padding: 4px 10px; font-size: 11.5px; }
+
+  .readout-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  @media (max-width: 768px) { .readout-grid { grid-template-columns: repeat(2, 1fr); } }
+  .readout-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+  }
+  .readout-k { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-muted); }
+  .readout-v { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; margin-top: 2px; }
+
+  .control-sidebar {
+    background: var(--panel);
+    border-left: 1px solid var(--panel-border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+  .sidebar-section-title {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-muted);
+    font-weight: 600;
+  }
+  .rule-list { display: flex; flex-direction: column; gap: 8px; }
+  .rule-card {
+    background: var(--card);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 9px 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .rule-card:hover { border-color: var(--ink-faint); }
+  .rule-card.selected { border-color: var(--accent); background: rgba(56,189,248,0.09); }
+  .rule-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .rule-name { font-weight: 600; font-size: 12.5px; }
+  .rule-nodes { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+  .rule-meta { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+  .note {
+    background: rgba(0,0,0,0.28);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 11px 12px;
+    font-size: 11.5px;
+    color: var(--ink-muted);
+    line-height: 1.55;
+  }
+  .note strong { color: var(--ink); }
+  .kv { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; font-size: 11.5px; }
+  .kv span:nth-child(2) { font-family: 'JetBrains Mono', monospace; color: var(--ink); }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--ink-muted); }
+  .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+
+  /* Evidence gallery */
+  .gallery-view { display: none; padding: 24px; }
+  .gallery-view.active { display: block; }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(430px, 1fr));
+    gap: 18px;
+  }
+  .gallery-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .gallery-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .gallery-card img { width: 100%; display: block; background: #05070c; }
+  .gallery-body { padding: 12px 14px; }
+  .gallery-title { font-weight: 600; font-size: 13px; }
+  .gallery-desc { color: var(--ink-muted); font-size: 11.5px; margin-top: 4px; }
+  .gallery-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); margin-top: 6px; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--panel-border); border-radius: var(--radius-sm); }
+  table { border-collapse: collapse; width: 100%; font-size: 11.5px; }
+  th, td { padding: 6px 10px; text-align: left; border-bottom: 1px solid #1b2436; }
+  th { color: var(--ink-muted); font-weight: 600; background: rgba(255,255,255,0.02); }
+  td.mono { font-family: 'JetBrains Mono', monospace; }
+  .pill { font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 999px; }
+  .pill.ok { background: rgba(52,211,153,0.15); color: var(--good); }
+
+  .lightbox-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 6, 12, 0.82);
+    z-index: 100;
+    padding: 24px;
+    align-items: center;
+    justify-content: center;
+  }
+  .lightbox-backdrop.active { display: flex; }
+  .lightbox-modal {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    max-width: 1180px;
+    width: 100%;
+    max-height: 92vh;
+    overflow: auto;
+  }
+  .lightbox-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--panel-border);
+    gap: 10px;
+  }
+  .lightbox-title { font-size: 15px; font-weight: 700; }
+  .lightbox-close {
+    background: transparent;
+    border: none;
+    color: var(--ink-muted);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+  }
+  .lightbox-close:hover { color: var(--ink); background: rgba(255,255,255,0.08); }
+  .lightbox-body { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; padding: 16px; }
+  @media (max-width: 900px) { .lightbox-body { grid-template-columns: 1fr; } }
+  .lightbox-img-pane img { width: 100%; border-radius: var(--radius-sm); background: #05070c; }
+  .lightbox-info-pane { display: flex; flex-direction: column; gap: 12px; }
+  .lightbox-sec-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); font-weight: 600; }
+  .lightbox-desc, .lightbox-theory { font-size: 12px; line-height: 1.6; }
+  .lightbox-theory { color: var(--ink-muted); }
+  .lightbox-cmd {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: #05070c;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #7dd3fc;
+  }
+  details { border: 1px solid var(--panel-border); border-radius: var(--radius-sm); padding: 10px 14px; background: var(--panel); }
+  summary { cursor: pointer; font-size: 12px; font-weight: 600; color: var(--ink-muted); }
+  details[open] summary { margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<nav class="nav-banner">
+  <span><strong style="color: var(--ink);">AMAT5315:</strong> Scientific Computing</span>
+  <a href="week1-pi-lab.html">Week 1: AI Agents &amp; Pi</a>
+  <a href="index.html">Week 2: Molecular Dynamics</a>
+  <a href="week3-ising-lab.html">Week 3: Ising Lattice Lab</a>
+  <a href="week4-fluid-lab.html">Week 4: Fluid Dynamics Lab</a>
+  <a href="week5-seismic-lab.html">Week 5: Seismic &amp; AD Lab</a>
+  <a href="week6-energy-lab.html">Week 6: Energy-Based Models</a>
+  <a href="week7-diffusion-lab.html">Week 7: Diffusion &amp; Flow Matching</a>
+  <a href="week8-language-lab.html">Week 8: Language &amp; Transformer</a>
+  <a href="week9-inference-lab.html">Week 9: Inference &amp; Tensor Nets</a>
+  <a href="week10-tensor-lab.html">Week 10: Tensor RG &amp; Ising</a>
+  <a href="week12-branching-lab.html" class="active">Week 12: IP &amp; Learned Branching</a>
+  <a class="repo-link" href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise" target="_blank" rel="noopener">GitHub Repo ↗</a>
+</nav>
+
+<header>
+  <div class="header-left">
+    <h1>
+      Integer Programming &amp; Learned Branching Lab
+      <span class="badge">Week 12 Interactive</span>
+    </h1>
+    <div class="sub">Spin glasses as mixed-integer programs, exact Branch-and-Bound, Strong Branching &amp; imitation learning</div>
+  </div>
+  <div class="tab-buttons">
+    <button class="tab-btn active" id="tabSimBtn" onclick="switchTab('sim')">Interactive Studio</button>
+    <button class="tab-btn" id="tabGalleryBtn" onclick="switchTab('gallery')">Evidence &amp; Verification (4)</button>
+  </div>
+</header>
+
+<!-- View 1: Interactive Studio -->
+<div class="workspace" id="simView">
+  <div class="viewport-panel">
+    <div class="readout-grid">
+      <div class="readout-card">
+        <div class="readout-k">Nodes visited</div>
+        <div class="readout-v" id="statNodes">0 / 5</div>
+      </div>
+      <div class="readout-card">
+        <div class="readout-k">LP solves</div>
+        <div class="readout-v" id="statLp">0</div>
+      </div>
+      <div class="readout-card">
+        <div class="readout-k">Incumbent (best energy)</div>
+        <div class="readout-v" id="statInc" style="color: var(--good);">−∞</div>
+      </div>
+      <div class="readout-card">
+        <div class="readout-k">Root LP bound</div>
+        <div class="readout-v" id="statRoot">−6.000</div>
+      </div>
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="treeCanvas" width="980" height="500"></canvas>
+    </div>
+
+    <div class="viewport-controls">
+      <div class="btn-group">
+        <button class="btn primary" id="btnPlay" onclick="togglePlay()">▶ Play search</button>
+        <button class="btn" onclick="stepSearch(1)">Step +1</button>
+        <button class="btn" onclick="resetSearch()">↺ Reset</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn tiny" id="btnSquareLp" onclick="setSquareMode('lp')">LP relaxation</button>
+        <button class="btn tiny" id="btnSquareGs" onclick="setSquareMode('gs')">Ground state</button>
+      </div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent);">
+        Action: <span id="actIndex">0</span> / <span id="actTotal">5</span> (<span id="actType">READY</span>)
+      </div>
+    </div>
+
+    <div class="canvas-container short">
+      <canvas id="squareCanvas" width="980" height="240"></canvas>
+    </div>
+  </div>
+
+  <div class="control-sidebar">
+    <div class="sidebar-section-title">⚙️ Branching rules (16 unseen graphs)</div>
+    <div class="rule-list" id="ruleList"></div>
+
+    <div class="sidebar-section-title">🔍 Search configuration</div>
+    <div class="kv" id="searchKv"></div>
+
+    <div class="sidebar-section-title">📐 The four-spin square</div>
+    <div class="kv" id="squareKv"></div>
+
+    <div class="legend">
+      <span><span class="swatch" style="background:#34d399;"></span>incumbent</span>
+      <span><span class="swatch" style="background:#f87171;"></span>pruned</span>
+      <span><span class="swatch" style="background:#38bdf8;"></span>split</span>
+      <span><span class="swatch" style="background:#475569;"></span>skipped</span>
+    </div>
+
+    <div class="note">
+      📐 <strong>Exactness by separation.</strong> The HiGHS LPs alone decide whether a node
+      is infeasible, pruned by bound, or integral; the rule only chooses which fractional spin
+      to split. Any rule, even an adversarial one, leaves the search exact, and only the tree
+      grows. On this tetrahedron, exploring <span style="font-family:'JetBrains Mono',monospace;">x0 = 1</span>
+      then <span style="font-family:'JetBrains Mono',monospace;">x1 = 1</span> finds the incumbent −3,
+      and <span style="font-family:'JetBrains Mono',monospace;">x0 = 0</span> is then pruned at −2 &gt; −3:
+      five nodes instead of seven.
+    </div>
+  </div>
+</div>
+
+<!-- View 2: Evidence & Verification -->
+<div class="gallery-view" id="galleryView">
+  <div style="max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+    <div>
+      <h2 style="margin: 0; font-size: 20px; font-weight: 700;">Week 12 Verification Suite &amp; Evidence Gallery</h2>
+      <p style="margin: 4px 0 0; color: var(--ink-muted); font-size: 13px;">
+        The four figures of the learning sheet, every one drawn by a Python script from the saved
+        <span style="font-family:'JetBrains Mono',monospace;">run.json</span> evidence, beside the
+        acceptance record of <span id="accHead"></span>.
+      </p>
+    </div>
+
+    <div class="gallery-grid" id="galleryCardsGrid"></div>
+
+    <details>
+      <summary>Acceptance record: <span id="accSummary"></span></summary>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Check</th><th>Sheet</th><th>Measured</th><th></th></tr></thead>
+          <tbody id="accTable"></tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox-backdrop" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-modal" onclick="event.stopPropagation()">
+    <div class="lightbox-header">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="badge" id="modalPartBadge">Part 1</span>
+        <span class="lightbox-title" id="modalTitle">Title</span>
+      </div>
+      <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    </div>
+    <div class="lightbox-body">
+      <div class="lightbox-img-pane"><img id="modalImg" src="" alt="Evidence"></div>
+      <div class="lightbox-info-pane">
+        <div>
+          <div class="lightbox-sec-title">Description</div>
+          <div class="lightbox-desc" id="modalDesc"></div>
+        </div>
+        <div>
+          <div class="lightbox-sec-title">Mathematical theory</div>
+          <div class="lightbox-theory" id="modalTheory"></div>
+        </div>
+        <div>
+          <div class="lightbox-sec-title">Recorded metrics</div>
+          <div class="kv" id="modalMetrics"></div>
+        </div>
+        <div>
+          <div class="lightbox-sec-title">Reproducing command</div>
+          <div class="lightbox-cmd" id="modalCmd"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+
+/* ---------------------------------------------------------------- helpers */
+const $ = (id) => document.getElementById(id);
+const fmt = (v, d = 3) => (v === null || v === undefined || Number.isNaN(v)) ? "—" : Number(v).toFixed(d);
+const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
+const COLORS = { "most-frac": "#7aa2f7", strong: "#e06c75", neural: "#4ade80", "root-neural": "#f6a45c" };
+const RULES = ["most-frac", "strong", "neural", "root-neural"];
+
+/* ------------------------------------------------------------ tab switching */
+function switchTab(which) {
+  const sim = $("simView"), gallery = $("galleryView");
+  $("tabSimBtn").classList.toggle("active", which === "sim");
+  $("tabGalleryBtn").classList.toggle("active", which === "gallery");
+  sim.style.display = which === "sim" ? "grid" : "none";
+  gallery.classList.toggle("active", which === "gallery");
+  if (which === "gallery") buildGallery();
+}
+
+/* -------------------------------------------------------------- the search */
+// The five explored nodes of the frustrated tetrahedron (most-frac), plus the
+// two children that pruning skips.
+const NODES = [
+  { id: 1, label: "root", bound: -6, status: "split x0", x: 0.50, y: 0.11, parent: null },
+  { id: 2, label: "x0=1", bound: -4, status: "split x1", x: 0.30, y: 0.40, parent: 1, edge: "x0=1" },
+  { id: 3, label: "x0=1,x1=1", bound: -3, status: "incumbent", x: 0.16, y: 0.70, parent: 2, edge: "x1=1" },
+  { id: 4, label: "x0=1,x1=0", bound: -3, status: "pruned-by-bound", x: 0.42, y: 0.70, parent: 2, edge: "x1=0" },
+  { id: 5, label: "x0=0", bound: -2, status: "pruned-by-bound", x: 0.80, y: 0.40, parent: 1, edge: "x0=0" },
+  { id: 6, label: "skipped", bound: -1, status: "skipped", x: 0.70, y: 0.70, parent: 5, edge: "x1=1" },
+  { id: 7, label: "skipped", bound: -1, status: "skipped", x: 0.92, y: 0.70, parent: 5, edge: "x1=0" },
+];
+const ORDER = [1, 2, 3, 4, 5];
+let step = 0, timer = null, incumbent = -Infinity;
+let squareMode = "lp";
+let selectedRule = "most-frac";
+
+function statusColor(status) {
+  if (status === "incumbent") return "#34d399";
+  if (status === "pruned-by-bound" || status === "infeasible") return "#f87171";
+  if (status === "skipped") return "#475569";
+  return "#38bdf8";
+}
+
+function drawTree() {
+  const canvas = $("treeCanvas");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const px = (x) => 90 + x * (W - 180);
+  const py = (y) => 40 + y * (H - 110);
+
+  // edges
+  for (const n of NODES) {
+    if (n.parent === null) continue;
+    const p = NODES.find((m) => m.id === n.parent);
+    const visited = ORDER.indexOf(n.id) < step && ORDER.indexOf(n.id) >= 0;
+    ctx.strokeStyle = n.status === "skipped" ? "#334155" : (visited ? "#3b4a63" : "#243044");
+    ctx.setLineDash(n.status === "skipped" ? [5, 5] : []);
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(px(p.x), py(p.y) + 20);
+    ctx.lineTo(px(n.x), py(n.y) - 20);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // branch label
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "11px 'JetBrains Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(n.edge, (px(p.x) + px(n.x)) / 2 + (n.x > p.x ? 16 : -16), (py(p.y) + py(n.y)) / 2);
+  }
+
+  // nodes
+  for (const n of NODES) {
+    const idx = ORDER.indexOf(n.id);
+    const visited = idx >= 0 && idx < step;
+    const active = idx === step - 1;
+    const color = n.status === "skipped" ? "#475569" : (visited ? statusColor(n.status) : "#334155");
+    ctx.beginPath();
+    ctx.arc(px(n.x), py(n.y), active ? 25 : 20, 0, Math.PI * 2);
+    ctx.fillStyle = visited ? color + "33" : "rgba(15,23,42,0.9)";
+    ctx.fill();
+    ctx.lineWidth = active ? 3 : 1.6;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+
+    ctx.fillStyle = visited ? "#f1f5f9" : "#64748b";
+    ctx.font = "600 13px 'JetBrains Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(n.id, px(n.x), py(n.y));
+
+    ctx.fillStyle = visited ? "#94a3b8" : "#475569";
+    ctx.font = "11px 'JetBrains Mono', monospace";
+    ctx.textBaseline = "top";
+    ctx.fillText(n.label, px(n.x), py(n.y) + 26);
+    ctx.fillText(n.bound.toFixed(0), px(n.x), py(n.y) + 40);
+  }
+
+  // caption
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "12px 'Inter', sans-serif";
+  ctx.fillText("Frustrated tetrahedron K4: all six couplings +1, field h₀ = +1, ground state −3", 20, 14);
+  if (step >= ORDER.length) {
+    ctx.fillStyle = "#34d399";
+    ctx.fillText("5 nodes explored, 2 subtrees skipped: pruning by bound is what makes the search small", 20, H - 26);
+  }
+}
+
+function drawSquare() {
+  const canvas = $("squareCanvas");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const cx = W / 2, cy = H / 2 + 8, r = Math.min(H, W) / 3.4;
+  const corners = [
+    { x: cx - r, y: cy - r }, { x: cx + r, y: cy - r },
+    { x: cx + r, y: cy + r }, { x: cx - r, y: cy + r },
+  ];
+  const edges = DATA.square.edges.map((e) => [e[0], e[1]]);
+  const couplings = DATA.square.couplings;
+  const half = squareMode === "lp";
+  const spins = half ? [0.5, 0.5, 0.5, 0.5] : DATA.square.exact_spins.map((x) => 1 - 2 * x);
+
+  edges.forEach(([u, v], k) => {
+    const j = couplings[k];
+    const product = spins[u] * spins[v];
+    // At x = 1/2 the LP sets every bond variable to its preferred value, so all
+    // four bonds look satisfied there; the ground state really satisfies three.
+    const satisfied = half ? true : (j > 0 ? product < 0 : product > 0);
+    ctx.strokeStyle = satisfied ? "#34d399" : "#f87171";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(corners[u].x, corners[u].y);
+    ctx.lineTo(corners[v].x, corners[v].y);
+    ctx.stroke();
+
+    const mx = (corners[u].x + corners[v].x) / 2, my = (corners[u].y + corners[v].y) / 2;
+    ctx.fillStyle = satisfied ? "#34d399" : "#f87171";
+    ctx.font = "600 12px 'JetBrains Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText((j > 0 ? "+1" : "−1") + (satisfied ? "" : " ✗"), mx, my);
+  });
+
+  corners.forEach((c, i) => {
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, 22, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(15,23,42,0.95)";
+    ctx.fill();
+    ctx.strokeStyle = "#38bdf8";
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+    ctx.fillStyle = "#f1f5f9";
+    ctx.font = "600 12px 'JetBrains Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const s = spins[i];
+    const text = half ? (s === 0.5 ? "1/2" : fmt(s, 1)) : (s > 0 ? "+1" : "−1");
+    ctx.fillText(text, c.x, c.y);
+    ctx.fillStyle = "#64748b";
+    ctx.font = "10px 'JetBrains Mono', monospace";
+    ctx.textBaseline = "top";
+    ctx.fillText("x" + i, c.x, c.y + 26);
+  });
+
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "12px 'Inter', sans-serif";
+  if (half) {
+    ctx.fillText("LP relaxation: every spin at 1/2, every bond takes its preferred value, zLP = −4", 20, 14);
+    ctx.fillStyle = "#fbbf24";
+    ctx.fillText("Rounding 1/2 to 0/1 leaves three of the four +1 bonds unsatisfied: H = +2", 20, 32);
+  } else {
+    const spinText = DATA.square.exact_spins.map((x) => (1 - 2 * x > 0 ? "+1" : "\u22121")).join(",");
+    ctx.fillText("Exact ground state: spins (" + spinText + "), three bonds satisfied, H* = \u22122", 20, 14);
+    ctx.fillStyle = "#94a3b8";
+    ctx.fillText("No state reaches −4: going round the square the four couplings cannot all be satisfied", 20, 32);
+  }
+}
+
+function refreshReadouts() {
+  $("statNodes").textContent = Math.min(step, ORDER.length) + " / 5";
+  $("statLp").textContent = String(Math.min(step, ORDER.length));
+  $("statInc").textContent = incumbent === -Infinity ? "−∞" : incumbent.toFixed(3);
+  $("actIndex").textContent = String(step);
+  const current = step > 0 ? NODES.find((n) => n.id === ORDER[Math.min(step, ORDER.length) - 1]) : null;
+  $("actType").textContent = current
+    ? (current.status === "incumbent" ? "INCUMBENT" : current.status === "split x0" || current.status === "split x1"
+        ? "SPLIT " + current.status.split(" ")[1] : "PRUNED")
+    : "READY";
+}
+
+function stepSearch(n) {
+  step = Math.max(0, Math.min(ORDER.length, step + n));
+  incumbent = -Infinity;
+  for (let k = 0; k < step; k++) {
+    const node = NODES.find((m) => m.id === ORDER[k]);
+    if (node.status === "incumbent") incumbent = node.bound;
+  }
+  drawTree();
+  refreshReadouts();
+}
+
+function resetSearch() {
+  if (timer) { clearInterval(timer); timer = null; }
+  $("btnPlay").textContent = "▶ Play search";
+  step = 0;
+  incumbent = -Infinity;
+  drawTree();
+  refreshReadouts();
+}
+
+function togglePlay() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+    $("btnPlay").textContent = "▶ Play search";
+    return;
+  }
+  if (step >= ORDER.length) resetSearch();
+  $("btnPlay").textContent = "⏸ Pause";
+  timer = setInterval(() => {
+    if (step >= ORDER.length) {
+      clearInterval(timer);
+      timer = null;
+      $("btnPlay").textContent = "▶ Play search";
+      return;
+    }
+    stepSearch(1);
+  }, 850);
+}
+
+function setSquareMode(mode) {
+  squareMode = mode;
+  $("btnSquareLp").classList.toggle("primary", mode === "lp");
+  $("btnSquareGs").classList.toggle("primary", mode === "gs");
+  drawSquare();
+}
+
+/* ---------------------------------------------------------------- sidebar */
+function buildRules() {
+  const host = $("ruleList");
+  host.innerHTML = "";
+  const pol = DATA.test.summary.policies;
+  for (const rule of RULES) {
+    const stats = pol[rule];
+    const card = document.createElement("div");
+    card.className = "rule-card" + (rule === selectedRule ? " selected" : "");
+    const extra = rule === "strong"
+      ? `${fmt(stats.mean_lp_solves, 1)} LP solves, ${fmt(stats.mean_total_ms, 1)} ms`
+      : `${fmt(stats.mean_nodes, 1)} LP solves, ${fmt(stats.mean_total_ms, 1)} ms`;
+    card.innerHTML = `<div class="rule-head"><span class="rule-name">${rule}</span>
+      <span class="rule-nodes">${fmt(stats.mean_nodes, 2)} nodes</span></div>
+      <div class="rule-meta">${extra}${stats.mean_infer_ms > 0 ? `, ${fmt(stats.mean_infer_ms, 2)} ms inference` : ""}</div>`;
+    card.onclick = () => { selectedRule = rule; buildRules(); buildKv(); };
+    host.appendChild(card);
+  }
+}
+
+function buildKv() {
+  const pol = DATA.test.summary.policies[selectedRule];
+  const tra = DATA.transfer.summary.policies[selectedRule];
+  const rows = [
+    ["rule", selectedRule],
+    ["16 unseen graphs, mean nodes", fmt(pol.mean_nodes, 2)],
+    ["8 larger graphs, mean nodes", fmt(tra.mean_nodes, 2)],
+    ["LP solves per node", fmt(pol.mean_lp_solves / pol.mean_nodes, 2)],
+    ["mean total time (22 spins)", fmt(pol.mean_total_ms, 2) + " ms"],
+    ["mean total time (30 spins)", fmt(tra.mean_total_ms, 2) + " ms"],
+    ["pruning tolerance", "1e-6"],
+    ["solver", "HiGHS, presolve off, 1 thread"],
+  ];
+  $("searchKv").innerHTML = rows.map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join("");
+  $("squareKv").innerHTML = [
+    ["edges", "4 (cycle 0-1-2-3-0)"],
+    ["couplings", "+1, +1, +1, −1"],
+    ["LP bound", fmt(DATA.square.lp_bound, 3)],
+    ["exact optimum", fmt(DATA.square.exact_energy, 3)],
+    ["nearest rounding", fmt(DATA.square.rounded_energy, 3)],
+    ["rounding excess", fmt(DATA.square.rounded_excess, 3)],
+    ["diet LP optimum", fmt(DATA.diet.cost, 6)],
+  ].map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join("");
+}
+
+/* ---------------------------------------------------------------- gallery */
+const CARDS = [
+  {
+    part: "Part 1",
+    file: "gap.png",
+    title: "The relaxation hides frustration",
+    desc: "The LP lower bound and the exact ground-state energy of the 16 seeded 22-spin, 52-bond spin glasses, beside the integrality gap and the energy that naive rounding costs.",
+    theory: "At x = 1/2 every bond disagreement z_e is free in [0,1], so the relaxation can satisfy every coupling at once and returns z_LP = −m. The exact optimum is 13.75 higher on average; rounding x_i ≥ 1/2 to 1 turns every spin to −1 and lands 34.25 above the optimum on average.",
+    metrics: () => [
+      ["mean LP bound", fmt(DATA.gap.summary.mean_lp_bound, 2)],
+      ["mean exact energy", fmt(DATA.gap.summary.mean_exact_energy, 2)],
+      ["mean integrality gap", fmt(DATA.gap.summary.mean_integrality_gap, 2)],
+      ["mean rounding excess", fmt(DATA.gap.summary.mean_rounding_excess, 2)],
+      ["suboptimal roundings", `${DATA.gap.summary.suboptimal_roundings} / 16`],
+      ["diet LP optimum", fmt(DATA.diet.cost, 6)],
+    ],
+    cmd: "python scripts/plot_gap.py",
+  },
+  {
+    part: "Part 2",
+    file: "bnb.png",
+    title: "A smaller tree at a higher price per node",
+    desc: "Explored nodes and LP solves per instance for the cheap rule and Strong Branching, each curve sorted independently, on the 48 Part 2 spin glasses.",
+    theory: "Every split on a 0/1 spin doubles the open subproblems, and pruning keeps the tree small only when the bounds tighten early. Strong Branching probes both child LPs of every candidate and scores them by max(Δ0,1e−6)·max(Δ1,1e−6), buying a smaller tree with many more LP solves.",
+    metrics: () => [
+      ["most-frac mean nodes", fmt(DATA.bnb.most.summary.mean_nodes, 2)],
+      ["Strong Branching mean nodes", fmt(DATA.bnb.strong.summary.mean_nodes, 2)],
+      ["tree shrink", fmt(DATA.bnb.most.summary.mean_nodes / DATA.bnb.strong.summary.mean_nodes, 2) + "×"],
+      ["Strong LP solves per node", fmt(DATA.bnb.strong.summary.mean_lp_solves / DATA.bnb.strong.summary.mean_nodes, 2)],
+      ["mean time most-frac", fmt(DATA.bnb.most.summary.mean_elapsed_ms, 2) + " ms"],
+      ["mean time strong", fmt(DATA.bnb.strong.summary.mean_elapsed_ms, 2) + " ms"],
+      ["largest error vs HiGHS", DATA.bnb.strong.summary.largest_error.toExponential(2)],
+    ],
+    cmd: "python scripts/plot_bnb.py",
+  },
+  {
+    part: "Part 3",
+    file: "neural_bnb.png",
+    title: "A network that copies the strong rule for free",
+    desc: "Training and validation cross-entropy against epoch, and the explored nodes of most-frac, the learned rule and Strong Branching on the 16 unseen 22-spin, 52-bond graphs (seed 3026).",
+    theory: "One shared MLP turns each candidate spin's 12 spin-graph features into a score, a masked softmax compares the candidates of a node, and cross-entropy against Strong Branching's choice is smooth enough to differentiate through. The network only chooses the split, so every optimum stays exact.",
+    metrics: () => [
+      ["training nodes / graphs", `${DATA.model.train.nodes} / ${DATA.model.train.instances.length}`],
+      ["validation nodes / graphs", `${DATA.model.validation.nodes} / ${DATA.model.validation.instances.length}`],
+      ["instance overlap", String(DATA.model.overlap)],
+      ["best validation cross-entropy", fmt(DATA.model.best_val_ce, 3) + " (epoch " + DATA.model.best_epoch + ")"],
+      ["neural mean nodes", fmt(DATA.test.summary.policies.neural.mean_nodes, 2)],
+      ["most-frac mean nodes", fmt(DATA.test.summary.policies["most-frac"].mean_nodes, 2)],
+      ["neural mean time", fmt(DATA.test.summary.policies.neural.mean_total_ms, 2) + " ms"],
+      ["Strong Branching mean time", fmt(DATA.test.summary.policies.strong.mean_total_ms, 2) + " ms"],
+    ],
+    cmd: "python scripts/plot_neural_bnb.py",
+  },
+  {
+    part: "Part 4",
+    file: "eval.png",
+    title: "Laptop time and size transfer to 30 spins",
+    desc: "Mean explored nodes of all four rules on both evaluation runs, and the wall-clock split between LP solves and inference on the larger 30-spin, 72-bond graphs (seed 4026).",
+    theory: "Total search time is the LP solves plus tree management plus the time spent extracting features and running the network. Per-node scoring pays that overhead at every node, root-cached scoring pays it once and then follows r_i + 3·2min(x_i,1−x_i); size-independent features let the 22-spin network score 30-spin graphs unchanged.",
+    metrics: () => [
+      ["30 spins, most-frac nodes", fmt(DATA.transfer.summary.policies["most-frac"].mean_nodes, 2)],
+      ["30 spins, neural nodes", fmt(DATA.transfer.summary.policies.neural.mean_nodes, 2)],
+      ["30 spins, root-neural nodes", fmt(DATA.transfer.summary.policies["root-neural"].mean_nodes, 2)],
+      ["30 spins, strong nodes", fmt(DATA.transfer.summary.policies.strong.mean_nodes, 2)],
+      ["neural inference, 30 spins", fmt(DATA.transfer.summary.policies.neural.mean_infer_ms, 2) + " ms"],
+      ["root-neural inference, 30 spins", fmt(DATA.transfer.summary.policies["root-neural"].mean_infer_ms, 2) + " ms"],
+      ["largest error vs HiGHS", DATA.transfer.summary.largest_highs_error.toExponential(2)],
+    ],
+    cmd: "python scripts/plot_eval.py",
+  },
+];
+
+let galleryBuilt = false;
+function buildGallery() {
+  if (galleryBuilt) return;
+  galleryBuilt = true;
+  const grid = $("galleryCardsGrid");
+  CARDS.forEach((card, index) => {
+    const el = document.createElement("div");
+    el.className = "gallery-card";
+    const m = card.metrics()[0];
+    el.innerHTML = `<img src="assets/week12/${card.file}" alt="${card.title}" loading="lazy">
+      <div class="gallery-body">
+        <div class="gallery-title">${card.title}</div>
+        <div class="gallery-desc">${card.desc}</div>
+        <div class="gallery-meta">${card.part} · ${m[0]}: ${m[1]}</div>
+      </div>`;
+    el.onclick = () => openLightbox(index);
+    grid.appendChild(el);
+  });
+
+  const acc = DATA.acceptance;
+  $("accSummary").textContent = `${acc.passed}/${acc.checks} checks pass, ` +
+    `${DATA.controls.caught}/${DATA.controls.defects} deliberate defects caught`;
+  $("accHead").textContent = `${acc.passed}/${acc.checks} automatic checks`;
+  $("accTable").innerHTML = acc.rows.map((row) =>
+    `<tr><td>${row.check}</td><td class="mono" style="color:var(--ink-muted);">${row.sheet}</td>
+     <td class="mono">${row.measured}</td>
+     <td>${row.pass ? '<span class="pill ok">PASS</span>' : '<span class="pill" style="background:rgba(248,113,113,0.15);color:#f87171;">FAIL</span>'}</td></tr>`
+  ).join("");
+}
+
+let current = 0;
+function openLightbox(index) {
+  current = index;
+  const card = CARDS[index];
+  $("modalPartBadge").textContent = card.part;
+  $("modalTitle").textContent = card.title;
+  $("modalImg").src = `assets/week12/${card.file}`;
+  $("modalDesc").textContent = card.desc;
+  $("modalTheory").textContent = card.theory;
+  $("modalMetrics").innerHTML = card.metrics().map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join("");
+  $("modalCmd").textContent = card.cmd;
+  $("lightbox").classList.add("active");
+}
+function closeLightbox() { $("lightbox").classList.remove("active"); }
+
+/* ------------------------------------------------------------------- boot */
+buildRules();
+buildKv();
+setSquareMode("lp");
+drawTree();
+refreshReadouts();
+buildGallery();
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeLightbox();
+  if (e.key === "ArrowRight" && $("simView").style.display !== "none") stepSearch(1);
+  if (e.key === "ArrowLeft" && $("simView").style.display !== "none") stepSearch(-1);
+});
+</script>
+</body>
+</html>

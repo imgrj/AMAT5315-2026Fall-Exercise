@@ -3,4 +3,7 @@
 .pytest_cache/
 .uv-cache/
 .hf-home/
-
+.tools/
+.tmp/
+.scratch/
+.probe/

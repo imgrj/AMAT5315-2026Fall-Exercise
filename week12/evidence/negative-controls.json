@@ -1,0 +1,58 @@
+{
+  "schema": "week12-negative-controls-v1",
+  "summary": {
+    "defects": 7,
+    "caught": 7
+  },
+  "controls": [
+    {
+      "defect": "square offset sign flipped",
+      "check": "square LP bound",
+      "baseline": "pass",
+      "with_defect": "fail",
+      "caught": true
+    },
+    {
+      "defect": "no pruning by bound",
+      "check": "tetrahedron nodes",
+      "baseline": "pass",
+      "with_defect": "fail",
+      "caught": true
+    },
+    {
+      "defect": "wrong branching tie-break",
+      "check": "most-frac mean nodes",
+      "baseline": "pass",
+      "with_defect": "fail",
+      "caught": true
+    },
+    {
+      "defect": "validation instances leak into training",
+      "check": "instance overlap",
+      "baseline": "pass",
+      "with_defect": "fail",
+      "caught": true
+    },
+    {
+      "defect": "hidden lookahead in the neural rule",
+      "check": "LP solves equal nodes (non-Strong)",
+      "baseline": "pass",
+      "with_defect": "fail",
+      "caught": true
+    },
+    {
+      "defect": "Rust no longer agrees with JAX",
+      "check": "JAX/Rust probe difference",
+      "baseline": "pass",
+      "with_defect": "fail",
+      "caught": true
+    },
+    {
+      "defect": "rounded state keeps the LP bonds",
+      "check": "square nearest-rounded energy",
+      "baseline": "pass",
+      "with_defect": "fail",
+      "caught": true
+    }
+  ]
+}

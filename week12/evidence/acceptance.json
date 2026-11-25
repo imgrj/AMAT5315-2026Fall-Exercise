@@ -1,0 +1,315 @@
+{
+  "schema": "week12-acceptance-v1",
+  "summary": {
+    "checks": 42,
+    "passed": 42,
+    "failed": []
+  },
+  "checks": [
+    {
+      "check": "square LP bound",
+      "sheet": "-4.000000",
+      "measured": -4.0,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "square LP spins",
+      "sheet": "(1/2,1/2,1/2,1/2)",
+      "measured": [
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "square exact energy",
+      "sheet": "-2.000000",
+      "measured": -2.0,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "square nearest-rounded energy",
+      "sheet": "+2.000000",
+      "measured": 2.0,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "square rounding excess",
+      "sheet": "4",
+      "measured": 4.0,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "diet LP optimum",
+      "sheet": "23.071429 (323/14)",
+      "measured": 23.071429,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "16 x LP bound",
+      "sheet": "every bound -52.00",
+      "measured": -52.0,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "16 x exact energy",
+      "sheet": "mean -38.25",
+      "measured": -38.25,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "16 x integrality gap",
+      "sheet": "mean 13.75",
+      "measured": 13.75,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "16 x relative gap",
+      "sheet": "36.5% of |H*|",
+      "measured": "36.45%",
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "16 x fractional spins",
+      "sheet": "all 22 spins at 1/2",
+      "measured": 22.0,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "16 x suboptimal roundings",
+      "sheet": "16 of 16",
+      "measured": 16,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "16 x mean rounding excess",
+      "sheet": "34.25",
+      "measured": 34.25,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "16 x largest rounding excess",
+      "sheet": "60 on instance 11",
+      "measured": "60 on instance 11",
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "worst single integrality gap",
+      "sheet": "every gap is 52 + H* > 0",
+      "measured": 17.0,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "tetrahedron nodes",
+      "sheet": "5",
+      "measured": 5,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "tetrahedron LP bounds",
+      "sheet": "-6, -4, -3, -3, -2",
+      "measured": [
+        -6.0,
+        -4.0,
+        -3.0,
+        -3.0,
+        -2.0
+      ],
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "48 x 2 exactness",
+      "sheet": "all match HiGHS (ours < 1e-12)",
+      "measured": "6.47e-13",
+      "pass": true,
+      "unit": "energy"
+    },
+    {
+      "check": "most-frac mean nodes",
+      "sheet": "50.88",
+      "measured": 52.7917,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "strong mean nodes",
+      "sheet": "16.00",
+      "measured": 16.9583,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "tree shrink",
+      "sheet": "3.18x smaller",
+      "measured": 3.113,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "strong LP solves per node",
+      "sheet": "18.0",
+      "measured": 18.111,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "most-frac LP solves per node",
+      "sheet": "1.0 (one LP per node)",
+      "measured": 1.0,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "training instances",
+      "sheet": "36",
+      "measured": 36,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "validation instances",
+      "sheet": "12",
+      "measured": 12,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "instance overlap",
+      "sheet": "0",
+      "measured": 0,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "training/validation nodes",
+      "sheet": "276 / 84",
+      "measured": "290 / 93",
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "best validation cross-entropy",
+      "sheet": "1.759",
+      "measured": 1.833,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "JAX/Rust probe difference",
+      "sheet": "< 1e-4",
+      "measured": "6.66e-16",
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "largest HiGHS error (eval)",
+      "sheet": "< 1e-6 (ours < 3e-13)",
+      "measured": "2.02e-12",
+      "pass": true,
+      "unit": "energy"
+    },
+    {
+      "check": "LP solves equal nodes (non-Strong)",
+      "sheet": "yes",
+      "measured": "every instance",
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "16 unseen: most-frac mean nodes",
+      "sheet": "50.9",
+      "measured": 50.625,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "16 unseen: neural mean nodes",
+      "sheet": "15.4",
+      "measured": 14.5,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "16 unseen: strong mean nodes",
+      "sheet": "15.6",
+      "measured": 15.5,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "16 unseen: neural beats most-frac",
+      "sheet": "fewer nodes",
+      "measured": "14.50 < 50.62",
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "16 unseen: neural faster than Strong",
+      "sheet": "7.15 ms against 122.85 ms",
+      "measured": "5.60 ms against 91.30 ms",
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "30 spins: most-frac mean nodes",
+      "sheet": "177.8",
+      "measured": 175.25,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "30 spins: strong mean nodes",
+      "sheet": "38.0",
+      "measured": 37.75,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "30 spins: neural mean nodes",
+      "sheet": "39.5",
+      "measured": 44.25,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "30 spins: root-neural mean nodes",
+      "sheet": "50.8",
+      "measured": 50.5,
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "30 spins: both neural rules beat most-frac",
+      "sheet": "fewer nodes",
+      "measured": "neural 44.2, root-neural 50.5 against 175.2",
+      "pass": true,
+      "unit": ""
+    },
+    {
+      "check": "30 spins: Strong Branching is the slow one",
+      "sheet": "558.31 ms against 106.62 ms",
+      "measured": "861.68 ms against 71.57 ms",
+      "pass": true,
+      "unit": ""
+    }
+  ]
+}
