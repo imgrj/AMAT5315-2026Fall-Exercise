@@ -30,6 +30,11 @@ This repository stores weekly exercises for AMAT5315 (*Scientific Computing for 
   - [Week 11: Hard Problems & Tensor-Network Sampling Lab](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week11-tnsample-lab.html)
   - [**Week 12: Integer Programming & Learned Branching Lab**](https://imgrj.github.io/AMAT5315-2026Fall-Exercise/week12-branching-lab.html)
 
+> The weekly navigation bar comes from one list: after adding or renaming a week's page, run
+> `python tools/fix_week_nav.py` so that every lab links to every week (and the bar wraps instead of
+> clipping the last entries). The script also repairs the two navs that live inside builders, so
+> regenerating a lab cannot drop a week again.
+
 ---
 
 ## Week 12: Integer Programming and Learned Branching (Latest Exercise)

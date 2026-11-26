@@ -143,6 +143,7 @@ NAV = """
   <a href="week9-inference-lab.html">Week 9: Inference &amp; Tensor Nets</a>
   <a href="week10-tensor-lab.html">Week 10: Tensor RG &amp; Ising</a>
   <a href="week11-tnsample-lab.html" class="active">Week 11: Hard Problems &amp; Sampling</a>
+  <a href="week12-branching-lab.html">Week 12: IP &amp; Learned Branching</a>
   <a class="repo-link" href="https://github.com/imgrj/AMAT5315-2026Fall-Exercise" target="_blank" rel="noopener">GitHub Repo &#8599;</a>
 </nav>
 """
